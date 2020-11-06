@@ -19,9 +19,11 @@
 Menu, Tray, Icon, C:\WINDOWS\system32\imageres.dll,53 ;Set custom Script icon
 
 ;~ Menu,Tray,Add,"Windows and left mouse click"
-; Menu, Tray, NoStandard ;removes default options
+Menu, Tray, NoStandard ;removes default options
 Menu, Tray, Add, Hotkeys, Hotkeys
 Menu, Tray, Add, Email Signature, SignatureGUI
+Menu, Tray, Add
+Menu, Tray, Add, About, AboutGUI
 Menu, Tray,Add,Exit App,Exit
 
 if (!FileExist(A_AppData "\ScreenClipping\settings.ini")){
@@ -1431,6 +1433,63 @@ notUnique(mod1, mod2, mod3){
     return false
 }
 ;*******************************************************
+AboutGUI:
+html =
+(
+	<!DOCTYPE html>
+	<html lang="en" dir="ltr">
+		<head>
+			<meta charset="utf-8">
+			<meta http-equiv="X-UA-Compatible" content="IE=edge">
+			<title></title>
+			<style media="screen">
+				.top {
+					text-align:center;
+				}
+				.top h2 {
+					color:#2274A5;
+				}
+				.donate {
+					color:#E83F6F;
+					text-align:center;
+					font-weight:bold;
+					font-size:small;
+					margin: 20px;
+				}
+				p {
+					margin: 0px;
+				}
+			</style>
+		</head>
+		<body>
+			<div class="top">
+				<h2>Screen Clipping Tool</h2>
+				<hr>
+				<p>Script Version: 1.0</p>
+				<p>Joe Glines</p>
+				<p><a href="https://the-automator.com" target="_blank">www.the-automator.com</a></p>
+			</div>
+			<div class="donate">
+				<p>If you like this tool please consider donating</p>
+				<p><a href="https://paypal.me">www.paypal.me/theautomator</a></p>
+			</div>
+		</body>
+	</html>
+)
+
+btnPos := 300/2 - 75/2
+Gui About:New,,About Screen Clipping Tool
+Gui Margin, 0
+Gui Add, ActiveX, w300 h220 vdoc, htmlfile
+Gui Add, Button, w75 x%btnPos% gaboutClose, Close
+doc.write(html)
+Gui Show
+return
+
+aboutClose:
+Gui About:Destroy
+return
+
 SignatureGUI:
 IniRead, currSig, % A_AppData "\ScreenClipping\settings.ini", Email, signature
 IniRead, currImg, % A_AppData "\ScreenClipping\settings.ini", Email, images
