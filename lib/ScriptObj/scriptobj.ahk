@@ -25,7 +25,8 @@ class script
 	author      := ""
 	email       := ""
 	homepage    := ""
-	conf        := ""
+	sdbg		:= false
+	dbgFile     := ""
 
 	/**
 	 * Function: Update
@@ -35,9 +36,9 @@ class script
 	 *
 	 * Parameters:
 	 * vfile	-	Version File
-	 *				This is the remote version file to be validated against.
+	 *				Remote version file to be validated against.
 	 * rfile	-	Remote File
-	 *				This is the remote script file to be downloaded and installed if a new version is found.
+	 *				Remote script file to be downloaded and installed if a new version is found.
 	 *				It should be a zip file that will be unzipped by the function
 	 *
 	 * Notes:
@@ -83,6 +84,9 @@ class script
 		; Make sure SemVer is used
 		regexmatch(this.version, "\d+\.\d+\.\d+", loVersion)
 		regexmatch(http.responseText, "\d+\.\d+\.\d+", remVersion)
+
+		Progress, 100, 100/100, % "Checking for updates", % "Updating"
+		Progress, OFF
 
 		; Compare against current stated version
 		if (loVersion >= remVersion)
@@ -169,12 +173,9 @@ class script
 				fileappend % tmpScript, % tmpDir "\update.ahk"
 				run % a_ahkpath " " tmpDir "\update.ahk"
 			}
+			filedelete % lockFile
+			exitapp
 		}
-
-		Progress, 100, 100/100, % "Checking for updates", % "Updating"
-		Progress, OFF
-		filedelete % lockFile
-		exitapp
 	}
 
 	/**
@@ -239,5 +240,35 @@ class script
 
 		Gui, Splash: destroy
 		return
+	}
+
+	/**
+	* Funtion: Debug
+	* Sends formatted debug messages either to a file or debugger app
+	*
+	* Parameters:
+	* msg 			-	Message to be sent
+	* delimiter 	-	Which message delimiter to use. There are 3 tipes:
+	* 					specifying 1 would have a message *preceded* by a delimiter
+	* 					specifying 2 would have a message *followed* by a delimiter
+	* 					specifying 3 would have a message *enclosed* by delimiters
+	*/
+	debug(msg,delimiter = false){
+
+		static ft := true   ; First time
+
+		t := delimiter = 1 ? msg := "* ------------------------------------------`n" msg
+		t := delimiter = 2 ? msg := msg "`n* ------------------------------------------"
+		t := delimiter = 3 ? msg := "* ------------------------------------------`n" msg
+								 .  "`n* ------------------------------------------"
+
+		script.sdbg && ft ? (msg := "* ------------------------------------------`n"
+								 .  "* " script.name " Debug ON`n* " script.name "[Start]`n" msg
+								 , ft := 0)
+
+		if (script.sdbg && !script.dbgFile)
+			OutputDebug, %msg%
+		else if (script.sdbg)
+			FileAppend, %msg%`n, % script.dbgFile
 	}
 }
