@@ -1,14 +1,30 @@
-﻿if((A_PtrSize=8&&A_IsCompiled="")||!A_IsUnicode){ ;32 bit=4  ;64 bit=8
-    SplitPath,A_AhkPath,,dir
-    if(!FileExist(correct:=dir "\AutoHotkeyU32.exe")){
-	    MsgBox error
-	    ExitApp
-    }
-    Run,"%correct%" "%A_ScriptName%",%A_ScriptDir%
-    ExitApp
-}
-#SingleInstance, Force
 #NoEnv
+#SingleInstance, Force
+
+#include lib
+#include ScriptObj/scriptobj.ahk
+
+if((A_PtrSize=8&&A_IsCompiled="")||!A_IsUnicode){ ;32 bit=4  ;64 bit=8
+	 SplitPath,A_AhkPath,,dir
+	 if(!FileExist(correct:=dir "\AutoHotkeyU32.exe")){
+		 MsgBox error
+		 ExitApp
+	 }
+	 Run,"%correct%" "%A_ScriptName%",%A_ScriptDir%
+	 ExitApp
+}
+
+script := {	base	: script
+		  ,name		: A_ScriptName
+		  ,version	: "0.1.0"
+		  ,author	: "Joe Glines"
+		  ,email	: "joe@the-automator.com"
+		  ,homepage	: "www.the-automator.com"}
+
+script.update("https://www.the-automator.com/screenclipping/ver"
+			 ,"https://www.the-automator.com/screenclipping/ScreenClippingTool.zip")
+
+script.splash("res/cam.jpg")
 
 /*  ; Credits   I borrowed heavily from ...
 	Screen clipping by Learning one  https://autohotkey.com/boards/viewtopic.php?f=6&t=12088
@@ -37,43 +53,43 @@ return
 
 ;===Functions==========================================================================
 SCW_Version() {
-   return 1.02
+	return 1.02
 }
 
 SCW_DestroyAllClipWins() {
-   MaxGuis := SCW_Reg("MaxGuis"), StartAfter := SCW_Reg("StartAfter")
-   Loop, %MaxGuis%    {
-      StartAfter++
-      Gui %StartAfter%: Destroy
-   }
+	MaxGuis := SCW_Reg("MaxGuis"), StartAfter := SCW_Reg("StartAfter")
+	Loop, %MaxGuis%    {
+		StartAfter++
+		Gui %StartAfter%: Destroy
+	}
 }
 
 SCW_SetUp(Options="") {
-   if !(Options = "") {
-      Loop, Parse, Options, %A_Space%
-      {
-         Field := A_LoopField
-         DotPos := InStr(Field, ".")
-         if (DotPos = 0)
+	if !(Options = "") {
+		Loop, Parse, Options, %A_Space%
+		{
+			Field := A_LoopField
+			DotPos := InStr(Field, ".")
+			if (DotPos = 0)
 		Continue
-         var := SubStr(Field, 1, DotPos-1)
-         val := SubStr(Field, DotPos+1)
-         if var in StartAfter,MaxGuis,AutoMonitorWM_LBUTTONDOWN,DrawCloseButton,BorderAColor,BorderBColor,SelColor,SelTrans
+			var := SubStr(Field, 1, DotPos-1)
+			val := SubStr(Field, DotPos+1)
+			if var in StartAfter,MaxGuis,AutoMonitorWM_LBUTTONDOWN,DrawCloseButton,BorderAColor,BorderBColor,SelColor,SelTrans
 		%var% := val
-      }
-   }
+		}
+	}
 
-   SCW_Default(StartAfter,80), SCW_Default(MaxGuis,6)
-   SCW_Default(AutoMonitorWM_LBUTTONDOWN,1), SCW_Default(DrawCloseButton,0)
-   SCW_Default(BorderAColor,"ff6666ff"), SCW_Default(BorderBColor,"ffffffff")
-   SCW_Default(SelColor,"Yellow"), SCW_Default(SelTrans,80)
+	SCW_Default(StartAfter,80), SCW_Default(MaxGuis,6)
+	SCW_Default(AutoMonitorWM_LBUTTONDOWN,1), SCW_Default(DrawCloseButton,0)
+	SCW_Default(BorderAColor,"ff6666ff"), SCW_Default(BorderBColor,"ffffffff")
+	SCW_Default(SelColor,"Yellow"), SCW_Default(SelTrans,80)
 
-   SCW_Reg("MaxGuis", MaxGuis), SCW_Reg("StartAfter", StartAfter), SCW_Reg("DrawCloseButton", DrawCloseButton)
-   SCW_Reg("BorderAColor", BorderAColor), SCW_Reg("BorderBColor", BorderBColor)
-   SCW_Reg("SelColor", SelColor), SCW_Reg("SelTrans",SelTrans)
-   SCW_Reg("WasSetUp", 1)
-   if AutoMonitorWM_LBUTTONDOWN
-   OnMessage(0x201, "SCW_LBUTTONDOWN")
+	SCW_Reg("MaxGuis", MaxGuis), SCW_Reg("StartAfter", StartAfter), SCW_Reg("DrawCloseButton", DrawCloseButton)
+	SCW_Reg("BorderAColor", BorderAColor), SCW_Reg("BorderBColor", BorderBColor)
+	SCW_Reg("SelColor", SelColor), SCW_Reg("SelTrans",SelTrans)
+	SCW_Reg("WasSetUp", 1)
+	if AutoMonitorWM_LBUTTONDOWN
+	OnMessage(0x201, "SCW_LBUTTONDOWN")
 }
 
 SCW_ScreenClip2Win(clip=0,email=0,OCR=0) {
@@ -144,28 +160,28 @@ SCW_ScreenClip2Win(clip=0,email=0,OCR=0) {
 		FormatTime, TodayDate , YYYYMMDDHH24MISS, dddd MMMM d, yyyy h:mm:ss tt
 		MailItem.Subject :="Screen shot taken : " (TodayDate) ;Subject line of email
 
-    if (FileExist(A_AppData "\ScreenClipping\settings.ini"))
-      IniRead, currSig, % A_AppData "\ScreenClipping\settings.ini", Email, signature
+	 if (FileExist(A_AppData "\ScreenClipping\settings.ini"))
+		IniRead, currSig, % A_AppData "\ScreenClipping\settings.ini", Email, signature
 
-    StringReplace, currSig, currSig, |, `n, All
+	 StringReplace, currSig, currSig, |, `n, All
 		MailItem.HTMLBody := currSig ? currSig : "<H2 style='BACKGROUND-COLOR: red'><br></H2>
 <HTML>Attached you will find the screenshot taken on " (TodayDate) " <br><br>
 <span style='color:black'>Please let me know if you have any questions.<br><br><a href='mailto:info@the-Automator.com'>Joe Glines</a> <br>682.xxx.xxxx</span>
 </HTML>"
 
-    IniRead, imgSettings, % A_AppData "\ScreenClipping\settings.ini", Email, images
-    if (imgSettings == "ERROR" || imgSettings == "")
-      imgSettings := 11
+	 IniRead, imgSettings, % A_AppData "\ScreenClipping\settings.ini", Email, images
+	 if (imgSettings == "ERROR" || imgSettings == "")
+		imgSettings := 11
 
-    file := StrSplit(imgSettings)
+	 file := StrSplit(imgSettings)
 
-    if (file[1])
+	 if (file[1])
 		  MailItem.Attachments.Add(File1)
-    if (file[2])
+	 if (file[2])
 		  MailItem.Attachments.Add(File2)
 		MailItem.Display
 
-    Reload
+	 Reload
 	}
 
 	;*******************************************************
@@ -250,52 +266,52 @@ SCW_CreateLayeredWinMod(GuiNum,pBitmap,x,y,DrawCloseButton=0) {
 }
 
 SCW_LBUTTONDOWN() {
-   MouseGetPos,,, WinUMID
-   WinGetTitle, Title, ahk_id %WinUMID%
-   if (Title = "ScreenClippingWindow") {
-      PostMessage, 0xA1, 2,,, ahk_id %WinUMID%
-      KeyWait, Lbutton
-      CoordMode, mouse, Relative
-      MouseGetPos, x,y
-     XClose := SCW_Reg("G" A_Gui "#XClose"), YClose := SCW_Reg("G" A_Gui "#YClose")
-      if (x > XClose and y < YClose)
+	MouseGetPos,,, WinUMID
+	WinGetTitle, Title, ahk_id %WinUMID%
+	if (Title = "ScreenClippingWindow") {
+		PostMessage, 0xA1, 2,,, ahk_id %WinUMID%
+		KeyWait, Lbutton
+		CoordMode, mouse, Relative
+		MouseGetPos, x,y
+	  XClose := SCW_Reg("G" A_Gui "#XClose"), YClose := SCW_Reg("G" A_Gui "#YClose")
+		if (x > XClose and y < YClose)
 		Gui %A_Gui%: Destroy
-      return 1   ; confirm that click was on module's screen clipping windows
-   }
+		return 1   ; confirm that click was on module's screen clipping windows
+	}
 }
 
 SCW_Reg(variable, value="") {
-   static
-   if (value = "") {
-      yaqxswcdevfr := kxucfp%variable%pqzmdk
-      Return yaqxswcdevfr
-   } Else
-   kxucfp%variable%pqzmdk = %value%
+	static
+	if (value = "") {
+		yaqxswcdevfr := kxucfp%variable%pqzmdk
+		Return yaqxswcdevfr
+	} Else
+	kxucfp%variable%pqzmdk = %value%
 }
 
 SCW_Default(ByRef Variable,DefaultValue) {
-   if (Variable="")
-   Variable := DefaultValue
+	if (Variable="")
+	Variable := DefaultValue
 }
 
 SCW_Win2Clipboard(KeepBorders=0) {
-   Send, !{PrintScreen} ; Active Win's client area to Clipboard
-   if !KeepBorders {
-      pToken := Gdip_Startup()
-      pBitmap := Gdip_CreateBitmapFromClipboard()
-      Gdip_GetDimensions(pBitmap, w, h)
-      pBitmap2 := SCW_CropImage(pBitmap, 3, 3, w-6, h-6)
-      Gdip_SetBitmapToClipboard(pBitmap2)
-      Gdip_DisposeImage(pBitmap), Gdip_DisposeImage(pBitmap2)
-      Gdip_Shutdown("pToken")
-   }
+	Send, !{PrintScreen} ; Active Win's client area to Clipboard
+	if !KeepBorders {
+		pToken := Gdip_Startup()
+		pBitmap := Gdip_CreateBitmapFromClipboard()
+		Gdip_GetDimensions(pBitmap, w, h)
+		pBitmap2 := SCW_CropImage(pBitmap, 3, 3, w-6, h-6)
+		Gdip_SetBitmapToClipboard(pBitmap2)
+		Gdip_DisposeImage(pBitmap), Gdip_DisposeImage(pBitmap2)
+		Gdip_Shutdown("pToken")
+	}
 }
 
 SCW_CropImage(pBitmap, x, y, w, h) {
-   pBitmap2 := Gdip_CreateBitmap(w, h), G2 := Gdip_GraphicsFromImage(pBitmap2)
-   Gdip_DrawImage(G2, pBitmap, 0, 0, w, h, x, y, w, h)
-   Gdip_DeleteGraphics(G2)
-   return pBitmap2
+	pBitmap2 := Gdip_CreateBitmap(w, h), G2 := Gdip_GraphicsFromImage(pBitmap2)
+	Gdip_DrawImage(G2, pBitmap, 0, 0, w, h, x, y, w, h)
+	Gdip_DeleteGraphics(G2)
+	return pBitmap2
 }
 
 UpdateLayeredWindow(hwnd, hdc, x="", y="", w="", h="", Alpha=255){
@@ -327,16 +343,16 @@ SetImage(hwnd, hBitmap){
 }
 
 SetSysColorToControl(hwnd, SysColor=15){
-   WinGetPos,,, w, h, ahk_id %hwnd%
-   bc := DllCall("GetSysColor", "Int", SysColor)
-   pBrushClear := Gdip_BrushCreateSolid(0xff000000 | (bc >> 16 | bc & 0xff00 | (bc & 0xff) << 16))
-   pBitmap := Gdip_CreateBitmap(w, h), G := Gdip_GraphicsFromImage(pBitmap)
-   Gdip_FillRectangle(G, pBrushClear, 0, 0, w, h)
-   hBitmap := Gdip_CreateHBITMAPFromBitmap(pBitmap)
-   SetImage(hwnd, hBitmap)
-   Gdip_DeleteBrush(pBrushClear)
-   Gdip_DeleteGraphics(G), Gdip_DisposeImage(pBitmap), DeleteObject(hBitmap)
-   return 0
+	WinGetPos,,, w, h, ahk_id %hwnd%
+	bc := DllCall("GetSysColor", "Int", SysColor)
+	pBrushClear := Gdip_BrushCreateSolid(0xff000000 | (bc >> 16 | bc & 0xff00 | (bc & 0xff) << 16))
+	pBitmap := Gdip_CreateBitmap(w, h), G := Gdip_GraphicsFromImage(pBitmap)
+	Gdip_FillRectangle(G, pBrushClear, 0, 0, w, h)
+	hBitmap := Gdip_CreateHBITMAPFromBitmap(pBitmap)
+	SetImage(hwnd, hBitmap)
+	Gdip_DeleteBrush(pBrushClear)
+	Gdip_DeleteGraphics(G), Gdip_DisposeImage(pBitmap), DeleteObject(hBitmap)
+	return 0
 }
 
 
@@ -377,18 +393,18 @@ Gdip_BitmapFromHWND(hwnd){
 }
 
 CreateRectF(ByRef RectF, x, y, w, h){
-   VarSetCapacity(RectF, 16)
-   NumPut(x, RectF, 0, "float"), NumPut(y, RectF, 4, "float"), NumPut(w, RectF, 8, "float"), NumPut(h, RectF, 12, "float")
+	VarSetCapacity(RectF, 16)
+	NumPut(x, RectF, 0, "float"), NumPut(y, RectF, 4, "float"), NumPut(w, RectF, 8, "float"), NumPut(h, RectF, 12, "float")
 }
 
 CreateSizeF(ByRef SizeF, w, h){
-   VarSetCapacity(SizeF, 8)
-   NumPut(w, SizeF, 0, "float"), NumPut(h, SizeF, 4, "float")
+	VarSetCapacity(SizeF, 8)
+	NumPut(w, SizeF, 0, "float"), NumPut(h, SizeF, 4, "float")
 }
 
 CreatePointF(ByRef PointF, x, y){
-   VarSetCapacity(PointF, 8)
-   NumPut(x, PointF, 0, "float"), NumPut(y, PointF, 4, "float")
+	VarSetCapacity(PointF, 8)
+	NumPut(x, PointF, 0, "float"), NumPut(y, PointF, 4, "float")
 }
 
 CreateDIBSection(w, h, hdc="", bpp=32, ByRef ppvBits=0){
@@ -407,7 +423,7 @@ PrintWindow(hwnd, hdc, Flags=0){
 }
 
 DestroyIcon(hIcon){
-   return DllCall("DestroyIcon", "uint", hIcon)
+	return DllCall("DestroyIcon", "uint", hIcon)
 }
 
 PaintDesktop(hdc){
@@ -419,15 +435,15 @@ CreateCompatibleBitmap(hdc, w, h){
 }
 
 CreateCompatibleDC(hdc=0){
-   return DllCall("CreateCompatibleDC", "uint", hdc)
+	return DllCall("CreateCompatibleDC", "uint", hdc)
 }
 
 SelectObject(hdc, hgdiobj){
-   return DllCall("SelectObject", "uint", hdc, "uint", hgdiobj)
+	return DllCall("SelectObject", "uint", hdc, "uint", hgdiobj)
 }
 
 DeleteObject(hObject){
-   return DllCall("DeleteObject", "uint", hObject)
+	return DllCall("DeleteObject", "uint", hObject)
 }
 
 GetDC(hwnd=0){
@@ -435,11 +451,11 @@ GetDC(hwnd=0){
 }
 
 ReleaseDC(hdc, hwnd=0){
-   return DllCall("ReleaseDC", "uint", hwnd, "uint", hdc)
+	return DllCall("ReleaseDC", "uint", hwnd, "uint", hdc)
 }
 
 DeleteDC(hdc){
-   return DllCall("DeleteDC", "uint", hdc)
+	return DllCall("DeleteDC", "uint", hdc)
 }
 
 Gdip_LibraryVersion(){
@@ -452,16 +468,16 @@ Gdip_BitmapFromBRA(ByRef BRAFromMemIn, File, Alternate=0){
  Loop, Parse, BRAFromMemIn, `n
  {
   if (A_Index = 1) {
-   StringSplit, Header, A_LoopField, |
-   if (Header0 != 4 || Header2 != "BRA!")
-    return -2
+	StringSplit, Header, A_LoopField, |
+	if (Header0 != 4 || Header2 != "BRA!")
+	 return -2
   }
   else if (A_Index = 2) {
-   StringSplit, Info, A_LoopField, |
-   if (Info0 != 3)
-    return -3
+	StringSplit, Info, A_LoopField, |
+	if (Info0 != 3)
+	 return -3
   } else
-   break
+	break
  }
  if !Alternate
   StringReplace, File, File, \, \\, All
@@ -480,7 +496,7 @@ Gdip_BitmapFromBRA(ByRef BRAFromMemIn, File, Alternate=0){
 }
 
 Gdip_DrawRectangle(pGraphics, pPen, x, y, w, h){
-   return DllCall("gdiplus\GdipDrawRectangle", "uint", pGraphics, "uint", pPen, "float", x, "float", y, "float", w, "float", h)
+	return DllCall("gdiplus\GdipDrawRectangle", "uint", pGraphics, "uint", pPen, "float", x, "float", y, "float", w, "float", h)
 }
 Gdip_DrawRoundedRectangle(pGraphics, pPen, x, y, w, h, r){
  Gdip_SetClipRect(pGraphics, x-r, y-r, 2*r, 2*r, 4)
@@ -500,39 +516,39 @@ Gdip_DrawRoundedRectangle(pGraphics, pPen, x, y, w, h, r){
 }
 
 Gdip_DrawEllipse(pGraphics, pPen, x, y, w, h){
-   return DllCall("gdiplus\GdipDrawEllipse", "uint", pGraphics, "uint", pPen, "float", x, "float", y, "float", w, "float", h)
+	return DllCall("gdiplus\GdipDrawEllipse", "uint", pGraphics, "uint", pPen, "float", x, "float", y, "float", w, "float", h)
 }
 
 Gdip_DrawBezier(pGraphics, pPen, x1, y1, x2, y2, x3, y3, x4, y4){
-   return DllCall("gdiplus\GdipDrawBezier", "uint", pgraphics, "uint", pPen, "float", x1, "float", y1, "float", x2, "float", y2, "float", x3, "float", y3, "float", x4, "float", y4)
+	return DllCall("gdiplus\GdipDrawBezier", "uint", pgraphics, "uint", pPen, "float", x1, "float", y1, "float", x2, "float", y2, "float", x3, "float", y3, "float", x4, "float", y4)
 }
 
 
 Gdip_DrawArc(pGraphics, pPen, x, y, w, h, StartAngle, SweepAngle){
-   return DllCall("gdiplus\GdipDrawArc", "uint", pGraphics, "uint", pPen, "float", x, "float", y, "float", w, "float", h, "float", StartAngle, "float", SweepAngle)
+	return DllCall("gdiplus\GdipDrawArc", "uint", pGraphics, "uint", pPen, "float", x, "float", y, "float", w, "float", h, "float", StartAngle, "float", SweepAngle)
 }
 
 Gdip_DrawPie(pGraphics, pPen, x, y, w, h, StartAngle, SweepAngle){
-   return DllCall("gdiplus\GdipDrawPie", "uint", pGraphics, "uint", pPen, "float", x, "float", y, "float", w, "float", h, "float", StartAngle, "float", SweepAngle)
+	return DllCall("gdiplus\GdipDrawPie", "uint", pGraphics, "uint", pPen, "float", x, "float", y, "float", w, "float", h, "float", StartAngle, "float", SweepAngle)
 }
 
 
 Gdip_DrawLine(pGraphics, pPen, x1, y1, x2, y2){
-   return DllCall("gdiplus\GdipDrawLine", "uint", pGraphics, "uint", pPen, "float", x1, "float", y1, "float", x2, "float", y2)
+	return DllCall("gdiplus\GdipDrawLine", "uint", pGraphics, "uint", pPen, "float", x1, "float", y1, "float", x2, "float", y2)
 }
 
 Gdip_DrawLines(pGraphics, pPen, Points){
-   StringSplit, Points, Points, |
-   VarSetCapacity(PointF, 8*Points0)
-   Loop, %Points0% {
-      StringSplit, Coord, Points%A_Index%, `,
-      NumPut(Coord1, PointF, 8*(A_Index-1), "float"), NumPut(Coord2, PointF, (8*(A_Index-1))+4, "float")
-   }
-   return DllCall("gdiplus\GdipDrawLines", "uint", pGraphics, "uint", pPen, "uint", &PointF, "int", Points0)
+	StringSplit, Points, Points, |
+	VarSetCapacity(PointF, 8*Points0)
+	Loop, %Points0% {
+		StringSplit, Coord, Points%A_Index%, `,
+		NumPut(Coord1, PointF, 8*(A_Index-1), "float"), NumPut(Coord2, PointF, (8*(A_Index-1))+4, "float")
+	}
+	return DllCall("gdiplus\GdipDrawLines", "uint", pGraphics, "uint", pPen, "uint", &PointF, "int", Points0)
 }
 
 Gdip_FillRectangle(pGraphics, pBrush, x, y, w, h){
-   return DllCall("gdiplus\GdipFillRectangle", "uint", pGraphics, "int", pBrush, "float", x, "float", y, "float", w, "float", h)
+	return DllCall("gdiplus\GdipFillRectangle", "uint", pGraphics, "int", pBrush, "float", x, "float", y, "float", w, "float", h)
 }
 
 Gdip_FillRoundedRectangle(pGraphics, pBrush, x, y, w, h, r){
@@ -555,17 +571,17 @@ Gdip_FillRoundedRectangle(pGraphics, pBrush, x, y, w, h, r){
 }
 
 Gdip_FillPolygon(pGraphics, pBrush, Points, FillMode=0){
-   StringSplit, Points, Points, |
-   VarSetCapacity(PointF, 8*Points0)
-   Loop, %Points0% {
-      StringSplit, Coord, Points%A_Index%, `,
-      NumPut(Coord1, PointF, 8*(A_Index-1), "float"), NumPut(Coord2, PointF, (8*(A_Index-1))+4, "float")
-   }
-   return DllCall("gdiplus\GdipFillPolygon", "uint", pGraphics, "uint", pBrush, "uint", &PointF, "int", Points0, "int", FillMode)
+	StringSplit, Points, Points, |
+	VarSetCapacity(PointF, 8*Points0)
+	Loop, %Points0% {
+		StringSplit, Coord, Points%A_Index%, `,
+		NumPut(Coord1, PointF, 8*(A_Index-1), "float"), NumPut(Coord2, PointF, (8*(A_Index-1))+4, "float")
+	}
+	return DllCall("gdiplus\GdipFillPolygon", "uint", pGraphics, "uint", pBrush, "uint", &PointF, "int", Points0, "int", FillMode)
 }
 
 Gdip_FillPie(pGraphics, pBrush, x, y, w, h, StartAngle, SweepAngle){
-   return DllCall("gdiplus\GdipFillPie", "uint", pGraphics, "uint", pBrush, "float", x, "float", y, "float", w, "float", h, "float", StartAngle, "float", SweepAngle)
+	return DllCall("gdiplus\GdipFillPie", "uint", pGraphics, "uint", pBrush, "float", x, "float", y, "float", w, "float", h, "float", StartAngle, "float", SweepAngle)
 }
 
 Gdip_FillEllipse(pGraphics, pBrush, x, y, w, h){
@@ -612,9 +628,9 @@ Gdip_DrawImage(pGraphics, pBitmap, dx="", dy="", dw="", dh="", sx="", sy="", sw=
 
  if (sx = "" && sy = "" && sw = "" && sh = "") {
   if (dx = "" && dy = "" && dw = "" && dh = "") {
-   sx := dx := 0, sy := dy := 0,sw :=dw:=Gdip_GetImageWidth(pBitmap),sh := dh := Gdip_GetImageHeight(pBitmap)
+	sx := dx := 0, sy := dy := 0,sw :=dw:=Gdip_GetImageWidth(pBitmap),sh := dh := Gdip_GetImageHeight(pBitmap)
   } else {
-   sx := sy := 0, sw := Gdip_GetImageWidth(pBitmap),sh := Gdip_GetImageHeight(pBitmap)
+	sx := sy := 0, sw := Gdip_GetImageWidth(pBitmap),sh := Gdip_GetImageHeight(pBitmap)
   }
  }
 
@@ -638,13 +654,13 @@ Gdip_SetImageAttributesColorMatrix(Matrix){
 }
 
 Gdip_GraphicsFromImage(pBitmap){
-    DllCall("gdiplus\GdipGetImageGraphicsContext", "uint", pBitmap, "uint*", pGraphics)
-    return pGraphics
+	 DllCall("gdiplus\GdipGetImageGraphicsContext", "uint", pBitmap, "uint*", pGraphics)
+	 return pGraphics
 }
 
 Gdip_GraphicsFromHDC(hdc){
-    DllCall("gdiplus\GdipCreateFromHDC", "uint", hdc, "uint*", pGraphics)
-    return pGraphics
+	 DllCall("gdiplus\GdipCreateFromHDC", "uint", hdc, "uint*", pGraphics)
+	 return pGraphics
 }
 
 Gdip_GetDC(pGraphics){
@@ -657,7 +673,7 @@ Gdip_ReleaseDC(pGraphics, hdc){
 }
 
 Gdip_GraphicsClear(pGraphics, ARGB=0x00ffffff){
-    return DllCall("gdiplus\GdipGraphicsClear", "uint", pGraphics, "int", ARGB)
+	 return DllCall("gdiplus\GdipGraphicsClear", "uint", pGraphics, "int", ARGB)
 }
 
 Gdip_BlurBitmap(pBitmap, Blur){
@@ -755,17 +771,17 @@ Gdip_GetPixel(pBitmap, x, y){
 }
 
 Gdip_SetPixel(pBitmap, x, y, ARGB){
-   return DllCall("gdiplus\GdipBitmapSetPixel", "uint", pBitmap, "int", x, "int", y, "int", ARGB)
+	return DllCall("gdiplus\GdipBitmapSetPixel", "uint", pBitmap, "int", x, "int", y, "int", ARGB)
 }
 
 Gdip_GetImageWidth(pBitmap){
-   DllCall("gdiplus\GdipGetImageWidth", "uint", pBitmap, "uint*", Width)
-   return Width
+	DllCall("gdiplus\GdipGetImageWidth", "uint", pBitmap, "uint*", Width)
+	return Width
 }
 
 Gdip_GetImageHeight(pBitmap){
-   DllCall("gdiplus\GdipGetImageHeight", "uint", pBitmap, "uint*", Height)
-   return Height
+	DllCall("gdiplus\GdipGetImageHeight", "uint", pBitmap, "uint*", Height)
+	return Height
 }
 
 Gdip_GetDimensions(pBitmap, ByRef Width, ByRef Height){
@@ -807,33 +823,33 @@ Gdip_CreateBitmapFromFile(sFile, IconNumber=1, IconSize=""){
   VarSetCapacity(buf, 40)
   Loop, Parse, Sizes, |
   {
-   DllCall("PrivateExtractIcons", "str", sFile, "int", IconNumber-1, "int", A_LoopField, "int", A_LoopField, "uint*", hIcon, "uint*", 0, "uint", 1, "uint", 0)
-   if !hIcon
+	DllCall("PrivateExtractIcons", "str", sFile, "int", IconNumber-1, "int", A_LoopField, "int", A_LoopField, "uint*", hIcon, "uint*", 0, "uint", 1, "uint", 0)
+	if !hIcon
 	continue
 
-   if !DllCall("GetIconInfo", "uint", hIcon, "uint", &buf) {
+	if !DllCall("GetIconInfo", "uint", hIcon, "uint", &buf) {
 	DestroyIcon(hIcon)
 	continue
-   }
-   hbmColor := NumGet(buf, 16)
-   hbmMask  := NumGet(buf, 12)
+	}
+	hbmColor := NumGet(buf, 16)
+	hbmMask  := NumGet(buf, 12)
 
-   if !(hbmColor && DllCall("GetObject", "uint", hbmColor, "int", 24, "uint", &buf))
-   {
-    DestroyIcon(hIcon)
-    continue
-   }
-   break
+	if !(hbmColor && DllCall("GetObject", "uint", hbmColor, "int", 24, "uint", &buf))
+	{
+	 DestroyIcon(hIcon)
+	 continue
+	}
+	break
   }
   if !hIcon
-   return -1
+	return -1
 
   Width := NumGet(buf, 4, "int"),  Height := NumGet(buf, 8, "int")
   hbm := CreateDIBSection(Width, -Height), hdc := CreateCompatibleDC(), obm := SelectObject(hdc, hbm)
 
   if !DllCall("DrawIconEx", "uint", hdc, "int", 0, "int", 0, "uint", hIcon, "uint", Width, "uint", Height, "uint", 0, "uint", 0, "uint", 3) {
-   DestroyIcon(hIcon)
-   return -2
+	DestroyIcon(hIcon)
+	return -2
   }
 
   VarSetCapacity(dib, 84)
@@ -848,11 +864,11 @@ Gdip_CreateBitmapFromFile(sFile, IconNumber=1, IconSize=""){
   DestroyIcon(hIcon)
  } else {
   if !A_IsUnicode {
-   VarSetCapacity(wFile, 1023)
-   DllCall("kernel32\MultiByteToWideChar", "uint", 0, "uint", 0, "uint", &sFile, "int", -1, "uint", &wFile, "int", 512)
-   DllCall("gdiplus\GdipCreateBitmapFromFile", "uint", &wFile, "uint*", pBitmap)
+	VarSetCapacity(wFile, 1023)
+	DllCall("kernel32\MultiByteToWideChar", "uint", 0, "uint", 0, "uint", &sFile, "int", -1, "uint", &wFile, "int", 512)
+	DllCall("gdiplus\GdipCreateBitmapFromFile", "uint", &wFile, "uint*", pBitmap)
   } else
-   DllCall("gdiplus\GdipCreateBitmapFromFile", "uint", &sFile, "uint*", pBitmap)
+	DllCall("gdiplus\GdipCreateBitmapFromFile", "uint", &sFile, "uint*", pBitmap)
  }
  return pBitmap
 }
@@ -878,8 +894,8 @@ Gdip_CreateHICONFromBitmap(pBitmap){
 }
 
 Gdip_CreateBitmap(Width, Height, Format=0x26200A){
-    DllCall("gdiplus\GdipCreateBitmapFromScan0", "int", Width, "int", Height, "int", 0, "int", Format, "uint", 0, "uint*", pBitmap)
-    Return pBitmap
+	 DllCall("gdiplus\GdipCreateBitmapFromScan0", "int", Width, "int", Height, "int", 0, "int", Format, "uint", 0, "uint*", pBitmap)
+	 Return pBitmap
 }
 
 Gdip_CreateBitmapFromClipboard(){
@@ -918,8 +934,8 @@ Gdip_CloneBitmapArea(pBitmap, x, y, w, h, Format=0x26200A){
 }
 
 Gdip_CreatePen(ARGB, w){
-   DllCall("gdiplus\GdipCreatePen1", "int", ARGB, "float", w, "int", 2, "uint*", pPen)
-   return pPen
+	DllCall("gdiplus\GdipCreatePen1", "int", ARGB, "float", w, "int", 2, "uint*", pPen)
+	return pPen
 }
 
 Gdip_CreatePenFromBrush(pBrush, w){
@@ -966,19 +982,19 @@ Gdip_CloneBrush(pBrush){
 
 
 Gdip_DeletePen(pPen){
-   return DllCall("gdiplus\GdipDeletePen", "uint", pPen)
+	return DllCall("gdiplus\GdipDeletePen", "uint", pPen)
 }
 
 Gdip_DeleteBrush(pBrush){
-   return DllCall("gdiplus\GdipDeleteBrush", "uint", pBrush)
+	return DllCall("gdiplus\GdipDeleteBrush", "uint", pBrush)
 }
 
 Gdip_DisposeImage(pBitmap){
-   return DllCall("gdiplus\GdipDisposeImage", "uint", pBitmap)
+	return DllCall("gdiplus\GdipDisposeImage", "uint", pBitmap)
 }
 
 Gdip_DeleteGraphics(pGraphics){
-   return DllCall("gdiplus\GdipDeleteGraphics", "uint", pGraphics)
+	return DllCall("gdiplus\GdipDeleteGraphics", "uint", pGraphics)
 }
 
 Gdip_DisposeImageAttributes(ImageAttr){
@@ -986,19 +1002,19 @@ Gdip_DisposeImageAttributes(ImageAttr){
 }
 
 Gdip_DeleteFont(hFont){
-   return DllCall("gdiplus\GdipDeleteFont", "uint", hFont)
+	return DllCall("gdiplus\GdipDeleteFont", "uint", hFont)
 }
 
 Gdip_DeleteStringFormat(hFormat){
-   return DllCall("gdiplus\GdipDeleteStringFormat", "uint", hFormat)
+	return DllCall("gdiplus\GdipDeleteStringFormat", "uint", hFormat)
 }
 
 Gdip_DeleteFontFamily(hFamily){
-   return DllCall("gdiplus\GdipDeleteFontFamily", "uint", hFamily)
+	return DllCall("gdiplus\GdipDeleteFontFamily", "uint", hFamily)
 }
 
 Gdip_DeleteMatrix(Matrix){
-   return DllCall("gdiplus\GdipDeleteMatrix", "uint", Matrix)
+	return DllCall("gdiplus\GdipDeleteMatrix", "uint", Matrix)
 }
 
 Gdip_TextToGraphics(pGraphics, Text, Options, Font="Arial", Width="", Height="", Measure=0){
@@ -1030,7 +1046,7 @@ Gdip_TextToGraphics(pGraphics, Text, Options, Font="Arial", Width="", Height="",
  Loop, Parse, Alignments, |
  {
   if RegExMatch(Options, "\b" A_loopField)
-   Align |= A_Index//2.1      ; 0|0|1|1|2|2
+	Align |= A_Index//2.1      ; 0|0|1|1|2|2
  }
 
  xpos := (xpos1 != "") ? xpos2 ? IWidth*(xpos1/100) : xpos1 : 0
@@ -1058,11 +1074,11 @@ Gdip_TextToGraphics(pGraphics, Text, Options, Font="Arial", Width="", Height="",
   StringSplit, ReturnRC, ReturnRC, |
 
   if (vPos = "vCentre") || (vPos = "vCenter")
-   ypos += (Height-ReturnRC4)//2
+	ypos += (Height-ReturnRC4)//2
   else if (vPos = "Top") || (vPos = "Up")
-   ypos := 0
+	ypos := 0
   else if (vPos = "Bottom") || (vPos = "Down")
-   ypos := Height-ReturnRC4
+	ypos := Height-ReturnRC4
 
   CreateRectF(RC, xpos, ypos, Width, ReturnRC4)
   ReturnRC := Gdip_MeasureString(pGraphics, Text, hFont, hFormat, RC)
@@ -1111,17 +1127,17 @@ Gdip_MeasureString(pGraphics, sString, hFont, hFormat, ByRef RectF){
 }
 
 Gdip_SetStringFormatAlign(hFormat, Align){
-   return DllCall("gdiplus\GdipSetStringFormatAlign", "uint", hFormat, "int", Align)
+	return DllCall("gdiplus\GdipSetStringFormatAlign", "uint", hFormat, "int", Align)
 }
 
 Gdip_StringFormatCreate(Format=0, Lang=0){
-   DllCall("gdiplus\GdipCreateStringFormat", "int", Format, "int", Lang, "uint*", hFormat)
-   return hFormat
+	DllCall("gdiplus\GdipCreateStringFormat", "int", Format, "int", Lang, "uint*", hFormat)
+	return hFormat
 }
 
 Gdip_FontCreate(hFamily, Size, Style=0){
-   DllCall("gdiplus\GdipCreateFont", "uint", hFamily, "float", Size, "int", Style, "int", 0, "uint*", hFont)
-   return hFont
+	DllCall("gdiplus\GdipCreateFont", "uint", hFamily, "float", Size, "int", Style, "int", 0, "uint*", hFont)
+	return hFont
 }
 
 Gdip_FontFamilyCreate(Font){
@@ -1138,13 +1154,13 @@ Gdip_FontFamilyCreate(Font){
 }
 
 Gdip_CreateAffineMatrix(m11, m12, m21, m22, x, y){
-   DllCall("gdiplus\GdipCreateMatrix2", "float", m11, "float", m12, "float", m21, "float", m22, "float", x, "float", y, "uint*", Matrix)
-   return Matrix
+	DllCall("gdiplus\GdipCreateMatrix2", "float", m11, "float", m12, "float", m21, "float", m22, "float", x, "float", y, "uint*", Matrix)
+	return Matrix
 }
 
 Gdip_CreateMatrix(){
-   DllCall("gdiplus\GdipCreateMatrix", "uint*", Matrix)
-   return Matrix
+	DllCall("gdiplus\GdipCreateMatrix", "uint*", Matrix)
+	return Matrix
 }
 
 Gdip_CreatePath(BrushMode=0){
@@ -1176,15 +1192,15 @@ Gdip_SetTextRenderingHint(pGraphics, RenderingHint){
 }
 
 Gdip_SetInterpolationMode(pGraphics, InterpolationMode){
-   return DllCall("gdiplus\GdipSetInterpolationMode", "uint", pGraphics, "int", InterpolationMode)
+	return DllCall("gdiplus\GdipSetInterpolationMode", "uint", pGraphics, "int", InterpolationMode)
 }
 
 Gdip_SetSmoothingMode(pGraphics, SmoothingMode){
-   return DllCall("gdiplus\GdipSetSmoothingMode", "uint", pGraphics, "int", SmoothingMode)
+	return DllCall("gdiplus\GdipSetSmoothingMode", "uint", pGraphics, "int", SmoothingMode)
 }
 
 Gdip_SetCompositingMode(pGraphics, CompositingMode=0){
-   return DllCall("gdiplus\GdipSetCompositingMode", "uint", pGraphics, "int", CompositingMode)
+	return DllCall("gdiplus\GdipSetCompositingMode", "uint", pGraphics, "int", CompositingMode)
 }
 
 Gdip_Startup(){
@@ -1241,15 +1257,15 @@ Gdip_GetRotatedDimensions(Width, Height, Angle, ByRef RWidth, ByRef RHeight){
 }
 
 Gdip_SetClipRect(pGraphics, x, y, w, h, CombineMode=0){
-   return DllCall("gdiplus\GdipSetClipRect", "uint", pGraphics, "float", x, "float", y, "float", w, "float", h, "int", CombineMode)
+	return DllCall("gdiplus\GdipSetClipRect", "uint", pGraphics, "float", x, "float", y, "float", w, "float", h, "int", CombineMode)
 }
 
 Gdip_SetClipPath(pGraphics, Path, CombineMode=0){
-   return DllCall("gdiplus\GdipSetClipPath", "uint", pGraphics, "uint", Path, "int", CombineMode)
+	return DllCall("gdiplus\GdipSetClipPath", "uint", pGraphics, "uint", Path, "int", CombineMode)
 }
 
 Gdip_ResetClip(pGraphics){
-   return DllCall("gdiplus\GdipResetClip", "uint", pGraphics)
+	return DllCall("gdiplus\GdipResetClip", "uint", pGraphics)
 }
 
 Gdip_GetClipRegion(pGraphics){
@@ -1273,47 +1289,47 @@ Gdip_DeleteRegion(Region){
 
 ;***********Function by Tervon*******************
 SCW_Win2File(KeepBorders=0) {
-   Send, !{PrintScreen} ; Active Win's client area to Clipboard
-   sleep 50
-   if !KeepBorders
-   {
-      pToken := Gdip_Startup()
-      pBitmap := Gdip_CreateBitmapFromClipboard()
-      Gdip_GetDimensions(pBitmap, w, h)
-      pBitmap2 := SCW_CropImage(pBitmap, 3, 3, w-6, h-6)
-      ;~ File2:=A_Desktop . "\" . A_Now . ".PNG" ; tervon  time /path to file to save
-      FormatTime, TodayDate , YYYYMMDDHH24MISS, MM_dd_yy @h_mm_ss ;This is Joe's time format
-      File2:=A_Desktop . "\" . TodayDate . ".PNG" ;path to file to save
-      Gdip_SaveBitmapToFile(pBitmap2, File2) ;Exports automatcially to file
-      Gdip_DisposeImage(pBitmap), Gdip_DisposeImage(pBitmap2)
-      Gdip_Shutdown("pToken")
-   }
+	Send, !{PrintScreen} ; Active Win's client area to Clipboard
+	sleep 50
+	if !KeepBorders
+	{
+		pToken := Gdip_Startup()
+		pBitmap := Gdip_CreateBitmapFromClipboard()
+		Gdip_GetDimensions(pBitmap, w, h)
+		pBitmap2 := SCW_CropImage(pBitmap, 3, 3, w-6, h-6)
+		;~ File2:=A_Desktop . "\" . A_Now . ".PNG" ; tervon  time /path to file to save
+		FormatTime, TodayDate , YYYYMMDDHH24MISS, MM_dd_yy @h_mm_ss ;This is Joe's time format
+		File2:=A_Desktop . "\" . TodayDate . ".PNG" ;path to file to save
+		Gdip_SaveBitmapToFile(pBitmap2, File2) ;Exports automatcially to file
+		Gdip_DisposeImage(pBitmap), Gdip_DisposeImage(pBitmap2)
+		Gdip_Shutdown("pToken")
+	}
 }
 
 ;*******************************************************
 CreateClass(string, interface, ByRef Class){
-   CreateHString(string, hString)
-   VarSetCapacity(GUID, 16)
-   DllCall("ole32\CLSIDFromString", "wstr", interface, "ptr", &GUID)
-   result := DllCall("Combase.dll\RoGetActivationFactory", "ptr", hString, "ptr", &GUID, "ptr*", Class)
-   if (result != 0){
-      if (result = 0x80004002)
-         msgbox No such interface supported
-      else if (result = 0x80040154)
-         msgbox Class not registered
-      else
-         msgbox error: %result%
-      ExitApp
-   }
-   DeleteHString(hString)
+	CreateHString(string, hString)
+	VarSetCapacity(GUID, 16)
+	DllCall("ole32\CLSIDFromString", "wstr", interface, "ptr", &GUID)
+	result := DllCall("Combase.dll\RoGetActivationFactory", "ptr", hString, "ptr", &GUID, "ptr*", Class)
+	if (result != 0){
+		if (result = 0x80004002)
+			msgbox No such interface supported
+		else if (result = 0x80040154)
+			msgbox Class not registered
+		else
+			msgbox error: %result%
+		ExitApp
+	}
+	DeleteHString(hString)
 }
 
 CreateHString(string, ByRef hString){
-    DllCall("Combase.dll\WindowsCreateString", "wstr", string, "uint", StrLen(string), "ptr*", hString)
+	 DllCall("Combase.dll\WindowsCreateString", "wstr", string, "uint", StrLen(string), "ptr*", hString)
 }
 
 DeleteHString(hString){
-   DllCall("Combase.dll\WindowsDeleteString", "ptr", hString)
+	DllCall("Combase.dll\WindowsDeleteString", "ptr", hString)
 }
 
 WaitForAsync(Object, ByRef ObjectResult){
@@ -1347,7 +1363,7 @@ HBitmapToRandomAccessStream(hBitmap) {
 	NumPut(hBitmap, PICTDESC, 8)
 	riid := CLSIDFromString(IID_IPicture, GUID1)
 	DllCall("OleAut32\OleCreatePictureIndirect", "Ptr", &PICTDESC, "Ptr", riid, "UInt", false, "PtrP", pIPicture, "UInt")
-   ; IPicture::SaveAsFile
+	; IPicture::SaveAsFile
 	DllCall(NumGet(NumGet(pIPicture+0) + A_PtrSize*15), "Ptr", pIPicture, "Ptr", pIStream, "UInt", true, "UIntP", size, "UInt")
 	riid := CLSIDFromString(IID_IRandomAccessStream, GUID2)
 	DllCall("ShCore\CreateRandomAccessStreamOverStream", "Ptr", pIStream, "UInt", BSOS_DEFAULT, "Ptr", riid, "PtrP", pIRandomAccessStream, "UInt")
@@ -1427,10 +1443,10 @@ OCR(IRandomAccessStream, language := "en"){
 
 notUnique(mod1, mod2, mod3){
 
-  if (mod1 == mod2 || mod1 == mod3 || mod2 == mod3)
-    return true
-  else
-    return false
+	if (mod1 == mod2 || mod1 == mod3 || mod2 == mod3)
+		return true
+	else
+		return false
 }
 ;*******************************************************
 AboutGUI:
@@ -1441,7 +1457,6 @@ html =
 		<head>
 			<meta charset="utf-8">
 			<meta http-equiv="X-UA-Compatible" content="IE=edge">
-			<title></title>
 			<style media="screen">
 				.top {
 					text-align:center;
@@ -1499,7 +1514,7 @@ imgSet := StrSplit(currImg)
 
 FormatTime, TodayDate , YYYYMMDDHH24MISS, dddd MMMM d, yyyy h:mm:ss tt
 if (!currSig || currSig == "ERROR")
-  currSig := "<H2 style='BACKGROUND-COLOR: red'><br></H2>
+	currSig := "<H2 style='BACKGROUND-COLOR: red'><br></H2>
 <HTML>Attached you will find the screenshot taken on " (TodayDate) " <br><br>
 <span style='color:black'>Please let me know if you have any questions.<br><br><a href='mailto:info@the-Automator.com'>Joe Glines</a> <br>682.xxx.xxxx</span>
 </HTML>"
@@ -1537,7 +1552,7 @@ Gui Hotkeys:New,, Hotkey Settings
 IniRead, currHK, % A_AppData "\ScreenClipping\settings.ini", Hotkeys, Screen
 
 if (!currHK || currHK == "ERROR")
-  currHK := "#"
+	currHK := "#"
 
 Gui Add, Checkbox, % (instr(currHK, "#") ? "checked" : "") " section vWsc", Win
 Gui Add, Checkbox, % (instr(currHK, "^") ? "checked" : "") " x+10 vCsc", Ctrl
@@ -1548,7 +1563,7 @@ Gui Add, Text, x+10, + Left mouse drag to screen capture
 IniRead, currHK, % A_AppData "\ScreenClipping\settings.ini", Hotkeys, Outlook
 
 if (!currHK || currHK == "ERROR")
-  currHK := "#!"
+	currHK := "#!"
 
 Gui Add, Checkbox, % (instr(currHK, "#") ? "checked" : "") " xs y+10 vWom", Win
 Gui Add, Checkbox, % (instr(currHK, "^") ? "checked" : "") " x+10 vCom", Ctrl
@@ -1559,7 +1574,7 @@ Gui Add, Text, x+10, + Left mouse drag to Attach to Outlook email
 IniRead, currHK, % A_AppData "\ScreenClipping\settings.ini", Hotkeys, OCR
 
 if (!currHK || currHK == "ERROR")
-  currHK := "#^"
+	currHK := "#^"
 
 Gui Add, Checkbox, % (instr(currHK, "#") ? "checked" : "") " xs y+10 vWpo", Win
 Gui Add, Checkbox, % (instr(currHK, "^") ? "checked" : "") " x+10 vCpo", Ctrl
@@ -1570,7 +1585,7 @@ Gui Add, Text, x+10, + Left mouse drag to perform OCR
 IniRead, currHK, % A_AppData "\ScreenClipping\settings.ini", Hotkeys, Desktop
 
 if (!currHK || currHK == "ERROR")
-  currHK := "^s"
+	currHK := "^s"
 
 Gui Add, Hotkey, w185 xs y+10 vDesktopSave, % currHK
 Gui Add, Text, x+10 yp+3, on screen clip to save to desktop
@@ -1591,23 +1606,23 @@ outhk := (Wom ? "#" : "") (Com ? "^" : "") (Som ? "+" : "") (Aom ? "!" : "")
 ocrhk := (Wpo ? "#" : "") (Cpo ? "^" : "") (Spo ? "+" : "") (Apo ? "!" : "")
 
 if (notUnique(scrhk, outhk, ocrhk)){
-  msgbox % "One of the hotkeys you tried to setup is already used by another command, please check and try again."
-  return
+	msgbox % "One of the hotkeys you tried to setup is already used by another command, please check and try again."
+	return
 }
 
 Gui Hotkeys:Submit
 Loop parse, hotkeys, |
 {
-  ; for some reason the hotkey command doesnt get the correct context for the ifWin directive
-  ; to fix this I manually setup the context for the hotkeys below
-  Hotkey, IfWinActive, % (a_loopfield != "Desktop" ? "" : "ScreenClippingWindow ahk_class AutoHotkeyGUI")
-  IniRead, currHK, % A_AppData "\ScreenClipping\settings.ini", Hotkeys, % a_loopfield
+	; for some reason the hotkey command doesnt get the correct context for the ifWin directive
+	; to fix this I manually setup the context for the hotkeys below
+	Hotkey, IfWinActive, % (a_loopfield != "Desktop" ? "" : "ScreenClippingWindow ahk_class AutoHotkeyGUI")
+	IniRead, currHK, % A_AppData "\ScreenClipping\settings.ini", Hotkeys, % a_loopfield
 
-  if (currHK == "ERROR" || currHK == "")
-    break
-  ; we make sure to disable all hotkeys to be able to set the new ones without issues
-  ; without this the new hotkey wont work
-  Hotkey, % currHK  (a_loopfield != "Desktop" ? "Lbutton" : ""), OFF
+	if (currHK == "ERROR" || currHK == "")
+		break
+	; we make sure to disable all hotkeys to be able to set the new ones without issues
+	; without this the new hotkey wont work
+	Hotkey, % currHK  (a_loopfield != "Desktop" ? "Lbutton" : ""), OFF
 }
 ; removed any context for later hotkey setup
 Hotkey, IfWinActive
