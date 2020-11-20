@@ -21,11 +21,6 @@ script := {	base	: script
 		  ,email	: "joe@the-automator.com"
 		  ,homepage	: "www.the-automator.com"}
 
-script.update("https://www.the-automator.com/screenclipping/ver"
-			 ,"https://www.the-automator.com/screenclipping/ScreenClippingTool.zip")
-
-script.splash("res/cam.jpg")
-
 /*  ; Credits   I borrowed heavily from ...
 	Screen clipping by Learning one  https://autohotkey.com/boards/viewtopic.php?f=6&t=12088
 	OCR by malcev https://www.autohotkey.com/boards/viewtopic.php?f=6&t=72674
@@ -33,6 +28,11 @@ script.splash("res/cam.jpg")
 ;~ #NoTrayIcon
 ;~ Menu, tray, icon, AutoRun\camera.ico , 1
 Menu, Tray, Icon, C:\WINDOWS\system32\imageres.dll,53 ;Set custom Script icon
+
+script.update("https://www.the-automator.com/screenclipping/ver"
+			 ,"https://www.the-automator.com/screenclipping/ScreenClippingTool.zip")
+
+script.splash("res/cam.jpg")
 
 ;~ Menu,Tray,Add,"Windows and left mouse click"
 Menu, Tray, NoStandard ;removes default options
