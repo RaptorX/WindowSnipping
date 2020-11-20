@@ -40,6 +40,7 @@ Menu, Tray, Add, Hotkeys, Hotkeys
 Menu, Tray, Add, Email Signature, SignatureGUI
 Menu, Tray, Add
 Menu, Tray, Add, About, AboutGUI
+Menu, Tray, Add, Check for Updates, Update
 Menu, Tray,Add,Exit App,Exit
 
 if (!FileExist(A_AppData "\ScreenClipping\settings.ini")){
@@ -1504,6 +1505,14 @@ return
 
 aboutClose:
 Gui About:Destroy
+return
+
+Update:
+res := script.update("https://www.the-automator.com/screenclipping/ver"
+					,"https://www.the-automator.com/screenclipping/ScreenClippingTool.zip")
+
+if (res == 5)
+	msgbox % "You are using the latest version."
 return
 
 SignatureGUI:
