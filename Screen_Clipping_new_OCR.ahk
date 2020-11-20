@@ -1451,6 +1451,7 @@ notUnique(mod1, mod2, mod3){
 ;*******************************************************
 AboutGUI:
 ver := script.version
+hp := regexreplace(script.homepage, "http(s)?:\/\/")
 html =
 (
 	<!DOCTYPE html>
@@ -1483,7 +1484,7 @@ html =
 				<hr>
 				<p>Script Version: %ver%</p>
 				<p>Joe Glines</p>
-				<p><a href="https://the-automator.com" target="_blank">www.the-automator.com</a></p>
+				<p><a href="https://%hp%" target="_blank">%hp%</a></p>
 			</div>
 			<div class="donate">
 				<p>If you like this tool please consider <a href="https://www.paypal.com/donate?hosted_button_id=MBT5HSD9G94N6">donating</a>.</p>
