@@ -1486,8 +1486,7 @@ html =
 				<p><a href="https://the-automator.com" target="_blank">www.the-automator.com</a></p>
 			</div>
 			<div class="donate">
-				<p>If you like this tool please consider donating</p>
-				<p><a href="https://paypal.me">www.paypal.me/theautomator</a></p>
+				<p>If you like this tool please consider <a href="https://www.paypal.com/donate?hosted_button_id=MBT5HSD9G94N6">donating</a>.</p>
 			</div>
 		</body>
 	</html>
@@ -1496,7 +1495,7 @@ html =
 btnPos := 300/2 - 75/2
 Gui About:New,,About Screen Clipping Tool
 Gui Margin, 0
-Gui Add, ActiveX, w300 h220 vdoc, htmlfile
+Gui Add, ActiveX, w300 h210 vdoc, htmlfile
 Gui Add, Button, w75 x%btnPos% gaboutClose, Close
 doc.write(html)
 Gui Show
