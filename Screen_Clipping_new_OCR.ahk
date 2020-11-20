@@ -16,7 +16,7 @@ if((A_PtrSize=8&&A_IsCompiled="")||!A_IsUnicode){ ;32 bit=4  ;64 bit=8
 
 script := {	base	: script
 		  ,name		: A_ScriptName
-		  ,version	: "0.1.0"
+		  ,version	: "1.03"
 		  ,author	: "Joe Glines"
 		  ,email	: "joe@the-automator.com"
 		  ,homepage	: "www.the-automator.com"}
@@ -53,7 +53,7 @@ return
 
 ;===Functions==========================================================================
 SCW_Version() {
-	return 1.02
+	return 1.03
 }
 
 SCW_DestroyAllClipWins() {
@@ -1450,6 +1450,7 @@ notUnique(mod1, mod2, mod3){
 }
 ;*******************************************************
 AboutGUI:
+ver := script.version
 html =
 (
 	<!DOCTYPE html>
@@ -1480,7 +1481,7 @@ html =
 			<div class="top">
 				<h2>Screen Clipping Tool</h2>
 				<hr>
-				<p>Script Version: 1.0</p>
+				<p>Script Version: %ver%</p>
 				<p>Joe Glines</p>
 				<p><a href="https://the-automator.com" target="_blank">www.the-automator.com</a></p>
 			</div>
