@@ -1663,7 +1663,12 @@ Hotkey, % currHK, DesktopHK, ON
 Hotkey, IfWinActive
 
 ~Esc:: winclose, ScreenClippingWindow ahk_class AutoHotkeyGUI
+
+#IfWinActive ScreenClippingWindow ahk_class AutoHotkeyGUI ;activates last clipped window
+^c::
+SCW_Win2Clipboard(0)  ;copies to clipboard by default w/o border
 return
+#IfWinActive
 
 ScreenHK:
 SCW_ScreenClip2Win(clip:=1,email:=0,OCR:=0)
