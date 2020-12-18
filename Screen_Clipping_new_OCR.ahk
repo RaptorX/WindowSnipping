@@ -16,7 +16,7 @@ if((A_PtrSize=8&&A_IsCompiled="")||!A_IsUnicode){ ;32 bit=4  ;64 bit=8
 
 script := {	base	: script
 		  ,name		: A_ScriptName
-		  ,version	: "1.03.0"
+		  ,version	: "1.7.2"
 		  ,author	: "Joe Glines"
 		  ,email	: "joe@the-automator.com"
 		  ,homepage	: "www.the-automator.com"}
@@ -52,7 +52,7 @@ return
 
 ;===Functions==========================================================================
 SCW_Version() {
-	return "1.03.0"
+	return "1.7.2"
 }
 
 SCW_DestroyAllClipWins() {
