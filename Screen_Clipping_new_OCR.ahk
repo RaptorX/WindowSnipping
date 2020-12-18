@@ -32,8 +32,6 @@ Menu, Tray, Icon, C:\WINDOWS\system32\imageres.dll,53 ;Set custom Script icon
 script.update("https://www.the-automator.com/screenclipping/ver"
 			 ,"https://www.the-automator.com/screenclipping/ScreenClippingTool.zip")
 
-script.splash("res/cam.jpg")
-
 ;~ Menu,Tray,Add,"Windows and left mouse click"
 Menu, Tray, NoStandard ;removes default options
 Menu, Tray, Add, Hotkeys, Hotkeys
