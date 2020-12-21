@@ -1631,7 +1631,7 @@ Loop parse, hotkeys, |
 		break
 	; we make sure to disable all hotkeys to be able to set the new ones without issues
 	; without this the new hotkey wont work
-	Hotkey, % currHK  (a_loopfield != "Desktop" ? "Lbutton" : ""), OFF
+	Hotkey, % currHK (a_loopfield != "Desktop" ? "Lbutton" : ""), OFF
 }
 ; removed any context for later hotkey setup
 Hotkey, IfWinActive
@@ -1647,13 +1647,13 @@ if (currHK == "ERROR" || currHK == "")
   return
 
 IniRead, currHK, % A_AppData "\ScreenClipping\settings.ini", Hotkeys, Screen
-Hotkey, % currHK "Lbutton", ScreenHK, ON
+Hotkey, % currHK "Lbutton", ScreenHK, % currHK ? "ON" : "OFF"
 
 IniRead, currHK, % A_AppData "\ScreenClipping\settings.ini", Hotkeys, Outlook
-Hotkey, % currHK "Lbutton", OutlookHK, ON
+Hotkey, % currHK "Lbutton", OutlookHK, % currHK ? "ON" : "OFF"
 
 IniRead, currHK, % A_AppData "\ScreenClipping\settings.ini", Hotkeys, OCR
-Hotkey, % currHK "Lbutton", OCRHK, ON
+Hotkey, % currHK "Lbutton", OCRHK, % currHK ? "ON" : "OFF"
 
 ;********************After clip exists***********************************
 IniRead, currHK, % A_AppData "\ScreenClipping\settings.ini", Hotkeys, Desktop
