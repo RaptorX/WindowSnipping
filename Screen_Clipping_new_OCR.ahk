@@ -172,6 +172,9 @@ SCW_ScreenClip2Win(clip=0,email=0,OCR=0) {
 		if (FileExist(A_AppData "\ScreenClipping\settings.ini"))
 		IniRead, currSig, % A_AppData "\ScreenClipping\settings.ini", Email, signature
 
+		if (!currSig || currSig == "ERROR")
+			currSig :=  defaultSignature
+
 		StringReplace, currSig, currSig, |, `n, All
 		StringReplace, currSig, currSig, `%date`%, %TodayDate%, All
 
