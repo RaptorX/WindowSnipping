@@ -41,6 +41,16 @@ Menu, Tray, Add, About, AboutGUI
 Menu, Tray, Add, Check for Updates, Update
 Menu, Tray,Add,Exit App,Exit
 
+defaultSignature =
+(
+<HTML>
+Attached you will find the screenshot taken on %date%.<br><br>
+<span style='color:black'>Please let me know if you have any questions.<br><br>
+<H2 style='BACKGROUND-COLOR: red'><br></H2>
+<a href='mailto:info@the-Automator.com'>Joe Glines</a><br>682.xxx.xxxx</span>
+</HTML>
+)
+
 if (!FileExist(A_AppData "\ScreenClipping\settings.ini")){
   FileCreateDir % A_AppData "\ScreenClipping"
   FileAppend,, % A_AppData "\ScreenClipping\settings.ini", UTF-8-RAW
@@ -165,11 +175,7 @@ SCW_ScreenClip2Win(clip=0,email=0,OCR=0) {
 		StringReplace, currSig, currSig, |, `n, All
 		StringReplace, currSig, currSig, `%date`%, %TodayDate%, All
 
-		MailItem.HTMLBody := currSig ? currSig
-									 : "<HTML>Attached you will find the screenshot taken on %date%"
-									 . " <br><br><span style='color:black'>Please let me know if you have any questions.<br><br>"
-									 . "<H2 style='BACKGROUND-COLOR: red'><br></H2>"
-									 . "<a href='mailto:info@the-Automator.com'>Joe Glines</a><br>682.xxx.xxxx</span></HTML>"
+		MailItem.HTMLBody := currSig
 
 		IniRead, imgSettings, % A_AppData "\ScreenClipping\settings.ini", Email, images
 		if (imgSettings == "ERROR" || imgSettings == "")
@@ -1520,13 +1526,11 @@ SignatureGUI:
 IniRead, currSig, % A_AppData "\ScreenClipping\settings.ini", Email, signature
 IniRead, currImg, % A_AppData "\ScreenClipping\settings.ini", Email, images
 
+if (!currSig || currSig == "ERROR")
+	currSig :=  defaultSignature
+
 StringReplace, currSig, currSig, |, `n, All
 imgSet := StrSplit(currImg)
-
-if (!currSig || currSig == "ERROR")
-	currSig :=  "<HTML>Attached you will find the screenshot taken on %date% <br><br><span style='color:black'>Please let me know if you have any questions.<br><br>"
-				. "<H2 style='BACKGROUND-COLOR: red'><br></H2>"
-				. "<a href='mailto:info@the-Automator.com'>Joe Glines</a><br>682.xxx.xxxx</span></HTML>"
 
 Gui Signature:New,,Signature Settings
 Gui Add, GroupBox, w320 h55 section, Description
