@@ -163,10 +163,11 @@ SCW_ScreenClip2Win(clip=0,email=0,OCR=0) {
 		IniRead, currSig, % A_AppData "\ScreenClipping\settings.ini", Email, signature
 
 	 StringReplace, currSig, currSig, |, `n, All
-		MailItem.HTMLBody := currSig ? currSig : "<H2 style='BACKGROUND-COLOR: red'><br></H2>
-<HTML>Attached you will find the screenshot taken on " (TodayDate) " <br><br>
-<span style='color:black'>Please let me know if you have any questions.<br><br><a href='mailto:info@the-Automator.com'>Joe Glines</a> <br>682.xxx.xxxx</span>
-</HTML>"
+		MailItem.HTMLBody := currSig ? currSig
+									: "<HTML>Attached you will find the screenshot taken on "
+									. (TodayDate) " <br><br><span style='color:black'>Please let me know if you have any questions.<br><br>"
+									. "<H2 style='BACKGROUND-COLOR: red'><br></H2>"
+									. "<a href='mailto:info@the-Automator.com'>Joe Glines</a><br>682.xxx.xxxx</span></HTML>"
 
 	 IniRead, imgSettings, % A_AppData "\ScreenClipping\settings.ini", Email, images
 	 if (imgSettings == "ERROR" || imgSettings == "")
@@ -1522,10 +1523,10 @@ imgSet := StrSplit(currImg)
 
 FormatTime, TodayDate , YYYYMMDDHH24MISS, dddd MMMM d, yyyy h:mm:ss tt
 if (!currSig || currSig == "ERROR")
-	currSig := "<H2 style='BACKGROUND-COLOR: red'><br></H2>
-<HTML>Attached you will find the screenshot taken on " (TodayDate) " <br><br>
-<span style='color:black'>Please let me know if you have any questions.<br><br><a href='mailto:info@the-Automator.com'>Joe Glines</a> <br>682.xxx.xxxx</span>
-</HTML>"
+	currSig :=  "<HTML>Attached you will find the screenshot taken on "
+				. (TodayDate) " <br><br><span style='color:black'>Please let me know if you have any questions.<br><br>"
+				. "<H2 style='BACKGROUND-COLOR: red'><br></H2>"
+				. "<a href='mailto:info@the-Automator.com'>Joe Glines</a><br>682.xxx.xxxx</span></HTML>"
 
 Gui Signature:New,,Signature Settings
 Gui Add, GroupBox, w320 h55 section, Description
