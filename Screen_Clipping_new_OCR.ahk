@@ -52,14 +52,18 @@ Attached you will find the screenshot taken on %date%.<br><br>
 </HTML>
 )
 
-if (!FileExist(script.inifile)){
-  FileCreateDir % A_AppData "\ScreenClipping"
-  FileAppend,, % script.inifile, UTF-8-RAW
-  IniWrite, 1, % script.inifile, Settings, FirstRun
-  Gosub Hotkeys
+if (!FileExist(script.inifile))
+{
+	FileCreateDir % A_AppData "\ScreenClipping"
+	FileAppend,, % script.inifile, UTF-8-RAW
+	IniWrite, % true, % script.inifile, Settings, FirstRun
+	Gosub Hotkeys
 }
-
-GoSub SetHotkeys
+else
+{
+	IniWrite, % false, % script.inifile, Settings, FirstRun
+	GoSub SetHotkeys
+}
 return
 
 ;===Functions==========================================================================
