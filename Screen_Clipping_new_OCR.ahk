@@ -19,7 +19,8 @@ script := {	base	: script
 		  ,version	: "1.7.2"
 		  ,author	: "Joe Glines"
 		  ,email	: "joe@the-automator.com"
-		  ,homepage	: "www.the-automator.com"}
+		  ,homepage	: "www.the-automator.com"
+		  ,inifile 	: A_AppData "\ScreenClipping\settings.ini"}
 
 /*  ; Credits   I borrowed heavily from ...
 	Screen clipping by Learning one  https://autohotkey.com/boards/viewtopic.php?f=6&t=12088
@@ -51,8 +52,9 @@ Attached you will find the screenshot taken on %date%.<br><br>
 </HTML>
 )
 
-if (!FileExist(A_AppData "\ScreenClipping\settings.ini")){
+if (!FileExist(script.inifile)){
   FileCreateDir % A_AppData "\ScreenClipping"
+  FileAppend,, % script.inifile, UTF-8-RAW
   FileAppend,, % A_AppData "\ScreenClipping\settings.ini", UTF-8-RAW
   Gosub Hotkeys
 }
@@ -169,8 +171,8 @@ SCW_ScreenClip2Win(clip=0,email=0,OCR=0) {
 		FormatTime, TodayDate , YYYYMMDDHH24MISS, dddd MMMM d, yyyy h:mm:ss tt
 		MailItem.Subject :="Screen shot taken : " (TodayDate) ;Subject line of email
 
-		if (FileExist(A_AppData "\ScreenClipping\settings.ini"))
-		IniRead, currSig, % A_AppData "\ScreenClipping\settings.ini", Email, signature
+		if (FileExist(script.inifile))
+		IniRead, currSig, % script.inifile, Email, signature
 
 		if (!currSig || currSig == "ERROR")
 			currSig :=  defaultSignature
@@ -180,7 +182,7 @@ SCW_ScreenClip2Win(clip=0,email=0,OCR=0) {
 
 		MailItem.HTMLBody := currSig
 
-		IniRead, imgSettings, % A_AppData "\ScreenClipping\settings.ini", Email, images
+		IniRead, imgSettings, % script.inifile, Email, images
 		if (imgSettings == "ERROR" || imgSettings == "")
 		imgSettings := 11
 
@@ -1452,8 +1454,8 @@ OCR(IRandomAccessStream, language := "en"){
 	return text
 }
 
-notUnique(mod1, mod2, mod3){
-
+notUnique(mod1, mod2, mod3)
+{
 	if (mod1 == mod2 || mod1 == mod3 || mod2 == mod3)
 		return true
 	else
@@ -1526,8 +1528,8 @@ if (res == 5)
 return
 
 SignatureGUI:
-IniRead, currSig, % A_AppData "\ScreenClipping\settings.ini", Email, signature
-IniRead, currImg, % A_AppData "\ScreenClipping\settings.ini", Email, images
+IniRead, currSig, % script.inifile, Email, signature
+IniRead, currImg, % script.inifile, Email, images
 
 if (!currSig || currSig == "ERROR")
 	currSig :=  defaultSignature
@@ -1558,14 +1560,15 @@ SignatureSave:
 Gui Signature:Submit
 
 StringReplace, SigEdit, SigEdit, `n, |, All
-IniWrite, % SigEdit, % A_AppData "\ScreenClipping\settings.ini", Email, signature
-IniWrite, % bmp jpg, % A_AppData "\ScreenClipping\settings.ini", Email, images
+IniWrite, % SigEdit, % script.inifile, Email, signature
+IniWrite, % bmp jpg, % script.inifile, Email, images
 return
 
 Hotkeys:
 Gui Hotkeys:New,, Hotkey Settings
 
 IniRead, currHK, % A_AppData "\ScreenClipping\settings.ini", Hotkeys, Screen
+IniRead, currHK, % script.inifile, Hotkeys, Screen
 
 if (!currHK || currHK == "ERROR")
 	currHK := "#"
@@ -1576,7 +1579,7 @@ Gui Add, Checkbox, % (instr(currHK, "+") ? "checked" : "") " x+10 vSsc", Shift
 Gui Add, Checkbox, % (instr(currHK, "!") ? "checked" : "") " x+10 vAsc", Alt
 Gui Add, Text, x+10, + Left mouse drag to screen capture
 
-IniRead, currHK, % A_AppData "\ScreenClipping\settings.ini", Hotkeys, Outlook
+IniRead, currHK, % script.inifile, Hotkeys, Outlook
 
 if (!currHK || currHK == "ERROR")
 	currHK := "#!"
@@ -1587,7 +1590,7 @@ Gui Add, Checkbox, % (instr(currHK, "+") ? "checked" : "") " x+10 vSom", Shift
 Gui Add, Checkbox, % (instr(currHK, "!") ? "checked" : "") " x+10 vAom", Alt
 Gui Add, Text, x+10, + Left mouse drag to Attach to Outlook email
 
-IniRead, currHK, % A_AppData "\ScreenClipping\settings.ini", Hotkeys, OCR
+IniRead, currHK, % script.inifile, Hotkeys, OCR
 
 if (!currHK || currHK == "ERROR")
 	currHK := "#^"
@@ -1598,7 +1601,7 @@ Gui Add, Checkbox, % (instr(currHK, "+") ? "checked" : "") " x+10 vSpo", Shift
 Gui Add, Checkbox, % (instr(currHK, "!") ? "checked" : "") " x+10 vApo", Alt
 Gui Add, Text, x+10, + Left mouse drag to perform OCR
 
-IniRead, currHK, % A_AppData "\ScreenClipping\settings.ini", Hotkeys, Desktop
+IniRead, currHK, % script.inifile, Hotkeys, Desktop
 
 if (!currHK || currHK == "ERROR")
 	currHK := "^s"
@@ -1632,7 +1635,7 @@ Loop parse, hotkeys, |
 	; for some reason the hotkey command doesnt get the correct context for the ifWin directive
 	; to fix this I manually setup the context for the hotkeys below
 	Hotkey, IfWinActive, % (a_loopfield != "Desktop" ? "" : "ScreenClippingWindow ahk_class AutoHotkeyGUI")
-	IniRead, currHK, % A_AppData "\ScreenClipping\settings.ini", Hotkeys, % a_loopfield
+	IniRead, currHK, % script.inifile, Hotkeys, % a_loopfield
 
 	if (currHK == "ERROR" || currHK == "")
 		break
@@ -1643,27 +1646,27 @@ Loop parse, hotkeys, |
 ; removed any context for later hotkey setup
 Hotkey, IfWinActive
 
-IniWrite, % scrhk, % A_AppData "\ScreenClipping\settings.ini", Hotkeys, Screen
-IniWrite, % outhk, % A_AppData "\ScreenClipping\settings.ini", Hotkeys, Outlook
-IniWrite, % ocrhk, % A_AppData "\ScreenClipping\settings.ini", Hotkeys, OCR
-IniWrite, % DesktopSave, % A_AppData "\ScreenClipping\settings.ini", Hotkeys, Desktop
+IniWrite, % scrhk, % script.inifile, Hotkeys, Screen
+IniWrite, % outhk, % script.inifile, Hotkeys, Outlook
+IniWrite, % ocrhk, % script.inifile, Hotkeys, OCR
+IniWrite, % DesktopSave, % script.inifile, Hotkeys, Desktop
 
 SetHotkeys:
-IniRead, currHK, % A_AppData "\ScreenClipping\settings.ini", Hotkeys
+IniRead, currHK, % script.inifile, Hotkeys
 if (currHK == "ERROR" || currHK == "")
   return
 
-IniRead, currHK, % A_AppData "\ScreenClipping\settings.ini", Hotkeys, Screen
+IniRead, currHK, % script.inifile, Hotkeys, Screen
 Hotkey, % currHK "Lbutton", ScreenHK, % currHK ? "ON" : "OFF"
 
-IniRead, currHK, % A_AppData "\ScreenClipping\settings.ini", Hotkeys, Outlook
+IniRead, currHK, % script.inifile, Hotkeys, Outlook
 Hotkey, % currHK "Lbutton", OutlookHK, % currHK ? "ON" : "OFF"
 
-IniRead, currHK, % A_AppData "\ScreenClipping\settings.ini", Hotkeys, OCR
+IniRead, currHK, % script.inifile, Hotkeys, OCR
 Hotkey, % currHK "Lbutton", OCRHK, % currHK ? "ON" : "OFF"
 
 ;********************After clip exists***********************************
-IniRead, currHK, % A_AppData "\ScreenClipping\settings.ini", Hotkeys, Desktop
+IniRead, currHK, % script.inifile, Hotkeys, Desktop
 Hotkey, IfWinActive, ScreenClippingWindow ahk_class AutoHotkeyGUI
 Hotkey, % currHK, DesktopHK, ON
 Hotkey, IfWinActive
