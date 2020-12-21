@@ -55,7 +55,7 @@ Attached you will find the screenshot taken on %date%.<br><br>
 if (!FileExist(script.inifile)){
   FileCreateDir % A_AppData "\ScreenClipping"
   FileAppend,, % script.inifile, UTF-8-RAW
-  FileAppend,, % A_AppData "\ScreenClipping\settings.ini", UTF-8-RAW
+  IniWrite, 1, % script.inifile, Settings, FirstRun
   Gosub Hotkeys
 }
 
@@ -1567,10 +1567,10 @@ return
 Hotkeys:
 Gui Hotkeys:New,, Hotkey Settings
 
-IniRead, currHK, % A_AppData "\ScreenClipping\settings.ini", Hotkeys, Screen
+IniRead, firstRun, % script.inifile, Settings, FirstRun
 IniRead, currHK, % script.inifile, Hotkeys, Screen
 
-if (!currHK || currHK == "ERROR")
+if (firstRun)
 	currHK := "#"
 
 Gui Add, Checkbox, % (instr(currHK, "#") ? "checked" : "") " section vWsc", Win
@@ -1581,7 +1581,7 @@ Gui Add, Text, x+10, + Left mouse drag to screen capture
 
 IniRead, currHK, % script.inifile, Hotkeys, Outlook
 
-if (!currHK || currHK == "ERROR")
+if (firstRun)
 	currHK := "#!"
 
 Gui Add, Checkbox, % (instr(currHK, "#") ? "checked" : "") " xs y+10 vWom", Win
@@ -1592,7 +1592,7 @@ Gui Add, Text, x+10, + Left mouse drag to Attach to Outlook email
 
 IniRead, currHK, % script.inifile, Hotkeys, OCR
 
-if (!currHK || currHK == "ERROR")
+if (firstRun)
 	currHK := "#^"
 
 Gui Add, Checkbox, % (instr(currHK, "#") ? "checked" : "") " xs y+10 vWpo", Win
@@ -1603,7 +1603,7 @@ Gui Add, Text, x+10, + Left mouse drag to perform OCR
 
 IniRead, currHK, % script.inifile, Hotkeys, Desktop
 
-if (!currHK || currHK == "ERROR")
+if (firstRun)
 	currHK := "^s"
 
 Gui Add, Hotkey, w185 xs y+10 vDesktopSave, % currHK
