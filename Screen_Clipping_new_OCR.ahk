@@ -1625,7 +1625,10 @@ outhk := (Wom ? "#" : "") (Com ? "^" : "") (Som ? "+" : "") (Aom ? "!" : "")
 ocrhk := (Wpo ? "#" : "") (Cpo ? "^" : "") (Spo ? "+" : "") (Apo ? "!" : "")
 
 if (notUnique(scrhk, outhk, ocrhk)){
-	msgbox % "One of the hotkeys you tried to setup is already used by another command, please check and try again."
+	msgbox  % 0x10
+			,% "Error"
+			,% "One of the hotkeys you tried to setup is already used by another"
+			.  " command, please check and try again."
 	return
 }
 
