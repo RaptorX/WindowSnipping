@@ -159,29 +159,31 @@ SCW_ScreenClip2Win(clip=0,email=0,OCR=0) {
 		FormatTime, TodayDate , YYYYMMDDHH24MISS, dddd MMMM d, yyyy h:mm:ss tt
 		MailItem.Subject :="Screen shot taken : " (TodayDate) ;Subject line of email
 
-	 if (FileExist(A_AppData "\ScreenClipping\settings.ini"))
+		if (FileExist(A_AppData "\ScreenClipping\settings.ini"))
 		IniRead, currSig, % A_AppData "\ScreenClipping\settings.ini", Email, signature
 
-	 StringReplace, currSig, currSig, |, `n, All
-		MailItem.HTMLBody := currSig ? currSig
-									: "<HTML>Attached you will find the screenshot taken on "
-									. (TodayDate) " <br><br><span style='color:black'>Please let me know if you have any questions.<br><br>"
-									. "<H2 style='BACKGROUND-COLOR: red'><br></H2>"
-									. "<a href='mailto:info@the-Automator.com'>Joe Glines</a><br>682.xxx.xxxx</span></HTML>"
+		StringReplace, currSig, currSig, |, `n, All
+		StringReplace, currSig, currSig, `%date`%, %TodayDate%, All
 
-	 IniRead, imgSettings, % A_AppData "\ScreenClipping\settings.ini", Email, images
-	 if (imgSettings == "ERROR" || imgSettings == "")
+		MailItem.HTMLBody := currSig ? currSig
+									 : "<HTML>Attached you will find the screenshot taken on %date%"
+									 . " <br><br><span style='color:black'>Please let me know if you have any questions.<br><br>"
+									 . "<H2 style='BACKGROUND-COLOR: red'><br></H2>"
+									 . "<a href='mailto:info@the-Automator.com'>Joe Glines</a><br>682.xxx.xxxx</span></HTML>"
+
+		IniRead, imgSettings, % A_AppData "\ScreenClipping\settings.ini", Email, images
+		if (imgSettings == "ERROR" || imgSettings == "")
 		imgSettings := 11
 
-	 file := StrSplit(imgSettings)
+		file := StrSplit(imgSettings)
 
-	 if (file[1])
-		  MailItem.Attachments.Add(File1)
-	 if (file[2])
-		  MailItem.Attachments.Add(File2)
+		if (file[1])
+			MailItem.Attachments.Add(File1)
+		if (file[2])
+			MailItem.Attachments.Add(File2)
 		MailItem.Display
 
-	 Reload
+		Reload
 	}
 
 	;*******************************************************
@@ -1521,10 +1523,8 @@ IniRead, currImg, % A_AppData "\ScreenClipping\settings.ini", Email, images
 StringReplace, currSig, currSig, |, `n, All
 imgSet := StrSplit(currImg)
 
-FormatTime, TodayDate , YYYYMMDDHH24MISS, dddd MMMM d, yyyy h:mm:ss tt
 if (!currSig || currSig == "ERROR")
-	currSig :=  "<HTML>Attached you will find the screenshot taken on "
-				. (TodayDate) " <br><br><span style='color:black'>Please let me know if you have any questions.<br><br>"
+	currSig :=  "<HTML>Attached you will find the screenshot taken on %date% <br><br><span style='color:black'>Please let me know if you have any questions.<br><br>"
 				. "<H2 style='BACKGROUND-COLOR: red'><br></H2>"
 				. "<a href='mailto:info@the-Automator.com'>Joe Glines</a><br>682.xxx.xxxx</span></HTML>"
 
