@@ -188,7 +188,7 @@ SCW_ScreenClip2Win(clip=0,email=0,OCR=0) {
 
 		IniRead, imgSettings, % script.inifile, Email, images
 		if (imgSettings == "ERROR" || imgSettings == "")
-		imgSettings := 11
+			imgSettings := 11
 
 		file := StrSplit(imgSettings)
 
@@ -198,7 +198,7 @@ SCW_ScreenClip2Win(clip=0,email=0,OCR=0) {
 			MailItem.Attachments.Add(File2)
 		MailItem.Display
 
-		Reload
+		; Reload
 	}
 
 	;*******************************************************
