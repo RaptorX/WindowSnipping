@@ -14,13 +14,13 @@ if((A_PtrSize=8&&A_IsCompiled="")||!A_IsUnicode){ ;32 bit=4  ;64 bit=8
 	 ExitApp
 }
 
-script := {	base	: script
-		  ,name		: A_ScriptName
-		  ,version	: "1.7.2"
-		  ,author	: "Joe Glines"
-		  ,email	: "joe@the-automator.com"
-		  ,homepage	: "www.the-automator.com"
-		  ,inifile 	: A_AppData "\ScreenClipping\settings.ini"}
+global script := {base		: script
+				 ,name		: A_ScriptName
+				 ,version	: "1.7.2"
+				 ,author	: "Joe Glines"
+				 ,email		: "joe@the-automator.com"
+				 ,homepage	: "www.the-automator.com"
+				 ,config 	: A_AppData "\ScreenClipping\settings.ini"}
 
 /*  ; Credits   I borrowed heavily from ...
 	Screen clipping by Learning one  https://autohotkey.com/boards/viewtopic.php?f=6&t=12088
@@ -52,16 +52,17 @@ Attached you will find the screenshot taken on %date%.<br><br>
 </HTML>
 )
 
-if (!FileExist(script.inifile))
+if (!FileExist(script.config))
 {
 	FileCreateDir % A_AppData "\ScreenClipping"
-	FileAppend,, % script.inifile, UTF-8-RAW
-	IniWrite, % true, % script.inifile, Settings, FirstRun
+	FileAppend,, % script.config, UTF-8-RAW
+
+	IniWrite, % true, % script.config, Settings, FirstRun
 	Gosub Hotkeys
 }
 else
 {
-	IniWrite, % false, % script.inifile, Settings, FirstRun
+	IniWrite, % false, % script.config, Settings, FirstRun
 	GoSub SetHotkeys
 }
 return
@@ -175,8 +176,8 @@ SCW_ScreenClip2Win(clip=0,email=0,OCR=0) {
 		FormatTime, TodayDate , YYYYMMDDHH24MISS, dddd MMMM d, yyyy h:mm:ss tt
 		MailItem.Subject :="Screen shot taken : " (TodayDate) ;Subject line of email
 
-		if (FileExist(script.inifile))
-		IniRead, currSig, % script.inifile, Email, signature
+		if (FileExist(script.config))
+		IniRead, currSig, % script.config, Email, signature
 
 		if (!currSig || currSig == "ERROR")
 			currSig :=  defaultSignature
@@ -186,7 +187,7 @@ SCW_ScreenClip2Win(clip=0,email=0,OCR=0) {
 
 		MailItem.HTMLBody := currSig
 
-		IniRead, imgSettings, % script.inifile, Email, images
+		IniRead, imgSettings, % script.config, Email, images
 		if (imgSettings == "ERROR" || imgSettings == "")
 			imgSettings := 11
 
@@ -253,6 +254,8 @@ SCW_SelectAreaMod(Options="") {
 SCW_CreateLayeredWinMod(GuiNum,pBitmap,x,y,DrawCloseButton=0) {
 	static CloseButton := 16
 	BorderAColor := SCW_Reg("BorderAColor"), BorderBColor := SCW_Reg("BorderBColor")
+
+	; IniRead, ClipBorder, % script.config, Settings, ClipBorder, % false
 
 	Gui %GuiNum%: -Caption +E0x80000 +LastFound +ToolWindow +AlwaysOnTop +OwnDialogs
 	Gui %GuiNum%: Show, Na, ScreenClippingWindow
@@ -1532,8 +1535,8 @@ if (res == 5)
 return
 
 SignatureGUI:
-IniRead, currSig, % script.inifile, Email, signature
-IniRead, currImg, % script.inifile, Email, images
+IniRead, currSig, % script.config, Email, signature
+IniRead, currImg, % script.config, Email, images
 
 if (!currSig || currSig == "ERROR")
 	currSig :=  defaultSignature
@@ -1564,15 +1567,15 @@ SignatureSave:
 Gui Signature:Submit
 
 StringReplace, SigEdit, SigEdit, `n, |, All
-IniWrite, % SigEdit, % script.inifile, Email, signature
-IniWrite, % bmp jpg, % script.inifile, Email, images
+IniWrite, % SigEdit, % script.config, Email, signature
+IniWrite, % bmp jpg, % script.config, Email, images
 return
 
 Hotkeys:
 Gui Hotkeys:New,, Hotkey Settings
 
-IniRead, firstRun, % script.inifile, Settings, FirstRun
-IniRead, currHK, % script.inifile, Hotkeys, Screen
+IniRead, firstRun, % script.config, Settings, FirstRun
+IniRead, currHK, % script.config, Hotkeys, Screen
 
 if (firstRun)
 	currHK := "#"
@@ -1583,7 +1586,7 @@ Gui Add, Checkbox, % (instr(currHK, "+") ? "checked" : "") " x+10 vSsc", Shift
 Gui Add, Checkbox, % (instr(currHK, "!") ? "checked" : "") " x+10 vAsc", Alt
 Gui Add, Text, x+10, + Left mouse drag to screen capture
 
-IniRead, currHK, % script.inifile, Hotkeys, Outlook
+IniRead, currHK, % script.config, Hotkeys, Outlook
 
 if (firstRun)
 	currHK := "#!"
@@ -1594,7 +1597,7 @@ Gui Add, Checkbox, % (instr(currHK, "+") ? "checked" : "") " x+10 vSom", Shift
 Gui Add, Checkbox, % (instr(currHK, "!") ? "checked" : "") " x+10 vAom", Alt
 Gui Add, Text, x+10, + Left mouse drag to Attach to Outlook email
 
-IniRead, currHK, % script.inifile, Hotkeys, OCR
+IniRead, currHK, % script.config, Hotkeys, OCR
 
 if (firstRun)
 	currHK := "#^"
@@ -1605,7 +1608,7 @@ Gui Add, Checkbox, % (instr(currHK, "+") ? "checked" : "") " x+10 vSpo", Shift
 Gui Add, Checkbox, % (instr(currHK, "!") ? "checked" : "") " x+10 vApo", Alt
 Gui Add, Text, x+10, + Left mouse drag to perform OCR
 
-IniRead, currHK, % script.inifile, Hotkeys, Desktop
+IniRead, currHK, % script.config, Hotkeys, Desktop
 
 if (firstRun)
 	currHK := "^s"
@@ -1642,7 +1645,7 @@ Loop parse, hotkeys, |
 	; for some reason the hotkey command doesnt get the correct context for the ifWin directive
 	; to fix this I manually setup the context for the hotkeys below
 	Hotkey, IfWinActive, % (a_loopfield != "Desktop" ? "" : "ScreenClippingWindow ahk_class AutoHotkeyGUI")
-	IniRead, currHK, % script.inifile, Hotkeys, % a_loopfield
+	IniRead, currHK, % script.config, Hotkeys, % a_loopfield
 
 	if (currHK == "ERROR" || currHK == "")
 		break
@@ -1653,27 +1656,27 @@ Loop parse, hotkeys, |
 ; removed any context for later hotkey setup
 Hotkey, IfWinActive
 
-IniWrite, % scrhk, % script.inifile, Hotkeys, Screen
-IniWrite, % outhk, % script.inifile, Hotkeys, Outlook
-IniWrite, % ocrhk, % script.inifile, Hotkeys, OCR
-IniWrite, % DesktopSave, % script.inifile, Hotkeys, Desktop
+IniWrite, % scrhk, % script.config, Hotkeys, Screen
+IniWrite, % outhk, % script.config, Hotkeys, Outlook
+IniWrite, % ocrhk, % script.config, Hotkeys, OCR
+IniWrite, % DesktopSave, % script.config, Hotkeys, Desktop
 
 SetHotkeys:
-IniRead, currHK, % script.inifile, Hotkeys
+IniRead, currHK, % script.config, Hotkeys
 if (currHK == "ERROR" || currHK == "")
   return
 
-IniRead, currHK, % script.inifile, Hotkeys, Screen
+IniRead, currHK, % script.config, Hotkeys, Screen
 Hotkey, % currHK "Lbutton", ScreenHK, % currHK ? "ON" : "OFF"
 
-IniRead, currHK, % script.inifile, Hotkeys, Outlook
+IniRead, currHK, % script.config, Hotkeys, Outlook
 Hotkey, % currHK "Lbutton", OutlookHK, % currHK ? "ON" : "OFF"
 
-IniRead, currHK, % script.inifile, Hotkeys, OCR
+IniRead, currHK, % script.config, Hotkeys, OCR
 Hotkey, % currHK "Lbutton", OCRHK, % currHK ? "ON" : "OFF"
 
 ;********************After clip exists***********************************
-IniRead, currHK, % script.inifile, Hotkeys, Desktop
+IniRead, currHK, % script.config, Hotkeys, Desktop
 Hotkey, IfWinActive, ScreenClippingWindow ahk_class AutoHotkeyGUI
 Hotkey, % currHK, DesktopHK, ON
 Hotkey, IfWinActive
