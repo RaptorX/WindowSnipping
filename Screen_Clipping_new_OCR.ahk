@@ -45,7 +45,8 @@ Menu, Tray,Add,Exit App,Exit
 defaultSignature =
 (
 <HTML>
-Attached you will find the screenshot taken on %date%.<br><br>
+Attached you will find the screenshot taken on `%date`%.<br><br>
+This email and screen clipping was created from Screen Clipper by the-Automator.<br><br>
 <span style='color:black'>Please let me know if you have any questions.<br><br>
 <H2 style='BACKGROUND-COLOR: red'><br></H2>
 <a href='mailto:info@the-Automator.com'>Joe Glines</a><br>682.xxx.xxxx</span>
