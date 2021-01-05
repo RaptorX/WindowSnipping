@@ -1652,6 +1652,10 @@ if (notUnique(scrhk, outhk, ocrhk)){
 }
 
 Gui Hotkeys:Submit
+
+if (A_GuiControl == "Cancel")
+	return
+
 Loop parse, hotkeys, |
 {
 	; for some reason the hotkey command doesnt get the correct context for the ifWin directive
