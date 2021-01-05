@@ -30,8 +30,8 @@ global script := {base		: script
 ;~ Menu, tray, icon, AutoRun\camera.ico , 1
 Menu, Tray, Icon, C:\WINDOWS\system32\imageres.dll,53 ;Set custom Script icon
 
-script.update("https://www.the-automator.com/screenclipping/ver"
-			 ,"https://www.the-automator.com/screenclipping/ScreenClippingTool.zip")
+script.update("https://www.the-automator.com/screenclippingupdate/ver"
+			 ,"https://www.the-automator.com/screenclippingupdate/ScreenClippingTool.zip")
 
 ;~ Menu,Tray,Add,"Windows and left mouse click"
 Menu, Tray, NoStandard ;removes default options
@@ -1536,8 +1536,8 @@ Gui About:Destroy
 return
 
 Update:
-res := script.update("https://www.the-automator.com/screenclipping/ver"
-					,"https://www.the-automator.com/screenclipping/ScreenClippingTool.zip")
+res := script.update("https://www.the-automator.com/screenclippingupdate/ver"
+					,"https://www.the-automator.com/screenclippingupdate/ScreenClippingTool.zip")
 
 if (res == 5)
 	msgbox % "You are using the latest version."
