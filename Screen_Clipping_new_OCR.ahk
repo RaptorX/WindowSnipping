@@ -140,7 +140,10 @@ SCW_ScreenClip2Win(clip=0,email=0,OCR=0) {
 		Clipboard:= ocr(pIRandomAccessStream, "en")
 		ObjRelease(pIRandomAccessStream)
 		;Notify().AddWindow(Clipboard,{Icon:300,Background:"0x0000FF",Title:"OCR Performed, now on clipboard",TitleSize:16,size:15,Time:4000})
-		ToolTip,% "Now on Clipboard`n`n" clipboard
+		if !Clipboard
+			ToolTip, % "Sorry, no text was captured.`nPlease Try again."
+		else
+			ToolTip, % "Now on Clipboard:`n`n" clipboard
 		sleep, 2000
 		ToolTip
 		Gdip_Shutdown("pToken") ;clear selection
