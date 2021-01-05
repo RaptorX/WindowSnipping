@@ -108,6 +108,8 @@ SCW_SetUp(Options="") {
 
 SCW_ScreenClip2Win(clip=0,email=0,OCR=0) {
 	static c
+	global defaultSignature
+
 	if !(SCW_Reg("WasSetUp"))
 		SCW_SetUp()
 
