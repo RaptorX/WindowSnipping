@@ -168,6 +168,7 @@ SCW_ScreenClip2Win(clip=0,email=0,OCR=0) {
 				  , % "For this feature to work correctly you should open Outlook.`n`n"
 				  .   "After is open try using the hotkey again."
 				  , 3
+			return
 		}
 		;**********************Write email*********************************
 
