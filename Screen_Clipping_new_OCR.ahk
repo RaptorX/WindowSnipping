@@ -159,8 +159,14 @@ SCW_ScreenClip2Win(clip=0,email=0,OCR=0) {
 		Process, Exist, Outlook.exe    ; check to see if Outlook is running.
 		Outlook_pid=%errorLevel%         ; errorlevel equals the PID if active
 		If (Outlook_pid = 0)   { ;
-			run outlook.exe
-			WinWait, Microsoft Outlook, ,3
+			; run outlook.exe
+			; WinWait, Microsoft Outlook, ,3
+
+			MsgBox, % 0x40
+				  , % "Outlook is not open"
+				  , % "For this feature to work correctly you should open Outlook.`n`n"
+				  .   "After is open try using the hotkey again."
+				  , 3
 		}
 		;**********************Write email*********************************
 
