@@ -1589,41 +1589,44 @@ IniRead, currHK, % script.config, Hotkeys, Screen
 if (firstRun)
 	currHK := "#"
 
-Gui Add, Checkbox, % (instr(currHK, "#") ? "checked" : "") " section vWsc", Win
+Gui Add,Text,, Please select the hotkeys of your choice:`n
+Gui Add, Text, w220 x0 right, Left mouse drag to screen capture +
+Gui Add, Checkbox, % (instr(currHK, "#") ? "checked" : "") " x+10 section vWsc", Win
 Gui Add, Checkbox, % (instr(currHK, "^") ? "checked" : "") " x+10 vCsc", Ctrl
 Gui Add, Checkbox, % (instr(currHK, "+") ? "checked" : "") " x+10 vSsc", Shift
 Gui Add, Checkbox, % (instr(currHK, "!") ? "checked" : "") " x+10 vAsc", Alt
-Gui Add, Text, x+10, + Left mouse drag to screen capture
+
 
 IniRead, currHK, % script.config, Hotkeys, Outlook
 
 if (firstRun)
 	currHK := "#!"
 
-Gui Add, Checkbox, % (instr(currHK, "#") ? "checked" : "") " xs y+10 vWom", Win
+Gui Add, Text, w220 x0 right, Left mouse drag to Attach to Outlook email +
+Gui Add, Checkbox, % (instr(currHK, "#") ? "checked" : "") " xs yp vWom", Win
 Gui Add, Checkbox, % (instr(currHK, "^") ? "checked" : "") " x+10 vCom", Ctrl
 Gui Add, Checkbox, % (instr(currHK, "+") ? "checked" : "") " x+10 vSom", Shift
 Gui Add, Checkbox, % (instr(currHK, "!") ? "checked" : "") " x+10 vAom", Alt
-Gui Add, Text, x+10, + Left mouse drag to Attach to Outlook email
 
 IniRead, currHK, % script.config, Hotkeys, OCR
 
 if (firstRun)
 	currHK := "#^"
 
-Gui Add, Checkbox, % (instr(currHK, "#") ? "checked" : "") " xs y+10 vWpo", Win
+Gui Add, Text, w220 x0 right, Left mouse drag to perform OCR +
+Gui Add, Checkbox, % (instr(currHK, "#") ? "checked" : "") " xs yp vWpo", Win
 Gui Add, Checkbox, % (instr(currHK, "^") ? "checked" : "") " x+10 vCpo", Ctrl
 Gui Add, Checkbox, % (instr(currHK, "+") ? "checked" : "") " x+10 vSpo", Shift
 Gui Add, Checkbox, % (instr(currHK, "!") ? "checked" : "") " x+10 vApo", Alt
-Gui Add, Text, x+10, + Left mouse drag to perform OCR
 
 IniRead, currHK, % script.config, Hotkeys, Desktop
 
 if (firstRun)
 	currHK := "^s"
 
-Gui Add, Hotkey, w185 xs y+10 vDesktopSave, % currHK
-Gui Add, Text, x+10 yp+3, on screen clip to save to desktop
+Gui Add, Text, w220 x0 y+13 right, Save clip to desktop
+Gui Add, Hotkey, w185 xs yp-3 vDesktopSave, % currHK
+
 
 Gui Add, Text, w450 x0 y+20 0x10
 Gui Add, Button, w75 x255 yp+10 gHokeysSave, Save
