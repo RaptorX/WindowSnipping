@@ -202,11 +202,11 @@ SCW_ScreenClip2Win(clip=0,email=0,OCR=0) {
 
 		MailItem.HTMLBody := currSig
 
-		IniRead, imgSettings, % script.config, Email, images
-		if (imgSettings == "ERROR" || imgSettings == "")
-			imgSettings := 11
+		IniRead, currImg, % script.config, Email, images
+		if (!currImg || currImg == "ERROR")
+			currImg := 11
 
-		file := StrSplit(imgSettings)
+		file := StrSplit(currImg)
 
 		if (file[1])
 			MailItem.Attachments.Add(File1)
@@ -1555,6 +1555,8 @@ IniRead, currImg, % script.config, Email, images
 
 if (!currSig || currSig == "ERROR")
 	currSig :=  defaultSignature
+if (!currImg || currImg == "ERROR")
+	currImg :=  11
 
 StringReplace, currSig, currSig, |, `n, All
 imgSet := StrSplit(currImg)
