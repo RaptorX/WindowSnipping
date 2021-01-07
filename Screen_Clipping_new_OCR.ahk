@@ -28,7 +28,8 @@ global script := {base		: script
 */
 ;~ #NoTrayIcon
 ;~ Menu, tray, icon, AutoRun\camera.ico , 1
-Menu, Tray, Icon, C:\WINDOWS\system32\imageres.dll,53 ;Set custom Script icon
+;@Ahk2Exe-SetMainIcon res\sct.ico
+Menu, Tray, Icon, res\sct.ico ;Set custom Script icon
 
 ;~ Menu,Tray,Add,"Windows and left mouse click"
 Menu, Tray, NoStandard ;removes default options
