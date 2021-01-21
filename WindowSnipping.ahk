@@ -15,12 +15,12 @@ if((A_PtrSize=8&&A_IsCompiled="")||!A_IsUnicode){ ;32 bit=4  ;64 bit=8
 }
 
 global script := {base		: script
-				 ,name		: A_ScriptName
+				 ,name		: regexreplace(A_ScriptName, "\.ahk")
 				 ,version	: "1.7.2"
 				 ,author	: "Joe Glines"
 				 ,email		: "joe@the-automator.com"
 				 ,homepage	: "www.the-automator.com"
-				 ,config 	: A_AppData "\ScreenClipping\settings.ini"}
+				 ,config 	: A_AppData "\" regexreplace(A_ScriptName, "\.ahk") "\settings.ini"}
 
 /*  ; Credits   I borrowed heavily from ...
 	Screen clipping by Learning one  https://autohotkey.com/boards/viewtopic.php?f=6&t=12088
@@ -32,7 +32,7 @@ global script := {base		: script
 ;@Ahk2Exe-SetMainIcon res\sct.ico
 
 ;~ Menu,Tray,Add,"Windows and left mouse click"
-Menu, Tray, NoStandard ;removes default options
+; Menu, Tray, NoStandard ;removes default options
 Menu, Tray, Add, Hotkeys, Hotkeys
 Menu, Tray, Add, Email Signature, SignatureGUI
 Menu, Tray, Add
@@ -1486,6 +1486,7 @@ notUnique(mod1, mod2, mod3)
 ;*******************************************************
 AboutGUI:
 ver := script.version
+name := script.name
 hp := regexreplace(script.homepage, "http(s)?:\/\/")
 html =
 (
@@ -1515,7 +1516,7 @@ html =
 		</head>
 		<body>
 			<div class="top">
-				<h2>Screen Clipping Tool</h2>
+				<h2>%name%</h2>
 				<hr>
 				<p>Script Version: %ver%</p>
 				<p>Joe Glines</p>
@@ -1524,14 +1525,16 @@ html =
 			<div class="donate">
 				<p>If you like this tool please consider <a href="https://www.paypal.com/donate?hosted_button_id=MBT5HSD9G94N6">donating</a>.</p>
 			</div>
+			<hr>
 		</body>
 	</html>
 )
 
 btnPos := 300/2 - 75/2
-Gui About:New,,About Screen Clipping Tool
+Gui About:New,,% "About " regexreplace(script.name, "\.ahk")
 Gui Margin, 0
-Gui Add, ActiveX, w300 h210 vdoc, htmlfile
+Gui Color, White
+Gui Add, ActiveX, w300 h220 vdoc, htmlfile
 Gui Add, Button, w75 x%btnPos% gaboutClose, Close
 doc.write(html)
 Gui Show
