@@ -28,13 +28,19 @@ global script := {base		: script
 */
 ;~ #NoTrayIcon
 ;~ Menu, tray, icon, AutoRun\camera.ico , 1
-; Menu, Tray, Icon, res\sct.ico ;Set custom Script icon
+Menu, Tray, Icon, res\sct.ico ;Set custom Script icon
 ;@Ahk2Exe-SetMainIcon res\sct.ico
 
 ;~ Menu,Tray,Add,"Windows and left mouse click"
+IniRead, ShowUsage, % script.config, Settings, ShowUsage, % true
+
 ; Menu, Tray, NoStandard ;removes default options
+Menu, Tray, Add	; to divide from standard menu, remove when above line is uncommented
 Menu, Tray, Add, Hotkeys, Hotkeys
 Menu, Tray, Add, Email Signature, SignatureGUI
+Menu, Tray, Add
+Menu, Tray, Add, Show Usage at Startup, ShowUsageSet
+Menu, Tray, % ShowUsage ? "Check" : "Uncheck", Show Usage at Startup
 Menu, Tray, Add
 Menu, Tray, Add, About, AboutGUI
 Menu, Tray, Add, Check for Updates, Update
@@ -52,10 +58,11 @@ Attached you will find the screenshot taken on `%date`%.<br><br>
 
 if (!FileExist(script.config))
 {
-	FileCreateDir % A_AppData "\ScreenClipping"
+	FileCreateDir % regexreplace(script.config, "^(.*)\\([^\\]*)$", "$1")
 	FileAppend,, % script.config, UTF-8-RAW
 
 	IniWrite, % true, % script.config, Settings, FirstRun
+	IniWrite, % true, % script.config, Settings, ShowUsage
 	Gosub Hotkeys
 }
 else
@@ -63,6 +70,9 @@ else
 	IniWrite, % false, % script.config, Settings, FirstRun
 	GoSub SetHotkeys
 }
+
+if (ShowUsage)
+	gosub ShowUsageGUI
 return
 
 ;===Functions==========================================================================
@@ -1484,6 +1494,20 @@ notUnique(mod1, mod2, mod3)
 		return false
 }
 ;*******************************************************
+ShowUsageSet:
+	IniRead, ShowUsage, % script.config, Settings, ShowUsage, % true
+	Menu, Tray, ToggleCheck, Show Usage at Startup
+	IniWrite, % !ShowUsage, % script.config, Settings, ShowUsage
+return
+
+ShowUsageGUI:
+	Gui ShowUsage:New, +ToolWindow
+	Gui Margin,0,0
+	Gui Color, White
+	Gui Add, Picture,, % "res\intro.png"
+	Gui Show
+return
+
 AboutGUI:
 ver := script.version
 name := script.name
