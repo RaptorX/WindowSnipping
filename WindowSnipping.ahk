@@ -1509,253 +1509,253 @@ ShowUsageGUI:
 return
 
 AboutGUI:
-ver := script.version
-name := script.name
-hp := regexreplace(script.homepage, "http(s)?:\/\/")
-html =
-(
-	<!DOCTYPE html>
-	<html lang="en" dir="ltr">
-		<head>
-			<meta charset="utf-8">
-			<meta http-equiv="X-UA-Compatible" content="IE=edge">
-			<style media="screen">
-				.top {
-					text-align:center;
-				}
-				.top h2 {
-					color:#2274A5;
-				}
-				.donate {
-					color:#E83F6F;
-					text-align:center;
-					font-weight:bold;
-					font-size:small;
-					margin: 20px;
-				}
-				p {
-					margin: 0px;
-				}
-			</style>
-		</head>
-		<body>
-			<div class="top">
-				<h2>%name%</h2>
+	ver := script.version
+	name := script.name
+	hp := regexreplace(script.homepage, "http(s)?:\/\/")
+	html =
+	(
+		<!DOCTYPE html>
+		<html lang="en" dir="ltr">
+			<head>
+				<meta charset="utf-8">
+				<meta http-equiv="X-UA-Compatible" content="IE=edge">
+				<style media="screen">
+					.top {
+						text-align:center;
+					}
+					.top h2 {
+						color:#2274A5;
+					}
+					.donate {
+						color:#E83F6F;
+						text-align:center;
+						font-weight:bold;
+						font-size:small;
+						margin: 20px;
+					}
+					p {
+						margin: 0px;
+					}
+				</style>
+			</head>
+			<body>
+				<div class="top">
+					<h2>%name%</h2>
+					<hr>
+					<p>Script Version: %ver%</p>
+					<p>Joe Glines</p>
+					<p><a href="https://%hp%" target="_blank">%hp%</a></p>
+				</div>
+				<div class="donate">
+					<p>If you like this tool please consider <a href="https://www.paypal.com/donate?hosted_button_id=MBT5HSD9G94N6">donating</a>.</p>
+				</div>
 				<hr>
-				<p>Script Version: %ver%</p>
-				<p>Joe Glines</p>
-				<p><a href="https://%hp%" target="_blank">%hp%</a></p>
-			</div>
-			<div class="donate">
-				<p>If you like this tool please consider <a href="https://www.paypal.com/donate?hosted_button_id=MBT5HSD9G94N6">donating</a>.</p>
-			</div>
-			<hr>
-		</body>
-	</html>
-)
+			</body>
+		</html>
+	)
 
-btnPos := 300/2 - 75/2
-Gui About:New,,% "About " regexreplace(script.name, "\.ahk")
-Gui Margin, 0
-Gui Color, White
-Gui Add, ActiveX, w300 h220 vdoc, htmlfile
-Gui Add, Button, w75 x%btnPos% gaboutClose, Close
-doc.write(html)
-Gui Show
+	btnPos := 300/2 - 75/2
+	Gui About:New,,% "About " regexreplace(script.name, "\.ahk")
+	Gui Margin, 0
+	Gui Color, White
+	Gui Add, ActiveX, w300 h220 vdoc, htmlfile
+	Gui Add, Button, w75 x%btnPos% gaboutClose, Close
+	doc.write(html)
+	Gui Show
 return
 
 aboutClose:
-Gui About:Destroy
+	Gui About:Destroy
 return
 
 Update:
-res := script.update("https://www.the-automator.com/screenclippingupdate/ver"
-					,"https://www.the-automator.com/screenclippingupdate/ScreenClippingTool.zip")
+	res := script.update("https://www.the-automator.com/screenclippingupdate/ver"
+						,"https://www.the-automator.com/screenclippingupdate/ScreenClippingTool.zip")
 
-if (res == 5)
-	msgbox % "You are using the latest version."
+	if (res == 5)
+		msgbox % "You are using the latest version."
 return
 
 SignatureGUI:
-IniRead, currSig, % script.config, Email, signature
-IniRead, currImg, % script.config, Email, images
+	IniRead, currSig, % script.config, Email, signature
+	IniRead, currImg, % script.config, Email, images
 
-if (!currSig || currSig == "ERROR")
-	currSig :=  defaultSignature
-if (!currImg || currImg == "ERROR")
-	currImg :=  11
+	if (!currSig || currSig == "ERROR")
+		currSig :=  defaultSignature
+	if (!currImg || currImg == "ERROR")
+		currImg :=  11
 
-StringReplace, currSig, currSig, |, `n, All
-imgSet := StrSplit(currImg)
+	StringReplace, currSig, currSig, |, `n, All
+	imgSet := StrSplit(currImg)
 
-Gui Signature:New,,Signature Settings
-Gui Add, GroupBox, w320 h55 section, Description
-Gui Add, Text, w300 xp+10 yp+20,This signature will be used when creating a clip and attaching it to an email. You can use HTML here.
-Gui Add, GroupBox, w320 h145 xs, Signature
-Gui Add, Edit, w300 r8 xp+10 yp+20 vSigEdit, %currSig%
-Gui Add, GroupBox, w320 h70 xs, Send Images as:
-Gui Add, Checkbox, % "checked" imgSet[1] " xp+10 yp+20 vbmp", BMP
-Gui Add, Checkbox, % "checked" imgSet[2] " y+10 vjpg", JPG
-Gui Add, Text, w360 x0 y+20 0x10
-Gui Add, Button, w75 x170 yp+10 gSignatureSave, Save
-Gui Add, Button, w75 x+10 gSignatureHide, Cancel
+	Gui Signature:New,,Signature Settings
+	Gui Add, GroupBox, w320 h55 section, Description
+	Gui Add, Text, w300 xp+10 yp+20,This signature will be used when creating a clip and attaching it to an email. You can use HTML here.
+	Gui Add, GroupBox, w320 h145 xs, Signature
+	Gui Add, Edit, w300 r8 xp+10 yp+20 vSigEdit, %currSig%
+	Gui Add, GroupBox, w320 h70 xs, Send Images as:
+	Gui Add, Checkbox, % "checked" imgSet[1] " xp+10 yp+20 vbmp", BMP
+	Gui Add, Checkbox, % "checked" imgSet[2] " y+10 vjpg", JPG
+	Gui Add, Text, w360 x0 y+20 0x10
+	Gui Add, Button, w75 x170 yp+10 gSignatureSave, Save
+	Gui Add, Button, w75 x+10 gSignatureHide, Cancel
 
-Gui Show, w340
+	Gui Show, w340
 return
 
 SignatureHide:
-Gui Signature:Destroy
+	Gui Signature:Destroy
 return
 
 SignatureSave:
-Gui Signature:Submit
+	Gui Signature:Submit
 
-StringReplace, SigEdit, SigEdit, `n, |, All
-IniWrite, % SigEdit, % script.config, Email, signature
-IniWrite, % bmp jpg, % script.config, Email, images
+	StringReplace, SigEdit, SigEdit, `n, |, All
+	IniWrite, % SigEdit, % script.config, Email, signature
+	IniWrite, % bmp jpg, % script.config, Email, images
 return
 
 Hotkeys:
-Gui Hotkeys:New,, Hotkey Settings
+	Gui Hotkeys:New,, Hotkey Settings
 
-IniRead, firstRun, % script.config, Settings, FirstRun
-IniRead, currHK, % script.config, Hotkeys, Screen
+	IniRead, firstRun, % script.config, Settings, FirstRun
+	IniRead, currHK, % script.config, Hotkeys, Screen
 
-if (firstRun)
-	currHK := "#"
+	if (firstRun)
+		currHK := "#"
 
-Gui Add,Text,, Please select the hotkeys of your choice:`n
-Gui Add, Text, w220 x0 right, Left mouse drag to screen capture +
-Gui Add, Checkbox, % (instr(currHK, "#") ? "checked" : "") " x+10 section vWsc", Win
-Gui Add, Checkbox, % (instr(currHK, "^") ? "checked" : "") " x+10 vCsc", Ctrl
-Gui Add, Checkbox, % (instr(currHK, "+") ? "checked" : "") " x+10 vSsc", Shift
-Gui Add, Checkbox, % (instr(currHK, "!") ? "checked" : "") " x+10 vAsc", Alt
-
-
-IniRead, currHK, % script.config, Hotkeys, Outlook
-
-if (firstRun)
-	currHK := "#!"
-
-Gui Add, Text, w220 x0 right, Left mouse drag to Attach to Outlook email +
-Gui Add, Checkbox, % (instr(currHK, "#") ? "checked" : "") " xs yp vWom", Win
-Gui Add, Checkbox, % (instr(currHK, "^") ? "checked" : "") " x+10 vCom", Ctrl
-Gui Add, Checkbox, % (instr(currHK, "+") ? "checked" : "") " x+10 vSom", Shift
-Gui Add, Checkbox, % (instr(currHK, "!") ? "checked" : "") " x+10 vAom", Alt
-
-IniRead, currHK, % script.config, Hotkeys, OCR
-
-if (firstRun)
-	currHK := "#^"
-
-Gui Add, Text, w220 x0 right, Left mouse drag to perform OCR +
-Gui Add, Checkbox, % (instr(currHK, "#") ? "checked" : "") " xs yp vWpo", Win
-Gui Add, Checkbox, % (instr(currHK, "^") ? "checked" : "") " x+10 vCpo", Ctrl
-Gui Add, Checkbox, % (instr(currHK, "+") ? "checked" : "") " x+10 vSpo", Shift
-Gui Add, Checkbox, % (instr(currHK, "!") ? "checked" : "") " x+10 vApo", Alt
-
-IniRead, currHK, % script.config, Hotkeys, Desktop
-
-if (firstRun)
-	currHK := "^s"
-
-Gui Add, Text, w220 x0 y+13 right, Save clip to desktop
-Gui Add, Hotkey, w185 xs yp-3 vDesktopSave, % currHK
+	Gui Add,Text,, Please select the hotkeys of your choice:`n
+	Gui Add, Text, w220 x0 right, Left mouse drag to screen capture +
+	Gui Add, Checkbox, % (instr(currHK, "#") ? "checked" : "") " x+10 section vWsc", Win
+	Gui Add, Checkbox, % (instr(currHK, "^") ? "checked" : "") " x+10 vCsc", Ctrl
+	Gui Add, Checkbox, % (instr(currHK, "+") ? "checked" : "") " x+10 vSsc", Shift
+	Gui Add, Checkbox, % (instr(currHK, "!") ? "checked" : "") " x+10 vAsc", Alt
 
 
-Gui Add, Text, w450 x0 y+20 0x10
-Gui Add, Button, w75 x255 yp+10 gHokeysSave, Save
-Gui Add, Button, w75 x+10 gHokeysSave, Cancel
+	IniRead, currHK, % script.config, Hotkeys, Outlook
 
-Gui Hotkeys:show, w425
+	if (firstRun)
+		currHK := "#!"
+
+	Gui Add, Text, w220 x0 right, Left mouse drag to Attach to Outlook email +
+	Gui Add, Checkbox, % (instr(currHK, "#") ? "checked" : "") " xs yp vWom", Win
+	Gui Add, Checkbox, % (instr(currHK, "^") ? "checked" : "") " x+10 vCom", Ctrl
+	Gui Add, Checkbox, % (instr(currHK, "+") ? "checked" : "") " x+10 vSom", Shift
+	Gui Add, Checkbox, % (instr(currHK, "!") ? "checked" : "") " x+10 vAom", Alt
+
+	IniRead, currHK, % script.config, Hotkeys, OCR
+
+	if (firstRun)
+		currHK := "#^"
+
+	Gui Add, Text, w220 x0 right, Left mouse drag to perform OCR +
+	Gui Add, Checkbox, % (instr(currHK, "#") ? "checked" : "") " xs yp vWpo", Win
+	Gui Add, Checkbox, % (instr(currHK, "^") ? "checked" : "") " x+10 vCpo", Ctrl
+	Gui Add, Checkbox, % (instr(currHK, "+") ? "checked" : "") " x+10 vSpo", Shift
+	Gui Add, Checkbox, % (instr(currHK, "!") ? "checked" : "") " x+10 vApo", Alt
+
+	IniRead, currHK, % script.config, Hotkeys, Desktop
+
+	if (firstRun)
+		currHK := "^s"
+
+	Gui Add, Text, w220 x0 y+13 right, Save clip to desktop
+	Gui Add, Hotkey, w185 xs yp-3 vDesktopSave, % currHK
+
+
+	Gui Add, Text, w450 x0 y+20 0x10
+	Gui Add, Button, w75 x255 yp+10 gHokeysSave, Save
+	Gui Add, Button, w75 x+10 gHokeysSave, Cancel
+
+	Gui Hotkeys:show, w425
 return
 
 HokeysSave:
-Gui Hotkeys:Submit, NoHide
-hotkeys := "Screen|Outlook|OCR|Desktop"
+	Gui Hotkeys:Submit, NoHide
+	hotkeys := "Screen|Outlook|OCR|Desktop"
 
-scrhk := (Wsc ? "#" : "") (Csc ? "^" : "") (Ssc ? "+" : "") (Asc ? "!" : "")
-outhk := (Wom ? "#" : "") (Com ? "^" : "") (Som ? "+" : "") (Aom ? "!" : "")
-ocrhk := (Wpo ? "#" : "") (Cpo ? "^" : "") (Spo ? "+" : "") (Apo ? "!" : "")
+	scrhk := (Wsc ? "#" : "") (Csc ? "^" : "") (Ssc ? "+" : "") (Asc ? "!" : "")
+	outhk := (Wom ? "#" : "") (Com ? "^" : "") (Som ? "+" : "") (Aom ? "!" : "")
+	ocrhk := (Wpo ? "#" : "") (Cpo ? "^" : "") (Spo ? "+" : "") (Apo ? "!" : "")
 
-if (notUnique(scrhk, outhk, ocrhk)){
-	msgbox  % 0x10
-			,% "Error"
-			,% "One of the hotkeys you tried to setup is already used by another"
-			.  " command, please check and try again."
-	return
-}
+	if (notUnique(scrhk, outhk, ocrhk)){
+		msgbox  % 0x10
+				,% "Error"
+				,% "One of the hotkeys you tried to setup is already used by another"
+				.  " command, please check and try again."
+		return
+	}
 
-Gui Hotkeys:Submit
+	Gui Hotkeys:Submit
 
-if (A_GuiControl == "Cancel")
-	return
+	if (A_GuiControl == "Cancel")
+		return
 
-Loop parse, hotkeys, |
-{
-	; for some reason the hotkey command doesnt get the correct context for the ifWin directive
-	; to fix this I manually setup the context for the hotkeys below
-	Hotkey, IfWinActive, % (a_loopfield != "Desktop" ? "" : "ScreenClippingWindow ahk_class AutoHotkeyGUI")
-	IniRead, currHK, % script.config, Hotkeys, % a_loopfield
+	Loop parse, hotkeys, |
+	{
+		; for some reason the hotkey command doesnt get the correct context for the ifWin directive
+		; to fix this I manually setup the context for the hotkeys below
+		Hotkey, IfWinActive, % (a_loopfield != "Desktop" ? "" : "ScreenClippingWindow ahk_class AutoHotkeyGUI")
+		IniRead, currHK, % script.config, Hotkeys, % a_loopfield
 
-	if (currHK == "ERROR" || currHK == "")
-		break
-	; we make sure to disable all hotkeys to be able to set the new ones without issues
-	; without this the new hotkey wont work
-	Hotkey, % currHK (a_loopfield != "Desktop" ? "Lbutton" : ""), OFF
-}
-; removed any context for later hotkey setup
-Hotkey, IfWinActive
+		if (currHK == "ERROR" || currHK == "")
+			break
+		; we make sure to disable all hotkeys to be able to set the new ones without issues
+		; without this the new hotkey wont work
+		Hotkey, % currHK (a_loopfield != "Desktop" ? "Lbutton" : ""), OFF
+	}
+	; removed any context for later hotkey setup
+	Hotkey, IfWinActive
 
-IniWrite, % scrhk, % script.config, Hotkeys, Screen
-IniWrite, % outhk, % script.config, Hotkeys, Outlook
-IniWrite, % ocrhk, % script.config, Hotkeys, OCR
-IniWrite, % DesktopSave, % script.config, Hotkeys, Desktop
+	IniWrite, % scrhk, % script.config, Hotkeys, Screen
+	IniWrite, % outhk, % script.config, Hotkeys, Outlook
+	IniWrite, % ocrhk, % script.config, Hotkeys, OCR
+	IniWrite, % DesktopSave, % script.config, Hotkeys, Desktop
 
-SetHotkeys:
-IniRead, currHK, % script.config, Hotkeys
-if (currHK == "ERROR" || currHK == "")
-  return
+	SetHotkeys:
+		IniRead, currHK, % script.config, Hotkeys
+		if (currHK == "ERROR" || currHK == "")
+			return
 
-IniRead, currHK, % script.config, Hotkeys, Screen
-Hotkey, % currHK "Lbutton", ScreenHK, % currHK ? "ON" : "OFF"
+		IniRead, currHK, % script.config, Hotkeys, Screen
+		Hotkey, % currHK "Lbutton", ScreenHK, % currHK ? "ON" : "OFF"
 
-IniRead, currHK, % script.config, Hotkeys, Outlook
-Hotkey, % currHK "Lbutton", OutlookHK, % currHK ? "ON" : "OFF"
+		IniRead, currHK, % script.config, Hotkeys, Outlook
+		Hotkey, % currHK "Lbutton", OutlookHK, % currHK ? "ON" : "OFF"
 
-IniRead, currHK, % script.config, Hotkeys, OCR
-Hotkey, % currHK "Lbutton", OCRHK, % currHK ? "ON" : "OFF"
+		IniRead, currHK, % script.config, Hotkeys, OCR
+		Hotkey, % currHK "Lbutton", OCRHK, % currHK ? "ON" : "OFF"
 
-;********************After clip exists***********************************
-IniRead, currHK, % script.config, Hotkeys, Desktop
-Hotkey, IfWinActive, ScreenClippingWindow ahk_class AutoHotkeyGUI
-Hotkey, % currHK, DesktopHK, ON
-Hotkey, IfWinActive
+		;********************After clip exists***********************************
+		IniRead, currHK, % script.config, Hotkeys, Desktop
+		Hotkey, IfWinActive, ScreenClippingWindow ahk_class AutoHotkeyGUI
+		Hotkey, % currHK, DesktopHK, ON
+		Hotkey, IfWinActive
+return
 
 ~Esc:: winclose, ScreenClippingWindow ahk_class AutoHotkeyGUI
 
 #IfWinActive ScreenClippingWindow ahk_class AutoHotkeyGUI ;activates last clipped window
 ^c::
-SCW_Win2Clipboard(0)  ;copies to clipboard by default w/o border
+	SCW_Win2Clipboard(0)  ;copies to clipboard by default w/o border
 return
 #IfWinActive
 
 ScreenHK:
-SCW_ScreenClip2Win(clip:=1,email:=0,OCR:=0)
+	SCW_ScreenClip2Win(clip:=1,email:=0,OCR:=0)
 return
 
 OutlookHK:
-SCW_ScreenClip2Win(clip:=0,email:=1,OCR:=0)
+	SCW_ScreenClip2Win(clip:=0,email:=1,OCR:=0)
 return
 
 OCRHK:
-SCW_ScreenClip2Win(clip:=0,email:=0,OCR:=1)
+	SCW_ScreenClip2Win(clip:=0,email:=0,OCR:=1)
 return
 
 DesktopHK:
-SCW_Win2File(0)
+	SCW_Win2File(0)
 return
 
 Exit:
-ExitApp
-return
+	ExitApp
