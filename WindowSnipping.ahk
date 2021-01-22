@@ -1493,6 +1493,21 @@ notUnique(mod1, mod2, mod3)
 	else
 		return false
 }
+
+Base64Enc( ByRef Bin, nBytes, LineLength := 64, LeadingSpaces := 0 )
+{ ; By SKAN / 18-Aug-2017
+	Local Rqd := 0, B64, B := "", N := 0 - LineLength + 1  ; CRYPT_STRING_BASE64 := 0x1
+	DllCall( "Crypt32.dll\CryptBinaryToString", "Ptr",&Bin ,"UInt",nBytes, "UInt",0x1, "Ptr",0,   "UIntP",Rqd )
+	VarSetCapacity( B64, Rqd * ( A_Isunicode ? 2 : 1 ), 0 )
+	DllCall( "Crypt32.dll\CryptBinaryToString", "Ptr",&Bin, "UInt",nBytes, "UInt",0x1, "Str",B64, "UIntP",Rqd )
+	If ( LineLength = 64 and ! LeadingSpaces )
+		Return B64
+	B64 := StrReplace( B64, "`r`n" )
+	Loop % Ceil( StrLen(B64) / LineLength )
+		B .= Format("{1:" LeadingSpaces "s}","" ) . SubStr( B64, N += LineLength, LineLength ) . "`n"
+	Return RTrim( B,"`n" )
+}
+
 ;*******************************************************
 ShowUsageSet:
 	IniRead, ShowUsage, % script.config, Settings, ShowUsage, % true
@@ -1501,10 +1516,65 @@ ShowUsageSet:
 return
 
 ShowUsageGUI:
+	FileGetSize, icosize, res\sct.ico
+	FileRead, icobin, *c res\sct.ico
+	base64ico := Base64Enc(icobin, icosize)
+	info =
+	(
+		<!DOCTYPE html>
+		<html lang="en" dir="ltr">
+			<head>
+				<meta charset="utf-8">
+					<meta http-equiv="X-UA-Compatible" content="IE=edge">
+					<style media="screen">
+						h2
+						{
+							text-align:center;
+							color:SteelBlue;
+						}
+						p
+						{
+							text-align:center;
+						}
+						li
+						{
+							margin-bottom:15px;
+						}
+						ol.secondary li
+						{
+							margin-bottom:5px;
+						}
+						img
+						{
+							width:35px;
+							height:35px;
+						}
+					</style>
+			</head>
+			<body>
+				<h2>Thank you for using WindowSnipping!</h2>
+				<p>To learn how to use the tool you can watch <a>this video</a>, however here are some quick tips.</p>
+				<hr>
+				<ol>
+					<li>After launching WindowSnipping you will see this icon in your system tray
+					<img src="data:image/x-icon;base64,%base64ico%" style="padding-left:15px"></li>
+					<li>If you right-click the icon you'll see the below menu items</li>
+						<ol type="a" class="secondary">
+							<li>Hotkeys (select the key combinations with the left mouse button)</li>
+							<li>Email signature (customizable Outlook signature)</li>
+							<li>About ( Links to website and <strong>donation</strong> button )</li>
+							<li>Check for updates (will look to see if there is a newer version of this program)</li>
+							<li>Exit app (Closes this program)</li>
+						</ol>
+				</ol>
+			</body>
+		</html>
+	)
 	Gui ShowUsage:New, +ToolWindow
 	Gui Margin,0,0
 	Gui Color, White
-	Gui Add, Picture,, % "res\intro.png"
+	Gui Add, ActiveX, w600 h360 vdoc, htmlfile
+	doc.write(info)
 	Gui Show
 return
 
