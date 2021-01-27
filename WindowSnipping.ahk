@@ -15,21 +15,28 @@ if((A_PtrSize=8&&A_IsCompiled="")||!A_IsUnicode){ ;32 bit=4  ;64 bit=8
 }
 
 global script := {base		: script
-				 ,name		: regexreplace(A_ScriptName, "\.ahk")
+				 ,name		: regexreplace(A_ScriptName, "\.\w+")
 				 ,version	: "1.7.2"
 				 ,author	: "Joe Glines"
 				 ,email		: "joe@the-automator.com"
 				 ,homepage	: "www.the-automator.com"
-				 ,config 	: A_AppData "\" regexreplace(A_ScriptName, "\.ahk") "\settings.ini"}
+				 ,resfolder	: A_AppData "\" regexreplace(A_ScriptName, "\.\w+") "\res"
+				 ,iconfile	: A_AppData "\" regexreplace(A_ScriptName, "\.\w+") "\res\sct.ico"
+				 ,config 	: A_AppData "\" regexreplace(A_ScriptName, "\.\w+") "\settings.ini"}
 
 /*  ; Credits   I borrowed heavily from ...
 	Screen clipping by Learning one  https://autohotkey.com/boards/viewtopic.php?f=6&t=12088
 	OCR by malcev https://www.autohotkey.com/boards/viewtopic.php?f=6&t=72674
 */
-;~ #NoTrayIcon
-;~ Menu, tray, icon, AutoRun\camera.ico , 1
-Menu, Tray, Icon, res\sct.ico ;Set custom Script icon
+
+if !fileExist(script.iconfile)
+{
+	FileCreateDir, % script.resfolder
+	FileInstall, res\sct.ico, % script.iconfile
+}
+
 ;@Ahk2Exe-SetMainIcon res\sct.ico
+Menu, Tray, Icon, % script.iconfile
 
 ;~ Menu,Tray,Add,"Windows and left mouse click"
 IniRead, ShowUsage, % script.config, Settings, ShowUsage, % true
