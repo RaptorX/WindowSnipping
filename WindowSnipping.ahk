@@ -42,7 +42,7 @@ Menu, Tray, Icon, % script.iconfile
 IniRead, ShowUsage, % script.config, Settings, ShowUsage, % true
 
 ; Menu, Tray, NoStandard ;removes default options
-Menu, Tray, Add	; to divide from standard menu, remove when above line is uncommented
+; Menu, Tray, Add	; to divide from standard menu, remove when above line is uncommented
 Menu, Tray, Add, Hotkeys, Hotkeys
 Menu, Tray, Add, Email Signature, SignatureGUI
 Menu, Tray, Add
@@ -1810,7 +1810,7 @@ HokeysSave:
 		Hotkey, IfWinActive
 return
 
-~Esc:: winclose, ScreenClippingWindow ahk_class AutoHotkeyGUI
+~^Esc:: winclose, ScreenClippingWindow ahk_class AutoHotkeyGUI
 
 #IfWinActive ScreenClippingWindow ahk_class AutoHotkeyGUI ;activates last clipped window
 ^c::
