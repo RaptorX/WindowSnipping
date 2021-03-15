@@ -1749,6 +1749,13 @@ return
 
 HokeysSave:
 	Gui Hotkeys:Submit, NoHide
+
+	if (A_GuiControl == "Cancel")
+	{
+		Gui Hotkeys:Destroy
+		return
+	}
+
 	hotkeys := "Screen|Outlook|OCR|Desktop"
 
 	scrhk := (Wsc ? "#" : "") (Csc ? "^" : "") (Ssc ? "+" : "") (Asc ? "!" : "")
