@@ -1646,11 +1646,14 @@ aboutClose:
 return
 
 Update:
-	res := script.update("https://www.the-automator.com/screenclippingupdate/ver"
-						,"https://www.the-automator.com/screenclippingupdate/ScreenClippingTool.zip")
-
-	if (res == 5)
-		msgbox % "You are using the latest version."
+	try
+		script.update("https://www.the-automator.com/WindowSnippingUpdate/ver"
+					,"https://www.the-automator.com/WindowSnippingUpdate/WindowSnipping.zip")
+	catch e
+	{
+		if (e.code == 6)
+			msgbox % e.msg
+	}
 return
 
 SignatureGUI:
