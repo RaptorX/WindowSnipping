@@ -1817,9 +1817,8 @@ HokeysSave:
 		Hotkey, IfWinActive
 return
 
-~^Esc:: winclose, ScreenClippingWindow ahk_class AutoHotkeyGUI
-
 #IfWinActive ScreenClippingWindow ahk_class AutoHotkeyGUI ;activates last clipped window
+~Esc::WinClose, ScreenClippingWindow ahk_class AutoHotkeyGUI
 ^c::
 	SCW_Win2Clipboard(0)  ;copies to clipboard by default w/o border
 return
