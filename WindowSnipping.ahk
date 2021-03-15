@@ -16,7 +16,7 @@ if((A_PtrSize=8&&A_IsCompiled="")||!A_IsUnicode){ ;32 bit=4  ;64 bit=8
 
 global script := {base		: script
 				 ,name		: regexreplace(A_ScriptName, "\.\w+")
-				 ,version	: "1.7.2"
+				 ,version	: "1.17.27"
 				 ,author	: "Joe Glines"
 				 ,email		: "joe@the-automator.com"
 				 ,homepage	: "www.the-automator.com"
@@ -84,7 +84,7 @@ return
 
 ;===Functions==========================================================================
 SCW_Version() {
-	return "1.7.2"
+	return "1.17.27"
 }
 
 SCW_DestroyAllClipWins() {
