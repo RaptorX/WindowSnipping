@@ -1720,16 +1720,20 @@ Hotkeys:
 	Gui Add, Checkbox, % (instr(currHK, "+") ? "checked" : "") " x+10 vSom", Shift
 	Gui Add, Checkbox, % (instr(currHK, "!") ? "checked" : "") " x+10 vAom", Alt
 
-	IniRead, currHK, % script.config, Hotkeys, OCR
 
-	if (firstRun)
-		currHK := "#^"
+	if A_OSVersion NOT in WIN_7,WIN_8,WIN_8.1,WIN_VISTA,WIN_2003,WIN_XP,WIN_2000
+	{
+		IniRead, currHK, % script.config, Hotkeys, OCR
 
-	Gui Add, Text, w220 x0 right, Left mouse drag to perform OCR +
-	Gui Add, Checkbox, % (instr(currHK, "#") ? "checked" : "") " xs yp vWpo", Win
-	Gui Add, Checkbox, % (instr(currHK, "^") ? "checked" : "") " x+10 vCpo", Ctrl
-	Gui Add, Checkbox, % (instr(currHK, "+") ? "checked" : "") " x+10 vSpo", Shift
-	Gui Add, Checkbox, % (instr(currHK, "!") ? "checked" : "") " x+10 vApo", Alt
+		if (firstRun)
+			currHK := "#^"
+
+		Gui Add, Text, w220 x0 right, Left mouse drag to perform OCR +
+		Gui Add, Checkbox, % (instr(currHK, "#") ? "checked" : "") " xs yp vWpo", Win
+		Gui Add, Checkbox, % (instr(currHK, "^") ? "checked" : "") " x+10 vCpo", Ctrl
+		Gui Add, Checkbox, % (instr(currHK, "+") ? "checked" : "") " x+10 vSpo", Shift
+		Gui Add, Checkbox, % (instr(currHK, "!") ? "checked" : "") " x+10 vApo", Alt
+	}
 
 	IniRead, currHK, % script.config, Hotkeys, Desktop
 
@@ -1760,7 +1764,9 @@ HokeysSave:
 
 	scrhk := (Wsc ? "#" : "") (Csc ? "^" : "") (Ssc ? "+" : "") (Asc ? "!" : "")
 	outhk := (Wom ? "#" : "") (Com ? "^" : "") (Som ? "+" : "") (Aom ? "!" : "")
-	ocrhk := (Wpo ? "#" : "") (Cpo ? "^" : "") (Spo ? "+" : "") (Apo ? "!" : "")
+
+	if A_OSVersion NOT in WIN_7,WIN_8,WIN_8.1,WIN_VISTA,WIN_2003,WIN_XP,WIN_2000
+		ocrhk := (Wpo ? "#" : "") (Cpo ? "^" : "") (Spo ? "+" : "") (Apo ? "!" : "")
 
 	if (notUnique(scrhk, outhk, ocrhk)){
 		msgbox  % 0x10
@@ -1793,7 +1799,10 @@ HokeysSave:
 
 	IniWrite, % scrhk, % script.config, Hotkeys, Screen
 	IniWrite, % outhk, % script.config, Hotkeys, Outlook
-	IniWrite, % ocrhk, % script.config, Hotkeys, OCR
+
+	if A_OSVersion NOT in WIN_7,WIN_8,WIN_8.1,WIN_VISTA,WIN_2003,WIN_XP,WIN_2000
+		IniWrite, % ocrhk, % script.config, Hotkeys, OCR
+
 	IniWrite, % DesktopSave, % script.config, Hotkeys, Desktop
 
 	SetHotkeys:
@@ -1833,7 +1842,8 @@ OutlookHK:
 return
 
 OCRHK:
-	SCW_ScreenClip2Win(clip:=0,email:=0,OCR:=1)
+	if A_OSVersion NOT in WIN_7,WIN_8,WIN_8.1,WIN_VISTA,WIN_2003,WIN_XP,WIN_2000
+		SCW_ScreenClip2Win(clip:=0,email:=0,OCR:=1)
 return
 
 DesktopHK:
