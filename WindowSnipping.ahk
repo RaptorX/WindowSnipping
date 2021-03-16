@@ -14,15 +14,18 @@ if((A_PtrSize=8&&A_IsCompiled="")||!A_IsUnicode){ ;32 bit=4  ;64 bit=8
 	 ExitApp
 }
 
-global script := {base		: script
-				 ,name		: regexreplace(A_ScriptName, "\.\w+")
-				 ,version	: "1.17.27"
-				 ,author	: "Joe Glines"
-				 ,email		: "joe@the-automator.com"
-				 ,homepage	: "www.the-automator.com"
-				 ,resfolder	: A_AppData "\" regexreplace(A_ScriptName, "\.\w+") "\res"
-				 ,iconfile	: A_AppData "\" regexreplace(A_ScriptName, "\.\w+") "\res\sct.ico"
-				 ,config 	: A_AppData "\" regexreplace(A_ScriptName, "\.\w+") "\settings.ini"}
+
+global script := {base			: script
+				 ,name			: regexreplace(A_ScriptName, "\.\w+")
+				 ,version		: "1.17.27"
+				 ,author		: "Joe Glines"
+				 ,email			: "joe@the-automator.com"
+				 ,homepagetext	: "www.the-automator.com"
+				 ,homepagelink	: "www.the-automator.com"
+				 ,donateLink	: "https://www.paypal.com/donate?hosted_button_id=MBT5HSD9G94N6"
+				 ,resfolder		: A_AppData "\" regexreplace(A_ScriptName, "\.\w+") "\res"
+				 ,iconfile		: A_AppData "\" regexreplace(A_ScriptName, "\.\w+") "\res\sct.ico"
+				 ,config 		: A_AppData "\" regexreplace(A_ScriptName, "\.\w+") "\settings.ini"}
 
 /*  ; Credits   I borrowed heavily from ...
 	Screen clipping by Learning one  https://autohotkey.com/boards/viewtopic.php?f=6&t=12088
