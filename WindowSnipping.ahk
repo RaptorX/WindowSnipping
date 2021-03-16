@@ -17,7 +17,7 @@ if((A_PtrSize=8&&A_IsCompiled="")||!A_IsUnicode){ ;32 bit=4  ;64 bit=8
 
 global script := {base			: script
 				 ,name			: regexreplace(A_ScriptName, "\.\w+")
-				 ,version		: "1.17.27"
+				 ,version		: "1.19.29"
 				 ,author		: "Joe Glines"
 				 ,email			: "joe@the-automator.com"
 				 ,homepagetext	: "www.the-automator.com"
@@ -44,8 +44,8 @@ Menu, Tray, Icon, % script.iconfile
 ;~ Menu,Tray,Add,"Windows and left mouse click"
 IniRead, ShowUsage, % script.config, Settings, ShowUsage, % true
 
-; Menu, Tray, NoStandard ;removes default options
-; Menu, Tray, Add	; to divide from standard menu, remove when above line is uncommented
+Menu, Tray, NoStandard ;removes default options
+Menu, Tray, Add	; to divide from standard menu, remove when above line is uncommented
 Menu, Tray, Add, Hotkeys, Hotkeys
 Menu, Tray, Add, Email Signature, SignatureGUI
 Menu, Tray, Add
@@ -87,7 +87,7 @@ return
 
 ;===Functions==========================================================================
 SCW_Version() {
-	return "1.17.27"
+	return "1.19.29"
 }
 
 SCW_DestroyAllClipWins() {
