@@ -1589,63 +1589,7 @@ ShowUsageGUI:
 return
 
 AboutGUI:
-	ver := script.version
-	name := script.name
-	hp := regexreplace(script.homepage, "http(s)?:\/\/")
-	html =
-	(
-		<!DOCTYPE html>
-		<html lang="en" dir="ltr">
-			<head>
-				<meta charset="utf-8">
-				<meta http-equiv="X-UA-Compatible" content="IE=edge">
-				<style media="screen">
-					.top {
-						text-align:center;
-					}
-					.top h2 {
-						color:#2274A5;
-					}
-					.donate {
-						color:#E83F6F;
-						text-align:center;
-						font-weight:bold;
-						font-size:small;
-						margin: 20px;
-					}
-					p {
-						margin: 0px;
-					}
-				</style>
-			</head>
-			<body>
-				<div class="top">
-					<h2>%name%</h2>
-					<hr>
-					<p>Script Version: %ver%</p>
-					<p>Joe Glines</p>
-					<p><a href="https://%hp%" target="_blank">%hp%</a></p>
-				</div>
-				<div class="donate">
-					<p>If you like this tool please consider <a href="https://www.paypal.com/donate?hosted_button_id=MBT5HSD9G94N6">donating</a>.</p>
-				</div>
-				<hr>
-			</body>
-		</html>
-	)
-
-	btnPos := 300/2 - 75/2
-	Gui About:New,,% "About " regexreplace(script.name, "\.ahk")
-	Gui Margin, 0
-	Gui Color, White
-	Gui Add, ActiveX, w300 h220 vdoc, htmlfile
-	Gui Add, Button, w75 x%btnPos% gaboutClose, Close
-	doc.write(html)
-	Gui Show
-return
-
-aboutClose:
-	Gui About:Destroy
+	script.about()
 return
 
 Update:
