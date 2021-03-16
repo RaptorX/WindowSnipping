@@ -14,46 +14,80 @@ if((A_PtrSize=8&&A_IsCompiled="")||!A_IsUnicode){ ;32 bit=4  ;64 bit=8
 	 ExitApp
 }
 
-script := {	base	: script
-		  ,name		: A_ScriptName
-		  ,version	: "0.1.0"
-		  ,author	: "Joe Glines"
-		  ,email	: "joe@the-automator.com"
-		  ,homepage	: "www.the-automator.com"}
 
-script.update("https://www.the-automator.com/screenclipping/ver"
-			 ,"https://www.the-automator.com/screenclipping/ScreenClippingTool.zip")
-
-script.splash("res/cam.jpg")
+global script := {base			: script
+				 ,name			: regexreplace(A_ScriptName, "\.\w+")
+				 ,version		: "1.19.29"
+				 ,author		: "Joe Glines"
+				 ,email			: "joe@the-automator.com"
+				 ,homepagetext	: "www.the-automator.com"
+				 ,homepagelink	: "www.the-automator.com"
+				 ,donateLink	: "https://www.paypal.com/donate?hosted_button_id=MBT5HSD9G94N6"
+				 ,resfolder		: A_AppData "\" regexreplace(A_ScriptName, "\.\w+") "\res"
+				 ,iconfile		: A_AppData "\" regexreplace(A_ScriptName, "\.\w+") "\res\sct.ico"
+				 ,config 		: A_AppData "\" regexreplace(A_ScriptName, "\.\w+") "\settings.ini"}
 
 /*  ; Credits   I borrowed heavily from ...
 	Screen clipping by Learning one  https://autohotkey.com/boards/viewtopic.php?f=6&t=12088
 	OCR by malcev https://www.autohotkey.com/boards/viewtopic.php?f=6&t=72674
 */
-;~ #NoTrayIcon
-;~ Menu, tray, icon, AutoRun\camera.ico , 1
-Menu, Tray, Icon, C:\WINDOWS\system32\imageres.dll,53 ;Set custom Script icon
+
+if !fileExist(script.iconfile)
+{
+	FileCreateDir, % script.resfolder
+	FileInstall, res\sct.ico, % script.iconfile
+}
+
+;@Ahk2Exe-SetMainIcon res\sct.ico
+Menu, Tray, Icon, % script.iconfile
 
 ;~ Menu,Tray,Add,"Windows and left mouse click"
+IniRead, ShowUsage, % script.config, Settings, ShowUsage, % true
+
 Menu, Tray, NoStandard ;removes default options
+Menu, Tray, Add	; to divide from standard menu, remove when above line is uncommented
 Menu, Tray, Add, Hotkeys, Hotkeys
 Menu, Tray, Add, Email Signature, SignatureGUI
 Menu, Tray, Add
+Menu, Tray, Add, Show Usage at Startup, ShowUsageSet
+Menu, Tray, % ShowUsage ? "Check" : "Uncheck", Show Usage at Startup
+Menu, Tray, Add
 Menu, Tray, Add, About, AboutGUI
+Menu, Tray, Add, Check for Updates, Update
 Menu, Tray,Add,Exit App,Exit
 
-if (!FileExist(A_AppData "\ScreenClipping\settings.ini")){
-  FileCreateDir % A_AppData "\ScreenClipping"
-  FileAppend,, % A_AppData "\ScreenClipping\settings.ini", UTF-8-RAW
-  Gosub Hotkeys
+defaultSignature =
+(
+<HTML>
+Attached you will find the screenshot taken on `%date`%.<br><br>
+<span style='color:black'>Please let me know if you have any questions.<br><br>
+<H2 style='BACKGROUND-COLOR: red'><br></H2>
+<a href='mailto:info@the-Automator.com'>Joe Glines</a><br>682.xxx.xxxx</span>.
+</HTML>
+)
+
+if (!FileExist(script.config))
+{
+	FileCreateDir % regexreplace(script.config, "^(.*)\\([^\\]*)$", "$1")
+	FileAppend,, % script.config, UTF-8-RAW
+
+	IniWrite, % true, % script.config, Settings, FirstRun
+	IniWrite, % true, % script.config, Settings, ShowUsage
+	Gosub Hotkeys
+}
+else
+{
+	IniWrite, % false, % script.config, Settings, FirstRun
+	GoSub SetHotkeys
 }
 
-GoSub SetHotkeys
+if (ShowUsage)
+	gosub ShowUsageGUI
 return
 
 ;===Functions==========================================================================
 SCW_Version() {
-	return 1.02
+	return "1.19.29"
 }
 
 SCW_DestroyAllClipWins() {
@@ -94,6 +128,8 @@ SCW_SetUp(Options="") {
 
 SCW_ScreenClip2Win(clip=0,email=0,OCR=0) {
 	static c
+	global defaultSignature
+
 	if !(SCW_Reg("WasSetUp"))
 		SCW_SetUp()
 
@@ -124,7 +160,10 @@ SCW_ScreenClip2Win(clip=0,email=0,OCR=0) {
 		Clipboard:= ocr(pIRandomAccessStream, "en")
 		ObjRelease(pIRandomAccessStream)
 		;Notify().AddWindow(Clipboard,{Icon:300,Background:"0x0000FF",Title:"OCR Performed, now on clipboard",TitleSize:16,size:15,Time:4000})
-		ToolTip,% "Now on Clipboard`n`n" clipboard
+		if !Clipboard
+			ToolTip, % "Sorry, no text was captured.`nPlease Try again."
+		else
+			ToolTip, % "Now on Clipboard:`n`n" clipboard
 		sleep, 2000
 		ToolTip
 		Gdip_Shutdown("pToken") ;clear selection
@@ -143,8 +182,14 @@ SCW_ScreenClip2Win(clip=0,email=0,OCR=0) {
 		Process, Exist, Outlook.exe    ; check to see if Outlook is running.
 		Outlook_pid=%errorLevel%         ; errorlevel equals the PID if active
 		If (Outlook_pid = 0)   { ;
-			run outlook.exe
-			WinWait, Microsoft Outlook, ,3
+			; run outlook.exe
+			; WinWait, Microsoft Outlook, ,3
+
+			MsgBox, % 0x40
+				  , % "Outlook is not open"
+				  , % "For this feature to work correctly you should open Outlook.`n`n"
+				  .   "After is open try using the hotkey again."
+			return
 		}
 		;**********************Write email*********************************
 
@@ -160,28 +205,36 @@ SCW_ScreenClip2Win(clip=0,email=0,OCR=0) {
 		FormatTime, TodayDate , YYYYMMDDHH24MISS, dddd MMMM d, yyyy h:mm:ss tt
 		MailItem.Subject :="Screen shot taken : " (TodayDate) ;Subject line of email
 
-	 if (FileExist(A_AppData "\ScreenClipping\settings.ini"))
-		IniRead, currSig, % A_AppData "\ScreenClipping\settings.ini", Email, signature
+		if (FileExist(script.config))
+		IniRead, currSig, % script.config, Email, signature
 
-	 StringReplace, currSig, currSig, |, `n, All
-		MailItem.HTMLBody := currSig ? currSig : "<H2 style='BACKGROUND-COLOR: red'><br></H2>
-<HTML>Attached you will find the screenshot taken on " (TodayDate) " <br><br>
-<span style='color:black'>Please let me know if you have any questions.<br><br><a href='mailto:info@the-Automator.com'>Joe Glines</a> <br>682.xxx.xxxx</span>
-</HTML>"
+		if (!currSig || currSig == "ERROR")
+			currSig :=  defaultSignature
 
-	 IniRead, imgSettings, % A_AppData "\ScreenClipping\settings.ini", Email, images
-	 if (imgSettings == "ERROR" || imgSettings == "")
-		imgSettings := 11
+		StringReplace, currSig, currSig, |, `n, All
+		StringReplace, currSig, currSig, `%date`%, %TodayDate%, All
+		StringReplace, currSig, currSig, </HTML>,
+		(LTrim
+			<br>
+			This email and screen clipping was created from Screen Clipper by <a href="https://www.the-automator.com/screenclipping/">the-Automator</a>.
+			</HTML>
+		), All
 
-	 file := StrSplit(imgSettings)
+		MailItem.HTMLBody := currSig
 
-	 if (file[1])
-		  MailItem.Attachments.Add(File1)
-	 if (file[2])
-		  MailItem.Attachments.Add(File2)
+		IniRead, currImg, % script.config, Email, images
+		if (!currImg || currImg == "ERROR")
+			currImg := 11
+
+		file := StrSplit(currImg)
+
+		if (file[1])
+			MailItem.Attachments.Add(File1)
+		if (file[2])
+			MailItem.Attachments.Add(File2)
 		MailItem.Display
 
-	 Reload
+		; Reload
 	}
 
 	;*******************************************************
@@ -236,6 +289,8 @@ SCW_SelectAreaMod(Options="") {
 SCW_CreateLayeredWinMod(GuiNum,pBitmap,x,y,DrawCloseButton=0) {
 	static CloseButton := 16
 	BorderAColor := SCW_Reg("BorderAColor"), BorderBColor := SCW_Reg("BorderBColor")
+
+	; IniRead, ClipBorder, % script.config, Settings, ClipBorder, % false
 
 	Gui %GuiNum%: -Caption +E0x80000 +LastFound +ToolWindow +AlwaysOnTop +OwnDialogs
 	Gui %GuiNum%: Show, Na, ScreenClippingWindow
@@ -1298,7 +1353,7 @@ SCW_Win2File(KeepBorders=0) {
 		Gdip_GetDimensions(pBitmap, w, h)
 		pBitmap2 := SCW_CropImage(pBitmap, 3, 3, w-6, h-6)
 		;~ File2:=A_Desktop . "\" . A_Now . ".PNG" ; tervon  time /path to file to save
-		FormatTime, TodayDate , YYYYMMDDHH24MISS, MM_dd_yy @h_mm_ss ;This is Joe's time format
+		FormatTime, TodayDate , YYYYMMDDHH24MISS, yyyy_MM_dd@h-mmtt ;This is Joe's time format
 		File2:=A_Desktop . "\" . TodayDate . ".PNG" ;path to file to save
 		Gdip_SaveBitmapToFile(pBitmap2, File2) ;Exports automatcially to file
 		Gdip_DisposeImage(pBitmap), Gdip_DisposeImage(pBitmap2)
@@ -1441,236 +1496,311 @@ OCR(IRandomAccessStream, language := "en"){
 	return text
 }
 
-notUnique(mod1, mod2, mod3){
-
+notUnique(mod1, mod2, mod3)
+{
 	if (mod1 == mod2 || mod1 == mod3 || mod2 == mod3)
 		return true
 	else
 		return false
 }
-;*******************************************************
-AboutGUI:
-html =
-(
-	<!DOCTYPE html>
-	<html lang="en" dir="ltr">
-		<head>
-			<meta charset="utf-8">
-			<meta http-equiv="X-UA-Compatible" content="IE=edge">
-			<style media="screen">
-				.top {
-					text-align:center;
-				}
-				.top h2 {
-					color:#2274A5;
-				}
-				.donate {
-					color:#E83F6F;
-					text-align:center;
-					font-weight:bold;
-					font-size:small;
-					margin: 20px;
-				}
-				p {
-					margin: 0px;
-				}
-			</style>
-		</head>
-		<body>
-			<div class="top">
-				<h2>Screen Clipping Tool</h2>
-				<hr>
-				<p>Script Version: 1.0</p>
-				<p>Joe Glines</p>
-				<p><a href="https://the-automator.com" target="_blank">www.the-automator.com</a></p>
-			</div>
-			<div class="donate">
-				<p>If you like this tool please consider donating</p>
-				<p><a href="https://paypal.me">www.paypal.me/theautomator</a></p>
-			</div>
-		</body>
-	</html>
-)
 
-btnPos := 300/2 - 75/2
-Gui About:New,,About Screen Clipping Tool
-Gui Margin, 0
-Gui Add, ActiveX, w300 h220 vdoc, htmlfile
-Gui Add, Button, w75 x%btnPos% gaboutClose, Close
-doc.write(html)
-Gui Show
+Base64Enc( ByRef Bin, nBytes, LineLength := 64, LeadingSpaces := 0 )
+{ ; By SKAN / 18-Aug-2017
+	Local Rqd := 0, B64, B := "", N := 0 - LineLength + 1  ; CRYPT_STRING_BASE64 := 0x1
+	DllCall( "Crypt32.dll\CryptBinaryToString", "Ptr",&Bin ,"UInt",nBytes, "UInt",0x1, "Ptr",0,   "UIntP",Rqd )
+	VarSetCapacity( B64, Rqd * ( A_Isunicode ? 2 : 1 ), 0 )
+	DllCall( "Crypt32.dll\CryptBinaryToString", "Ptr",&Bin, "UInt",nBytes, "UInt",0x1, "Str",B64, "UIntP",Rqd )
+	If ( LineLength = 64 and ! LeadingSpaces )
+		Return B64
+	B64 := StrReplace( B64, "`r`n" )
+	Loop % Ceil( StrLen(B64) / LineLength )
+		B .= Format("{1:" LeadingSpaces "s}","" ) . SubStr( B64, N += LineLength, LineLength ) . "`n"
+	Return RTrim( B,"`n" )
+}
+
+;*******************************************************
+ShowUsageSet:
+	IniRead, ShowUsage, % script.config, Settings, ShowUsage, % true ; read value in case variable was reset
+	Menu, Tray, ToggleCheck, Show Usage at Startup
+
+	if (ShowUsage := !ShowUsage) ; set variable for later use on the gui
+		gosub, ShowUsageGUI
+	IniWrite, % ShowUsage, % script.config, Settings, ShowUsage
 return
 
-aboutClose:
-Gui About:Destroy
+ShowUsageGUI:
+	FileGetSize, icosize, res\sct.ico
+	FileRead, icobin, *c res\sct.ico
+	base64ico := Base64Enc(icobin, icosize)
+	info =
+	(
+		<!DOCTYPE html>
+		<html lang="en" dir="ltr">
+			<head>
+				<meta charset="utf-8">
+					<meta http-equiv="X-UA-Compatible" content="IE=edge">
+					<style media="screen">
+						h2
+						{
+							text-align:center;
+							color:SteelBlue;
+						}
+						p
+						{
+							text-align:center;
+						}
+						li
+						{
+							margin-bottom:15px;
+						}
+						ol.secondary li
+						{
+							margin-bottom:5px;
+						}
+						img
+						{
+							width:35px;
+							height:35px;
+						}
+					</style>
+			</head>
+			<body>
+				<h2>Thank you for using WindowSnipping!</h2>
+				<p>To learn how to use the tool you can watch <a>this video</a>, however here are some quick tips.</p>
+				<hr>
+				<ol>
+					<li>After launching WindowSnipping you will see this icon in your system tray
+					<img src="data:image/x-icon;base64,%base64ico%" style="padding-left:15px"></li>
+					<li>If you right-click the icon you'll see the below menu items</li>
+						<ol type="a" class="secondary">
+							<li>Hotkeys (select the key combinations with the left mouse button)</li>
+							<li>Email signature (customizable Outlook signature)</li>
+							<li>About ( Links to website and <strong>donation</strong> button )</li>
+							<li>Check for updates (will look to see if there is a newer version of this program)</li>
+							<li>Exit app (Closes this program)</li>
+						</ol>
+				</ol>
+			</body>
+		</html>
+	)
+	gui showusage:new, +toolwindow
+	gui margin, 0,0
+	gui color, white
+	gui add, activex, w600 h360 vdoc, htmlfile
+	gui margin, 0,10
+	gui add, checkbox, x10 y+10 checked%ShowUsage% gShowUsageSet vShowUsageShow, % "Show Usage at Startup"
+	doc.write(info)
+	gui show
+return
+
+AboutGUI:
+	script.about()
+return
+
+Update:
+	try
+		script.update("https://www.the-automator.com/WindowSnippingUpdate/ver"
+					 ,"https://www.the-automator.com/WindowSnippingUpdate/WindowSnipping.zip")
+	catch e
+	{
+		if (e.code == 6)
+			msgbox % e.msg
+	}
 return
 
 SignatureGUI:
-IniRead, currSig, % A_AppData "\ScreenClipping\settings.ini", Email, signature
-IniRead, currImg, % A_AppData "\ScreenClipping\settings.ini", Email, images
+	IniRead, currSig, % script.config, Email, signature
+	IniRead, currImg, % script.config, Email, images
 
-StringReplace, currSig, currSig, |, `n, All
-imgSet := StrSplit(currImg)
+	if (!currSig || currSig == "ERROR")
+		currSig :=  defaultSignature
+	if (!currImg || currImg == "ERROR")
+		currImg :=  11
 
-FormatTime, TodayDate , YYYYMMDDHH24MISS, dddd MMMM d, yyyy h:mm:ss tt
-if (!currSig || currSig == "ERROR")
-	currSig := "<H2 style='BACKGROUND-COLOR: red'><br></H2>
-<HTML>Attached you will find the screenshot taken on " (TodayDate) " <br><br>
-<span style='color:black'>Please let me know if you have any questions.<br><br><a href='mailto:info@the-Automator.com'>Joe Glines</a> <br>682.xxx.xxxx</span>
-</HTML>"
+	StringReplace, currSig, currSig, |, `n, All
+	imgSet := StrSplit(currImg)
 
-Gui Signature:New,,Signature Settings
-Gui Add, GroupBox, w320 h55 section, Description
-Gui Add, Text, w300 xp+10 yp+20,This signature will be used when creating a clip and attaching it to an email. You can use HTML here.
-Gui Add, GroupBox, w320 h145 xs, Signature
-Gui Add, Edit, w300 r8 xp+10 yp+20 vSigEdit, %currSig%
-Gui Add, GroupBox, w320 h70 xs, Send Images as:
-Gui Add, Checkbox, % "checked" imgSet[1] " xp+10 yp+20 vbmp", BMP
-Gui Add, Checkbox, % "checked" imgSet[2] " y+10 vjpg", JPG
-Gui Add, Text, w360 x0 y+20 0x10
-Gui Add, Button, w75 x170 yp+10 gSignatureSave, Save
-Gui Add, Button, w75 x+10 gSignatureHide, Cancel
+	Gui Signature:New,,Signature Settings
+	Gui Add, GroupBox, w320 h55 section, Description
+	Gui Add, Text, w300 xp+10 yp+20,This signature will be used when creating a clip and attaching it to an email. You can use HTML here.
+	Gui Add, GroupBox, w320 h145 xs, Signature
+	Gui Add, Edit, w300 r8 xp+10 yp+20 vSigEdit, %currSig%
+	Gui Add, GroupBox, w320 h70 xs, Send Images as:
+	Gui Add, Checkbox, % "checked" imgSet[1] " xp+10 yp+20 vbmp", BMP
+	Gui Add, Checkbox, % "checked" imgSet[2] " y+10 vjpg", JPG
+	Gui Add, Text, w360 x0 y+20 0x10
+	Gui Add, Button, w75 x170 yp+10 gSignatureSave, Save
+	Gui Add, Button, w75 x+10 gSignatureHide, Cancel
 
-Gui Show, w340
+	Gui Show, w340
 return
 
 SignatureHide:
-Gui Signature:Destroy
+	Gui Signature:Destroy
 return
 
 SignatureSave:
-Gui Signature:Submit
+	Gui Signature:Submit
 
-StringReplace, SigEdit, SigEdit, `n, |, All
-IniWrite, % SigEdit, % A_AppData "\ScreenClipping\settings.ini", Email, signature
-IniWrite, % bmp jpg, % A_AppData "\ScreenClipping\settings.ini", Email, images
+	StringReplace, SigEdit, SigEdit, `n, |, All
+	IniWrite, % SigEdit, % script.config, Email, signature
+	IniWrite, % bmp jpg, % script.config, Email, images
 return
 
 Hotkeys:
-Gui Hotkeys:New,, Hotkey Settings
+	Gui Hotkeys:New,, Hotkey Settings
 
-IniRead, currHK, % A_AppData "\ScreenClipping\settings.ini", Hotkeys, Screen
+	IniRead, firstRun, % script.config, Settings, FirstRun
+	IniRead, currHK, % script.config, Hotkeys, Screen
 
-if (!currHK || currHK == "ERROR")
-	currHK := "#"
+	if (firstRun)
+		currHK := "#"
 
-Gui Add, Checkbox, % (instr(currHK, "#") ? "checked" : "") " section vWsc", Win
-Gui Add, Checkbox, % (instr(currHK, "^") ? "checked" : "") " x+10 vCsc", Ctrl
-Gui Add, Checkbox, % (instr(currHK, "+") ? "checked" : "") " x+10 vSsc", Shift
-Gui Add, Checkbox, % (instr(currHK, "!") ? "checked" : "") " x+10 vAsc", Alt
-Gui Add, Text, x+10, + Left mouse drag to screen capture
+	Gui Add,Text,, Please select the hotkeys of your choice:`n
+	Gui Add, Text, w220 x0 right, Left mouse drag to screen capture +
+	Gui Add, Checkbox, % (instr(currHK, "#") ? "checked" : "") " x+10 section vWsc", Win
+	Gui Add, Checkbox, % (instr(currHK, "^") ? "checked" : "") " x+10 vCsc", Ctrl
+	Gui Add, Checkbox, % (instr(currHK, "+") ? "checked" : "") " x+10 vSsc", Shift
+	Gui Add, Checkbox, % (instr(currHK, "!") ? "checked" : "") " x+10 vAsc", Alt
 
-IniRead, currHK, % A_AppData "\ScreenClipping\settings.ini", Hotkeys, Outlook
 
-if (!currHK || currHK == "ERROR")
-	currHK := "#!"
+	IniRead, currHK, % script.config, Hotkeys, Outlook
 
-Gui Add, Checkbox, % (instr(currHK, "#") ? "checked" : "") " xs y+10 vWom", Win
-Gui Add, Checkbox, % (instr(currHK, "^") ? "checked" : "") " x+10 vCom", Ctrl
-Gui Add, Checkbox, % (instr(currHK, "+") ? "checked" : "") " x+10 vSom", Shift
-Gui Add, Checkbox, % (instr(currHK, "!") ? "checked" : "") " x+10 vAom", Alt
-Gui Add, Text, x+10, + Left mouse drag to Attach to Outlook email
+	if (firstRun)
+		currHK := "#!"
 
-IniRead, currHK, % A_AppData "\ScreenClipping\settings.ini", Hotkeys, OCR
+	Gui Add, Text, w220 x0 right, Left mouse drag to Attach to Outlook email +
+	Gui Add, Checkbox, % (instr(currHK, "#") ? "checked" : "") " xs yp vWom", Win
+	Gui Add, Checkbox, % (instr(currHK, "^") ? "checked" : "") " x+10 vCom", Ctrl
+	Gui Add, Checkbox, % (instr(currHK, "+") ? "checked" : "") " x+10 vSom", Shift
+	Gui Add, Checkbox, % (instr(currHK, "!") ? "checked" : "") " x+10 vAom", Alt
 
-if (!currHK || currHK == "ERROR")
-	currHK := "#^"
 
-Gui Add, Checkbox, % (instr(currHK, "#") ? "checked" : "") " xs y+10 vWpo", Win
-Gui Add, Checkbox, % (instr(currHK, "^") ? "checked" : "") " x+10 vCpo", Ctrl
-Gui Add, Checkbox, % (instr(currHK, "+") ? "checked" : "") " x+10 vSpo", Shift
-Gui Add, Checkbox, % (instr(currHK, "!") ? "checked" : "") " x+10 vApo", Alt
-Gui Add, Text, x+10, + Left mouse drag to perform OCR
+	if A_OSVersion NOT in WIN_7,WIN_8,WIN_8.1,WIN_VISTA,WIN_2003,WIN_XP,WIN_2000
+	{
+		IniRead, currHK, % script.config, Hotkeys, OCR
 
-IniRead, currHK, % A_AppData "\ScreenClipping\settings.ini", Hotkeys, Desktop
+		if (firstRun)
+			currHK := "#^"
 
-if (!currHK || currHK == "ERROR")
-	currHK := "^s"
+		Gui Add, Text, w220 x0 right, Left mouse drag to perform OCR +
+		Gui Add, Checkbox, % (instr(currHK, "#") ? "checked" : "") " xs yp vWpo", Win
+		Gui Add, Checkbox, % (instr(currHK, "^") ? "checked" : "") " x+10 vCpo", Ctrl
+		Gui Add, Checkbox, % (instr(currHK, "+") ? "checked" : "") " x+10 vSpo", Shift
+		Gui Add, Checkbox, % (instr(currHK, "!") ? "checked" : "") " x+10 vApo", Alt
+	}
 
-Gui Add, Hotkey, w185 xs y+10 vDesktopSave, % currHK
-Gui Add, Text, x+10 yp+3, on screen clip to save to desktop
+	IniRead, currHK, % script.config, Hotkeys, Desktop
 
-Gui Add, Text, w450 x0 y+20 0x10
-Gui Add, Button, w75 x255 yp+10 gHokeysSave, Save
-Gui Add, Button, w75 x+10 gHokeysSave, Cancel
+	if (firstRun)
+		currHK := "^s"
 
-Gui Hotkeys:show, w425
+	Gui Add, Text, w220 x0 y+13 right, Save clip to desktop
+	Gui Add, Hotkey, w185 xs yp-3 vDesktopSave, % currHK
+
+
+	Gui Add, Text, w450 x0 y+20 0x10
+	Gui Add, Button, w75 x255 yp+10 gHokeysSave, Save
+	Gui Add, Button, w75 x+10 gHokeysSave, Cancel
+
+	Gui Hotkeys:show, w425
 return
 
 HokeysSave:
-Gui Hotkeys:Submit, NoHide
-hotkeys := "Screen|Outlook|OCR|Desktop"
+	Gui Hotkeys:Submit, NoHide
 
-scrhk := (Wsc ? "#" : "") (Csc ? "^" : "") (Ssc ? "+" : "") (Asc ? "!" : "")
-outhk := (Wom ? "#" : "") (Com ? "^" : "") (Som ? "+" : "") (Aom ? "!" : "")
-ocrhk := (Wpo ? "#" : "") (Cpo ? "^" : "") (Spo ? "+" : "") (Apo ? "!" : "")
+	if (A_GuiControl == "Cancel")
+	{
+		Gui Hotkeys:Destroy
+		return
+	}
 
-if (notUnique(scrhk, outhk, ocrhk)){
-	msgbox % "One of the hotkeys you tried to setup is already used by another command, please check and try again."
-	return
-}
+	hotkeys := "Screen|Outlook|OCR|Desktop"
 
-Gui Hotkeys:Submit
-Loop parse, hotkeys, |
-{
-	; for some reason the hotkey command doesnt get the correct context for the ifWin directive
-	; to fix this I manually setup the context for the hotkeys below
-	Hotkey, IfWinActive, % (a_loopfield != "Desktop" ? "" : "ScreenClippingWindow ahk_class AutoHotkeyGUI")
-	IniRead, currHK, % A_AppData "\ScreenClipping\settings.ini", Hotkeys, % a_loopfield
+	scrhk := (Wsc ? "#" : "") (Csc ? "^" : "") (Ssc ? "+" : "") (Asc ? "!" : "")
+	outhk := (Wom ? "#" : "") (Com ? "^" : "") (Som ? "+" : "") (Aom ? "!" : "")
 
-	if (currHK == "ERROR" || currHK == "")
-		break
-	; we make sure to disable all hotkeys to be able to set the new ones without issues
-	; without this the new hotkey wont work
-	Hotkey, % currHK  (a_loopfield != "Desktop" ? "Lbutton" : ""), OFF
-}
-; removed any context for later hotkey setup
-Hotkey, IfWinActive
+	if A_OSVersion NOT in WIN_7,WIN_8,WIN_8.1,WIN_VISTA,WIN_2003,WIN_XP,WIN_2000
+		ocrhk := (Wpo ? "#" : "") (Cpo ? "^" : "") (Spo ? "+" : "") (Apo ? "!" : "")
 
-IniWrite, % scrhk, % A_AppData "\ScreenClipping\settings.ini", Hotkeys, Screen
-IniWrite, % outhk, % A_AppData "\ScreenClipping\settings.ini", Hotkeys, Outlook
-IniWrite, % ocrhk, % A_AppData "\ScreenClipping\settings.ini", Hotkeys, OCR
-IniWrite, % DesktopSave, % A_AppData "\ScreenClipping\settings.ini", Hotkeys, Desktop
+	if (notUnique(scrhk, outhk, ocrhk)){
+		msgbox  % 0x10
+				,% "Error"
+				,% "One of the hotkeys you tried to setup is already used by another"
+				.  " command, please check and try again."
+		return
+	}
 
-SetHotkeys:
-IniRead, currHK, % A_AppData "\ScreenClipping\settings.ini", Hotkeys
-if (currHK == "ERROR" || currHK == "")
-  return
+	Gui Hotkeys:Submit
 
-IniRead, currHK, % A_AppData "\ScreenClipping\settings.ini", Hotkeys, Screen
-Hotkey, % currHK "Lbutton", ScreenHK, ON
+	Loop parse, hotkeys, |
+	{
+		; for some reason the hotkey command doesnt get the correct context for the ifWin directive
+		; to fix this I manually setup the context for the hotkeys below
+		Hotkey, IfWinActive, % (a_loopfield != "Desktop" ? "" : "ScreenClippingWindow ahk_class AutoHotkeyGUI")
+		IniRead, currHK, % script.config, Hotkeys, % a_loopfield
 
-IniRead, currHK, % A_AppData "\ScreenClipping\settings.ini", Hotkeys, Outlook
-Hotkey, % currHK "Lbutton", OutlookHK, ON
+		if (currHK == "ERROR" || currHK == "")
+			break
+		; we make sure to disable all hotkeys to be able to set the new ones without issues
+		; without this the new hotkey wont work
+		Hotkey, % currHK (a_loopfield != "Desktop" ? "Lbutton" : ""), OFF
+	}
+	; removed any context for later hotkey setup
+	Hotkey, IfWinActive
 
-IniRead, currHK, % A_AppData "\ScreenClipping\settings.ini", Hotkeys, OCR
-Hotkey, % currHK "Lbutton", OCRHK, ON
+	IniWrite, % scrhk, % script.config, Hotkeys, Screen
+	IniWrite, % outhk, % script.config, Hotkeys, Outlook
 
-;********************After clip exists***********************************
-IniRead, currHK, % A_AppData "\ScreenClipping\settings.ini", Hotkeys, Desktop
-Hotkey, IfWinActive, ScreenClippingWindow ahk_class AutoHotkeyGUI
-Hotkey, % currHK, DesktopHK, ON
-Hotkey, IfWinActive
+	if A_OSVersion NOT in WIN_7,WIN_8,WIN_8.1,WIN_VISTA,WIN_2003,WIN_XP,WIN_2000
+		IniWrite, % ocrhk, % script.config, Hotkeys, OCR
 
-~Esc:: winclose, ScreenClippingWindow ahk_class AutoHotkeyGUI
+	IniWrite, % DesktopSave, % script.config, Hotkeys, Desktop
+
+	SetHotkeys:
+		IniRead, currHK, % script.config, Hotkeys
+		if (currHK == "ERROR" || currHK == "")
+			return
+
+		IniRead, currHK, % script.config, Hotkeys, Screen
+		Hotkey, % currHK "Lbutton", ScreenHK, % currHK ? "ON" : "OFF"
+
+		IniRead, currHK, % script.config, Hotkeys, Outlook
+		Hotkey, % currHK "Lbutton", OutlookHK, % currHK ? "ON" : "OFF"
+
+		IniRead, currHK, % script.config, Hotkeys, OCR
+		Hotkey, % currHK "Lbutton", OCRHK, % currHK ? "ON" : "OFF"
+
+		;********************After clip exists***********************************
+		IniRead, currHK, % script.config, Hotkeys, Desktop
+		Hotkey, IfWinActive, ScreenClippingWindow ahk_class AutoHotkeyGUI
+		Hotkey, % currHK, DesktopHK, ON
+		Hotkey, IfWinActive
 return
 
+#IfWinActive ScreenClippingWindow ahk_class AutoHotkeyGUI ;activates last clipped window
+~Esc::WinClose, ScreenClippingWindow ahk_class AutoHotkeyGUI
+^c::
+	SCW_Win2Clipboard(0)  ;copies to clipboard by default w/o border
+return
+#IfWinActive
+
 ScreenHK:
-SCW_ScreenClip2Win(clip:=1,email:=0,OCR:=0)
+	SCW_ScreenClip2Win(clip:=1,email:=0,OCR:=0)
 return
 
 OutlookHK:
-SCW_ScreenClip2Win(clip:=0,email:=1,OCR:=0)
+	SCW_ScreenClip2Win(clip:=0,email:=1,OCR:=0)
 return
 
 OCRHK:
-SCW_ScreenClip2Win(clip:=0,email:=0,OCR:=1)
+	if A_OSVersion NOT in WIN_7,WIN_8,WIN_8.1,WIN_VISTA,WIN_2003,WIN_XP,WIN_2000
+		SCW_ScreenClip2Win(clip:=0,email:=0,OCR:=1)
 return
 
 DesktopHK:
-SCW_Win2File(0)
+	SCW_Win2File(0)
 return
 
 Exit:
-ExitApp
-return
+	ExitApp
