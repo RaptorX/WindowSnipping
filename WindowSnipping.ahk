@@ -1520,9 +1520,12 @@ Base64Enc( ByRef Bin, nBytes, LineLength := 64, LeadingSpaces := 0 )
 
 ;*******************************************************
 ShowUsageSet:
-	IniRead, ShowUsage, % script.config, Settings, ShowUsage, % true
+	IniRead, ShowUsage, % script.config, Settings, ShowUsage, % true ; read value in case variable was reset
 	Menu, Tray, ToggleCheck, Show Usage at Startup
-	IniWrite, % !ShowUsage, % script.config, Settings, ShowUsage
+
+	if (ShowUsage := !ShowUsage) ; set variable for later use on the gui
+		gosub, ShowUsageGUI
+	IniWrite, % ShowUsage, % script.config, Settings, ShowUsage
 return
 
 ShowUsageGUI:
@@ -1580,12 +1583,14 @@ ShowUsageGUI:
 			</body>
 		</html>
 	)
-	Gui ShowUsage:New, +ToolWindow
-	Gui Margin,0,0
-	Gui Color, White
-	Gui Add, ActiveX, w600 h360 vdoc, htmlfile
+	gui showusage:new, +toolwindow
+	gui margin, 0,0
+	gui color, white
+	gui add, activex, w600 h360 vdoc, htmlfile
+	gui margin, 0,10
+	gui add, checkbox, x10 y+10 checked%ShowUsage% gShowUsageSet vShowUsageShow, % "Show Usage at Startup"
 	doc.write(info)
-	Gui Show
+	gui show
 return
 
 AboutGUI:
