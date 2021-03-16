@@ -1600,7 +1600,7 @@ return
 Update:
 	try
 		script.update("https://www.the-automator.com/WindowSnippingUpdate/ver"
-					,"https://www.the-automator.com/WindowSnippingUpdate/WindowSnipping.zip")
+					 ,"https://www.the-automator.com/WindowSnippingUpdate/WindowSnipping.zip")
 	catch e
 	{
 		if (e.code == 6)
