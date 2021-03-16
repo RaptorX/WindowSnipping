@@ -14,14 +14,13 @@ if((A_PtrSize=8&&A_IsCompiled="")||!A_IsUnicode){ ;32 bit=4  ;64 bit=8
 	 ExitApp
 }
 
-
 global script := {base			: script
 				 ,name			: regexreplace(A_ScriptName, "\.\w+")
 				 ,version		: "1.19.29"
 				 ,author		: "Joe Glines"
 				 ,email			: "joe@the-automator.com"
-				 ,homepagetext	: "www.the-automator.com"
-				 ,homepagelink	: "www.the-automator.com"
+				 ,homepagetext	: "www.the-automator.com/snip"
+				 ,homepagelink	: "www.the-automator.com/snip?src=app"
 				 ,donateLink	: "https://www.paypal.com/donate?hosted_button_id=MBT5HSD9G94N6"
 				 ,resfolder		: A_AppData "\" regexreplace(A_ScriptName, "\.\w+") "\res"
 				 ,iconfile		: A_AppData "\" regexreplace(A_ScriptName, "\.\w+") "\res\sct.ico"
@@ -1566,7 +1565,7 @@ ShowUsageGUI:
 			</head>
 			<body>
 				<h2>Thank you for using WindowSnipping!</h2>
-				<p>To learn how to use the tool you can watch <a>this video</a>, however here are some quick tips.</p>
+				<p>To learn how to use the tool you can watch <a href="https://www.the-automator.com/WindowSnippingVideo">this video</a>, however here are some quick tips.</p>
 				<hr>
 				<ol>
 					<li>After launching WindowSnipping you will see this icon in your system tray
