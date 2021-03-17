@@ -31,7 +31,7 @@ global script := {base			: script
 	OCR by malcev https://www.autohotkey.com/boards/viewtopic.php?f=6&t=72674
 */
 
-if !fileExist(script.iconfile)
+if !fileExist(script.resfolder)
 {
 	FileCreateDir, % script.resfolder
 	FileInstall, res\sct.ico, % script.iconfile
