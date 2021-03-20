@@ -17,7 +17,7 @@ if((A_PtrSize=8&&A_IsCompiled="")||!A_IsUnicode){ ;32 bit=4  ;64 bit=8
 if !InStr(A_OSVersion, "10.")
 	appdata := A_ScriptDir
 else
-	appdata := A_AppData "\" regexreplace(A_ScriptName, "\.\w+") , isWin10 := true
+	appdata := A_AppData "\" regexreplace(A_ScriptName, "\.\w+"), isWin10 := true
 
 global script := {base			: script
 				 ,name			: regexreplace(A_ScriptName, "\.\w+")
@@ -87,11 +87,11 @@ if (!FileExist(script.config))
 else
 {
 	IniWrite, % false, % script.config, Settings, FirstRun
-	GoSub SetHotkeys
+	Gosub SetHotkeys
 }
 
 if (ShowUsage)
-	gosub ShowUsageGUI
+	Gosub ShowUsageGUI
 return
 
 ;===Functions==========================================================================
@@ -1533,7 +1533,7 @@ ShowUsageSet:
 	Menu, Tray, ToggleCheck, Show Usage at Startup
 
 	if (ShowUsage := !ShowUsage) ; set variable for later use on the gui
-		gosub, ShowUsageGUI
+		Gosub, ShowUsageGUI
 	IniWrite, % ShowUsage, % script.config, Settings, ShowUsage
 return
 
