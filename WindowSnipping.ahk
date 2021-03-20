@@ -60,15 +60,20 @@ Menu, Tray, Add, About, AboutGUI
 Menu, Tray, Add, Check for Updates, Update
 Menu, Tray,Add,Exit App,Exit
 
-defaultSignature =
-(
-<HTML>
-Attached you will find the screenshot taken on `%date`%.<br><br>
+defOCRHK := "#^"
+defScreenHK := "#"
+defOutlookHK := "#!"
+defDesktopHK := "^s"
+defaultSignature :=
+("%"
+"<HTML>
+Attached you will find the screenshot taken on %date%.<br><br>
 <span style='color:black'>Please let me know if you have any questions.<br><br>
 <H2 style='BACKGROUND-COLOR: red'><br></H2>
 <a href='mailto:info@the-Automator.com'>Joe Glines</a><br>682.xxx.xxxx</span>.
-</HTML>
+</HTML>"
 )
+
 
 if (!FileExist(script.config))
 {
@@ -1700,7 +1705,7 @@ Hotkeys:
 		currHK := "^s"
 
 	Gui Add, Text, w220 x0 y+13 right, Save clip to desktop
-	Gui Add, Hotkey, w185 xs yp-3 vDesktopSave, % currHK
+	Gui Add, Hotkey, w185 xs yp-3 vdeshk, % currHK
 
 
 	Gui Add, Text, w450 x0 y+20 0x10
@@ -1719,8 +1724,6 @@ HokeysSave:
 		return
 	}
 
-	hotkeys := "Screen|Outlook|OCR|Desktop"
-
 	scrhk := (Wsc ? "#" : "") (Csc ? "^" : "") (Ssc ? "+" : "") (Asc ? "!" : "")
 	outhk := (Wom ? "#" : "") (Com ? "^" : "") (Som ? "+" : "") (Aom ? "!" : "")
 
@@ -1737,49 +1740,35 @@ HokeysSave:
 
 	Gui Hotkeys:Submit
 
+SetHotkeys:
+	hotkeys := "Screen|Outlook|OCR|Desktop"
+	; we make sure to disable all hotkeys to be able to set the new ones without issues
+	; without this the new hotkeys wont work
 	Loop parse, hotkeys, |
 	{
-		; for some reason the hotkey command doesnt get the correct context for the ifWin directive
-		; to fix this I manually setup the context for the hotkeys below
-		Hotkey, IfWinActive, % (a_loopfield != "Desktop" ? "" : "ScreenClippingWindow ahk_class AutoHotkeyGUI")
-		IniRead, currHK, % script.config, Hotkeys, % a_loopfield
+		defHK := "def" A_LoopField "HK"
+		newHK := SubStr(A_LoopField, 1, 3) "HK"
 
-		if (currHK == "ERROR" || currHK == "")
-			break
-		; we make sure to disable all hotkeys to be able to set the new ones without issues
-		; without this the new hotkey wont work
-		Hotkey, % currHK (a_loopfield != "Desktop" ? "Lbutton" : ""), OFF
-	}
-	; removed any context for later hotkey setup
-	Hotkey, IfWinActive
+		if (A_loopField == "Desktop")
+			Hotkey, IfWinActive, % "ScreenClippingWindow ahk_class AutoHotkeyGUI"
+		
+		IniRead, currHK, % script.config, Hotkeys, % A_LoopField, % %defHK%
+		try
+			Hotkey, % currHK (A_LoopField != "Desktop" ? "Lbutton" : ""), OFF
+		catch e
+			if (!currHK)
+				currHK := %defHK%
+		Finally 
+			Hotkey, % (%newHK% ? %newHK% : currHK) (A_LoopField != "Desktop" ? "Lbutton" : ""), % A_LoopField "HK", ON
 
-	IniWrite, % scrhk, % script.config, Hotkeys, Screen
-	IniWrite, % outhk, % script.config, Hotkeys, Outlook
-
-	if (isWin10)
-		IniWrite, % ocrhk, % script.config, Hotkeys, OCR
-
-	IniWrite, % DesktopSave, % script.config, Hotkeys, Desktop
-
-	SetHotkeys:
-		IniRead, currHK, % script.config, Hotkeys
-		if (currHK == "ERROR" || currHK == "")
-			return
-
-		IniRead, currHK, % script.config, Hotkeys, Screen
-		Hotkey, % currHK "Lbutton", ScreenHK, % currHK ? "ON" : "OFF"
-
-		IniRead, currHK, % script.config, Hotkeys, Outlook
-		Hotkey, % currHK "Lbutton", OutlookHK, % currHK ? "ON" : "OFF"
-
-		IniRead, currHK, % script.config, Hotkeys, OCR
-		Hotkey, % currHK "Lbutton", OCRHK, % currHK ? "ON" : "OFF"
-
-		;********************After clip exists***********************************
-		IniRead, currHK, % script.config, Hotkeys, Desktop
-		Hotkey, IfWinActive, ScreenClippingWindow ahk_class AutoHotkeyGUI
-		Hotkey, % currHK, DesktopHK, ON
+		; OutputDebug, % currHK ">" %newHK%
 		Hotkey, IfWinActive
+		
+		if (newHK == "ocrhk" && !isWin10)
+			continue
+		else
+			IniWrite, % %newHK% ? %newHK% : currHK, % script.config, Hotkeys, % A_LoopField
+	}
 return
 
 #IfWinActive ScreenClippingWindow ahk_class AutoHotkeyGUI ;activates last clipped window
