@@ -14,6 +14,11 @@ if((A_PtrSize=8&&A_IsCompiled="")||!A_IsUnicode){ ;32 bit=4  ;64 bit=8
 	 ExitApp
 }
 
+if !InStr(A_OSVersion, "10.")
+	appdata := A_ScriptDir
+else
+	appdata := A_AppData "\" regexreplace(A_ScriptName, "\.\w+") , isWin10 := true
+
 global script := {base			: script
 				 ,name			: regexreplace(A_ScriptName, "\.\w+")
 				 ,version		: "1.19.29"
@@ -22,9 +27,9 @@ global script := {base			: script
 				 ,homepagetext	: "www.the-automator.com/snip"
 				 ,homepagelink	: "www.the-automator.com/snip?src=app"
 				 ,donateLink	: "https://www.paypal.com/donate?hosted_button_id=MBT5HSD9G94N6"
-				 ,resfolder		: A_AppData "\" regexreplace(A_ScriptName, "\.\w+") "\res"
-				 ,iconfile		: A_AppData "\" regexreplace(A_ScriptName, "\.\w+") "\res\sct.ico"
-				 ,config 		: A_AppData "\" regexreplace(A_ScriptName, "\.\w+") "\settings.ini"}
+				 ,resfolder		: appdata "\res"
+				 ,iconfile		: appdata "\res\sct.ico"
+				 ,config 		: appdata "\settings.ini"}
 
 /*  ; Credits   I borrowed heavily from ...
 	Screen clipping by Learning one  https://autohotkey.com/boards/viewtopic.php?f=6&t=12088
@@ -1675,7 +1680,7 @@ Hotkeys:
 	Gui Add, Checkbox, % (instr(currHK, "!") ? "checked" : "") " x+10 vAom", Alt
 
 
-	if A_OSVersion NOT in WIN_7,WIN_8,WIN_8.1,WIN_VISTA,WIN_2003,WIN_XP,WIN_2000
+	if (isWin10)
 	{
 		IniRead, currHK, % script.config, Hotkeys, OCR
 
@@ -1719,7 +1724,7 @@ HokeysSave:
 	scrhk := (Wsc ? "#" : "") (Csc ? "^" : "") (Ssc ? "+" : "") (Asc ? "!" : "")
 	outhk := (Wom ? "#" : "") (Com ? "^" : "") (Som ? "+" : "") (Aom ? "!" : "")
 
-	if A_OSVersion NOT in WIN_7,WIN_8,WIN_8.1,WIN_VISTA,WIN_2003,WIN_XP,WIN_2000
+	if (isWin10)
 		ocrhk := (Wpo ? "#" : "") (Cpo ? "^" : "") (Spo ? "+" : "") (Apo ? "!" : "")
 
 	if (notUnique(scrhk, outhk, ocrhk)){
@@ -1751,7 +1756,7 @@ HokeysSave:
 	IniWrite, % scrhk, % script.config, Hotkeys, Screen
 	IniWrite, % outhk, % script.config, Hotkeys, Outlook
 
-	if A_OSVersion NOT in WIN_7,WIN_8,WIN_8.1,WIN_VISTA,WIN_2003,WIN_XP,WIN_2000
+	if (isWin10)
 		IniWrite, % ocrhk, % script.config, Hotkeys, OCR
 
 	IniWrite, % DesktopSave, % script.config, Hotkeys, Desktop
@@ -1793,7 +1798,7 @@ OutlookHK:
 return
 
 OCRHK:
-	if A_OSVersion NOT in WIN_7,WIN_8,WIN_8.1,WIN_VISTA,WIN_2003,WIN_XP,WIN_2000
+	if (isWin10)
 		SCW_ScreenClip2Win(clip:=0,email:=0,OCR:=1)
 return
 
