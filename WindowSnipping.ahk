@@ -74,7 +74,6 @@ Attached you will find the screenshot taken on %date%.<br><br>
 </HTML>"
 )
 
-
 if (!FileExist(script.config))
 {
 	FileCreateDir % regexreplace(script.config, "^(.*)\\([^\\]*)$", "$1")
@@ -1662,6 +1661,10 @@ return
 Hotkeys:
 	Gui Hotkeys:New,, Hotkey Settings
 
+	hotkeys := "Screen|Outlook|OCR|Desktop"
+	preffix := "wcsa"
+	suffix := ["sc", "om", "po", "dt"]
+
 	IniRead, firstRun, % script.config, Settings, FirstRun
 	IniRead, currHK, % script.config, Hotkeys, Screen
 
@@ -1670,10 +1673,11 @@ Hotkeys:
 
 	Gui Add,Text,, Please select the hotkeys of your choice:`n
 	Gui Add, Text, w220 x0 right, Left mouse drag to screen capture +
-	Gui Add, Checkbox, % (instr(currHK, "#") ? "checked" : "") " x+10 section vWsc", Win
-	Gui Add, Checkbox, % (instr(currHK, "^") ? "checked" : "") " x+10 vCsc", Ctrl
-	Gui Add, Checkbox, % (instr(currHK, "+") ? "checked" : "") " x+10 vSsc", Shift
-	Gui Add, Checkbox, % (instr(currHK, "!") ? "checked" : "") " x+10 vAsc", Alt
+	Gui Add, Checkbox, % (instr(currHK, "#") ? "checked" : "") " x+10 section vWsc gdisableHK", Win
+	Gui Add, Checkbox, % (instr(currHK, "^") ? "checked" : "") " x+10 vCsc gdisableHK", Ctrl
+	Gui Add, Checkbox, % (instr(currHK, "+") ? "checked" : "") " x+10 vSsc gdisableHK", Shift
+	Gui Add, Checkbox, % (instr(currHK, "!") ? "checked" : "") " x+10 vAsc gdisableHK", Alt
+	Gui Add, Checkbox, % (instr(currHK, "disabled") ? "checked" : "") " x+10 gdisableHK vDisabledsc", Disabled
 
 
 	IniRead, currHK, % script.config, Hotkeys, Outlook
@@ -1682,10 +1686,11 @@ Hotkeys:
 		currHK := "#!"
 
 	Gui Add, Text, w220 x0 right, Left mouse drag to Attach to Outlook email +
-	Gui Add, Checkbox, % (instr(currHK, "#") ? "checked" : "") " xs yp vWom", Win
-	Gui Add, Checkbox, % (instr(currHK, "^") ? "checked" : "") " x+10 vCom", Ctrl
-	Gui Add, Checkbox, % (instr(currHK, "+") ? "checked" : "") " x+10 vSom", Shift
-	Gui Add, Checkbox, % (instr(currHK, "!") ? "checked" : "") " x+10 vAom", Alt
+	Gui Add, Checkbox, % (instr(currHK, "#") ? "checked" : "") " xs yp vWom gdisableHK", Win
+	Gui Add, Checkbox, % (instr(currHK, "^") ? "checked" : "") " x+10 vCom gdisableHK", Ctrl
+	Gui Add, Checkbox, % (instr(currHK, "+") ? "checked" : "") " x+10 vSom gdisableHK", Shift
+	Gui Add, Checkbox, % (instr(currHK, "!") ? "checked" : "") " x+10 vAom gdisableHK", Alt
+	Gui Add, Checkbox, % (instr(currHK, "disabled") ? "checked" : "") " x+10 gdisableHK vDisabledom", Disabled
 
 
 	if (isWin10)
@@ -1696,10 +1701,11 @@ Hotkeys:
 			currHK := "#^"
 
 		Gui Add, Text, w220 x0 right, Left mouse drag to perform OCR +
-		Gui Add, Checkbox, % (instr(currHK, "#") ? "checked" : "") " xs yp vWpo", Win
-		Gui Add, Checkbox, % (instr(currHK, "^") ? "checked" : "") " x+10 vCpo", Ctrl
-		Gui Add, Checkbox, % (instr(currHK, "+") ? "checked" : "") " x+10 vSpo", Shift
-		Gui Add, Checkbox, % (instr(currHK, "!") ? "checked" : "") " x+10 vApo", Alt
+		Gui Add, Checkbox, % (instr(currHK, "#") ? "checked" : "") " xs yp vWpo gdisableHK", Win
+		Gui Add, Checkbox, % (instr(currHK, "^") ? "checked" : "") " x+10 vCpo gdisableHK", Ctrl
+		Gui Add, Checkbox, % (instr(currHK, "+") ? "checked" : "") " x+10 vSpo gdisableHK", Shift
+		Gui Add, Checkbox, % (instr(currHK, "!") ? "checked" : "") " x+10 vApo gdisableHK", Alt
+		Gui Add, Checkbox, % (instr(currHK, "disabled") ? "checked" : "") " x+10 gdisableHK vDisabledpo", Disabled
 	}
 
 	IniRead, currHK, % script.config, Hotkeys, Desktop
@@ -1709,13 +1715,13 @@ Hotkeys:
 
 	Gui Add, Text, w220 x0 y+13 right, Save clip to desktop
 	Gui Add, Hotkey, w185 xs yp-3 vdeshk, % currHK
+	Gui Add, Checkbox, % (instr(currHK, "disabled") ? "checked" : "") " x+10 yp+3 gdisableHK vDisableddt", Disabled
 
 
-	Gui Add, Text, w450 x0 y+20 0x10
+	Gui Add, Text, w500 x0 y+20 0x10
 	Gui Add, Button, w75 x255 yp+10 gHokeysSave, Save
 	Gui Add, Button, w75 x+10 gHokeysSave, Cancel
-
-	Gui Hotkeys:show, w425
+	Gui Hotkeys:show, w495
 return
 
 HokeysSave:
@@ -1729,11 +1735,10 @@ HokeysSave:
 
 	scrhk := (Wsc ? "#" : "") (Csc ? "^" : "") (Ssc ? "+" : "") (Asc ? "!" : "")
 	outhk := (Wom ? "#" : "") (Com ? "^" : "") (Som ? "+" : "") (Aom ? "!" : "")
-
-	if (isWin10)
 		ocrhk := (Wpo ? "#" : "") (Cpo ? "^" : "") (Spo ? "+" : "") (Apo ? "!" : "")
 
-	if (notUnique(scrhk, outhk, ocrhk)){
+	if (notUnique(scrhk, outhk, ocrhk))
+	{
 		msgbox  % 0x10
 				,% "Error"
 				,% "One of the hotkeys you tried to setup is already used by another"
@@ -1744,13 +1749,13 @@ HokeysSave:
 	Gui Hotkeys:Submit
 
 SetHotkeys:
-	hotkeys := "Screen|Outlook|OCR|Desktop"
 	; we make sure to disable all hotkeys to be able to set the new ones without issues
 	; without this the new hotkeys wont work
 	Loop parse, hotkeys, |
 	{
 		defHK := "def" A_LoopField "HK"
 		newHK := SubStr(A_LoopField, 1, 3) "HK"
+		disHK := "Disabled" suffix[A_Index]
 
 		if (A_loopField == "Desktop")
 			Hotkey, IfWinActive, % "ScreenClippingWindow ahk_class AutoHotkeyGUI"
@@ -1759,9 +1764,10 @@ SetHotkeys:
 		try
 			Hotkey, % currHK (A_LoopField != "Desktop" ? "Lbutton" : ""), OFF
 		catch e
-			if (!currHK)
+			if ((!currHK || currHK == "disabled") && !%disHK%)
 				currHK := %defHK%
 		Finally 
+			if (!%disHK%)
 			Hotkey, % (%newHK% ? %newHK% : currHK) (A_LoopField != "Desktop" ? "Lbutton" : ""), % A_LoopField "HK", ON
 
 		; OutputDebug, % currHK ">" %newHK%
@@ -1770,7 +1776,33 @@ SetHotkeys:
 		if (newHK == "ocrhk" && !isWin10)
 			continue
 		else
+		{
+			if (%disHK%)
+				IniWrite, % "disabled", % script.config, Hotkeys, % A_LoopField
+			else
 			IniWrite, % %newHK% ? %newHK% : currHK, % script.config, Hotkeys, % A_LoopField
+	}
+	}
+return
+
+disableHK:
+	Gui Hotkeys:Submit, NoHide
+	
+	if (!InStr(A_GuiControl, "Disabled"))
+	{
+		GuiControl,, % "Disabled" SubStr(A_GuiControl, 2), % false
+		return
+	}
+
+	if (SubStr(A_GuiControl, -1) == "dt")
+		GuiControl,, deshk, % ""
+	else
+	{
+		loop parse, preffix
+		{
+			currCB := A_LoopField SubStr(A_GuiControl, -1)
+			GuiControl,, % currCB, % false
+		}
 	}
 return
 
