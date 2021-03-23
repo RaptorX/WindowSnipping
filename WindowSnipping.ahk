@@ -59,6 +59,7 @@ Menu, Tray, Add
 Menu, Tray, Add, About, AboutGUI
 Menu, Tray, Add, Check for Updates, Update
 Menu, Tray,Add,Exit App,Exit
+Menu, Tray, Default, Hotkeys
 
 if (!FileExist(script.config))
 {
