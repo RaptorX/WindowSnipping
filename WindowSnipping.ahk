@@ -1508,11 +1508,11 @@ notUnique(mod1, mod2, mod3)
 {
 	if (mod1 && mod2 || mod1 && mod3 || mod2 && mod3) ; at least 2 of them are set
 	{
-	if (mod1 == mod2 || mod1 == mod3 || mod2 == mod3)
-		return true
-	else
-		return false
-}
+		if (mod1 == mod2 || mod1 == mod3 || mod2 == mod3)
+			return true
+		else
+			return false
+	}
 }
 
 Base64Enc( ByRef Bin, nBytes, LineLength := 64, LeadingSpaces := 0 )
@@ -1660,7 +1660,7 @@ return
 
 Hotkeys:
 	Gui Hotkeys:New,, Hotkey Settings
-
+	
 	hotkeys := "Screen|Outlook|OCR|Desktop"
 	preffix := "wcsa"
 	suffix := ["sc", "om", "po", "dt"]
@@ -1735,7 +1735,7 @@ HokeysSave:
 
 	scrhk := (Wsc ? "#" : "") (Csc ? "^" : "") (Ssc ? "+" : "") (Asc ? "!" : "")
 	outhk := (Wom ? "#" : "") (Com ? "^" : "") (Som ? "+" : "") (Aom ? "!" : "")
-		ocrhk := (Wpo ? "#" : "") (Cpo ? "^" : "") (Spo ? "+" : "") (Apo ? "!" : "")
+	ocrhk := (Wpo ? "#" : "") (Cpo ? "^" : "") (Spo ? "+" : "") (Apo ? "!" : "")
 
 	if (notUnique(scrhk, outhk, ocrhk))
 	{
@@ -1766,22 +1766,22 @@ SetHotkeys:
 		catch e
 			if ((!currHK || currHK == "disabled") && !%disHK%)
 				currHK := %defHK%
-		Finally 
+		Finally
 			if (!%disHK%)
-			Hotkey, % (%newHK% ? %newHK% : currHK) (A_LoopField != "Desktop" ? "Lbutton" : ""), % A_LoopField "HK", ON
+				Hotkey, % (%newHK% ? %newHK% : currHK) (A_LoopField != "Desktop" ? "Lbutton" : ""), % A_LoopField "HK", ON
 
 		; OutputDebug, % currHK ">" %newHK%
 		Hotkey, IfWinActive
 		
 		if (newHK == "ocrhk" && !isWin10)
 			continue
-		else
+		else 
 		{
 			if (%disHK%)
 				IniWrite, % "disabled", % script.config, Hotkeys, % A_LoopField
 			else
-			IniWrite, % %newHK% ? %newHK% : currHK, % script.config, Hotkeys, % A_LoopField
-	}
+				IniWrite, % %newHK% ? %newHK% : currHK, % script.config, Hotkeys, % A_LoopField
+		}
 	}
 return
 
