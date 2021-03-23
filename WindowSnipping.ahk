@@ -85,6 +85,32 @@ SCW_Version() {
 	return "1.19.29"
 }
 
+UriEncode(Uri, Enc = "UTF-8"){
+	StrPutVar(Uri, Var, Enc)
+	f := A_FormatInteger
+	SetFormat, IntegerFast, H
+	Loop
+	{
+		Code := NumGet(Var, A_Index - 1, "UChar")
+		If (!Code)
+			Break
+		If (Code >= 0x30 && Code <= 0x39 ; 0-9
+			|| Code >= 0x41 && Code <= 0x5A ; A-Z
+			|| Code >= 0x61 && Code <= 0x7A) ; a-z
+			Res .= Chr(Code)
+		Else
+			Res .= "%" . SubStr(Code + 0x100, -1)
+	}
+	SetFormat, IntegerFast, %f%
+	Return, Res
+}
+
+StrPutVar(Str, ByRef Var, Enc = ""){
+	Len := StrPut(Str, Enc) * (Enc = "UTF-16" || Enc = "CP1200" ? 2 : 1)
+	VarSetCapacity(Var, Len, 0)
+	Return, StrPut(Str, &Var, Enc)
+}
+
 SCW_DestroyAllClipWins() {
 	MaxGuis := SCW_Reg("MaxGuis"), StartAfter := SCW_Reg("StartAfter")
 	Loop, %MaxGuis%    {
@@ -163,8 +189,13 @@ SCW_ScreenClip2Win(clip=0,email=0,OCR=0) {
 						 , "No text was captured by the OCR engine.`nPlease Try again."
 		else
 		{
+			url := "https://translate.google.com/?sl=" currLang "&tl=en&text=" UriEncode(Clipboard) "&op=translate"
+			
 			Gui, ocrResult:new
 			Gui, add, edit, w600 r20, % Clipboard
+			
+			if (currLang != "en")
+				Gui, add, link,, % "<a href=""" url """>Translate using Google</a>"
 			Gui, show
 		}
 		Gdip_Shutdown("pToken") ;clear selection
@@ -1470,7 +1501,7 @@ OCR(IRandomAccessStream, language := "en"){
 	DllCall(NumGet(NumGet(BitmapFrame+0)+13*A_PtrSize), "ptr", BitmapFrame, "uint*", height)   ; get_PixelHeight
 	if (width > MaxDimension) or (height > MaxDimension){
 		msgbox Image is to big - %width%x%height%.`nIt should be maximum - %MaxDimension% pixels
-		ExitApp
+		return
 	}
 	SoftwareBitmap := ComObjQuery(BitmapDecoderObject1, IBitmapFrameWithSoftwareBitmap := "{FE287C9A-420C-4963-87AD-691436E08383}")
 	DllCall(NumGet(NumGet(SoftwareBitmap+0)+6*A_PtrSize), "ptr", SoftwareBitmap, "ptr*", BitmapFrame1)   ; GetSoftwareBitmapAsync
