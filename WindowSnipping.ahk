@@ -152,7 +152,7 @@ SCW_ScreenClip2Win(clip=0,email=0,OCR=0) {
 		hBitmap:=Gdip_CreateHBITMAPFromBitmap(pBitmap) ;Convert an hBitmap from the pBitmap
 		pIRandomAccessStream := HBitmapToRandomAccessStream(hBitmap) ;OCR function needs a randome access stream (so it isn't "locked down")
 		DllCall("DeleteObject", "Ptr", hBitmap)
-
+		
 		IniRead, currLang, % script.config, OCR, lang, en
 
 		Clipboard:= ocr(pIRandomAccessStream, currLang)
@@ -1657,23 +1657,6 @@ return
 Hotkeys:
 	Gui Hotkeys:New,, Hotkey Settings
 	
-	defOCRHK 			:= "#^"
-	defScreenHK 		:= "#"
-	defOutlookHK 		:= "#!"
-	defDesktopHK 		:= "^s"
-	preffix 			:= "wcsa"
-	suffix 				:= ["sc", "om", "po", "dt"]
-	hotkeys 			:= "Screen|Outlook|OCR|Desktop"
-	defaultSignature 	:=
-	("%"
-	"<HTML>
-	Attached you will find the screenshot taken on %date%.<br><br>
-	<span style='color:black'>Please let me know if you have any questions.<br><br>
-	<H2 style='BACKGROUND-COLOR: red'><br></H2>
-	<a href='mailto:info@the-Automator.com'>Joe Glines</a><br>682.xxx.xxxx</span>.
-	</HTML>"
-	)
-
 	IniRead, firstRun, % script.config, Settings, FirstRun
 	IniRead, currHK, % script.config, Hotkeys, Screen
 
@@ -1787,6 +1770,23 @@ HokeysSave:
 	Gui Hotkeys:Submit
 
 SetHotkeys:
+	defOCRHK 			:= "#^"
+	defScreenHK 		:= "#"
+	defOutlookHK 		:= "#!"
+	defDesktopHK 		:= "^s"
+	preffix 			:= "wcsa"
+	suffix 				:= ["sc", "om", "po", "dt"]
+	hotkeys 			:= "Screen|Outlook|OCR|Desktop"
+	defaultSignature 	:=
+	("%"
+	"<HTML>
+	Attached you will find the screenshot taken on %date%.<br><br>
+	<span style='color:black'>Please let me know if you have any questions.<br><br>
+	<H2 style='BACKGROUND-COLOR: red'><br></H2>
+	<a href='mailto:info@the-Automator.com'>Joe Glines</a><br>682.xxx.xxxx</span>.
+	</HTML>"
+	)
+	
 	; we make sure to disable all hotkeys to be able to set the new ones without issues
 	; without this the new hotkeys wont work
 	Loop parse, hotkeys, |
