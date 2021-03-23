@@ -123,7 +123,7 @@ SCW_SetUp(Options="") {
 
 SCW_ScreenClip2Win(clip=0,email=0,OCR=0) {
 	static c
-	global defaultSignature
+	global defaultSignature, selLanguage
 
 	if !(SCW_Reg("WasSetUp"))
 		SCW_SetUp()
@@ -147,20 +147,26 @@ SCW_ScreenClip2Win(clip=0,email=0,OCR=0) {
 	Sleep, 100
 
 	pBitmap := Gdip_BitmapFromScreen(Area)
-	if (OCR=1){
+	if (OCR=1)
+	{
 		hBitmap:=Gdip_CreateHBITMAPFromBitmap(pBitmap) ;Convert an hBitmap from the pBitmap
 		pIRandomAccessStream := HBitmapToRandomAccessStream(hBitmap) ;OCR function needs a randome access stream (so it isn't "locked down")
 		DllCall("DeleteObject", "Ptr", hBitmap)
 
-		Clipboard:= ocr(pIRandomAccessStream, "en")
+		IniRead, currLang, % script.config, OCR, lang, en
+
+		Clipboard:= ocr(pIRandomAccessStream, currLang)
 		ObjRelease(pIRandomAccessStream)
 		;Notify().AddWindow(Clipboard,{Icon:300,Background:"0x0000FF",Title:"OCR Performed, now on clipboard",TitleSize:16,size:15,Time:4000})
 		if !Clipboard
-			ToolTip, % "Sorry, no text was captured.`nPlease Try again."
+			MsgBox % 0x10, "Error"
+						 , "No text was captured by the OCR engine.`nPlease Try again."
 		else
-			ToolTip, % "Now on Clipboard:`n`n" clipboard
-		sleep, 2000
-		ToolTip
+		{
+			Gui, ocrResult:new
+			Gui, add, edit, w600 r20, % Clipboard
+			Gui, show
+		}
 		Gdip_Shutdown("pToken") ;clear selection
 	}
 
@@ -1432,6 +1438,8 @@ CLSIDFromString(IID, ByRef CLSID) {
 ;********************teadrinker OCR ***********************************
 OCR(IRandomAccessStream, language := "en"){
 	static OcrEngineClass, OcrEngineObject, MaxDimension, LanguageClass, LanguageObject, CurrentLanguage, StorageFileClass, BitmapDecoderClass
+	static rlangList := {"ar":"Arabic (Saudi Arabia)","bg":"Bulgarian (Bulgaria)","zh":"Chinese (Hong Kong S.A.R.)","zh":"Chinese (PRC)","zh":"Chinese (Taiwan)","hr":"Croatian (Croatia)","cs":"Czech (Czech Republic)","da":"Danish (Denmark)","nl":"Dutch (Netherlands)","En":"English (Great Britain)","en":"English (United States)","et":"Estonian (Estonia)","fi":"Finnish (Finland)","fr":"French (France)","de":"German (Germany)","el":"Greek (Greece)","he":"Hebrew (Israel)","hu":"Hungarian (Hungary)","it":"Italian (Italy)","ja":"Japanese (Japan)","ko":"Korean (Korea)","lv":"Latvian (Latvia)","lt":"Lithuanian (Lithuania)","nb":"Norwegian, Bokmål (Norway)","pl":"Polish (Poland)","pt":"Portuguese (Brazil)","pt":"Portuguese (Portugal)","ro":"Romanian (Romania)","ru":"Russian (Russia)","sr":"Serbian (Latin, Serbia)","sr":"Serbian (Latin, Serbia)","sk":"Slovak (Slovakia)","sl":"Slovenian (Slovenia)","es":"Spanish (Spain)","sv":"Swedish (Sweden)","th":"Thai (Thailand)","tr":"Turkish (Turkey)","uk":"Ukrainian (Ukraine)"}
+
 	if (OcrEngineClass = "")	{
 		CreateClass("Windows.Globalization.Language", ILanguageFactory := "{9B0252AC-0C27-44F8-B792-9793FB66C63E}", LanguageClass)
 		CreateClass("Windows.Graphics.Imaging.BitmapDecoder", IStorageFileStatics := "{438CCB26-BCEF-4E95-BAD6-23A822E58D01}", BitmapDecoderClass)
@@ -1449,8 +1457,9 @@ OCR(IRandomAccessStream, language := "en"){
 		DeleteHString(hString)
 		DllCall(NumGet(NumGet(OcrEngineClass+0)+9*A_PtrSize), "ptr", OcrEngineClass, ptr, LanguageObject, "ptr*", OcrEngineObject)   ; TryCreateFromLanguage
 		if (OcrEngineObject = 0){
-			msgbox Can not use language "%language%" for OCR, please install language pack.
-			ExitApp
+			MsgBox % 0x10, % "OCR Error"
+						 , % "Can not use language """ rlangList[language] """ for OCR, please install the corresponding language pack."
+			return
 		}
 		CurrentLanguage := language
 	}
@@ -1695,6 +1704,14 @@ Hotkeys:
 
 	if (isWin10)
 	{
+		;~ Language CodeDescription (informative)BCP 47 Code
+		langList := {"Arabic (Saudi Arabia)":"ar","Bulgarian (Bulgaria)":"bg","Chinese (Hong Kong S.A.R.)":"zh","Chinese (PRC)":"zh","Chinese (Taiwan)":"zh","Croatian (Croatia)":"hr","Czech (Czech Republic)":"cs","Danish (Denmark)":"da","Dutch (Netherlands)":"nl","English (Great Britain)":"En","English (United States)":"en","Estonian (Estonia)":"et","Finnish (Finland)":"fi","French (France)":"fr","German (Germany)":"de","Greek (Greece)":"el","Hebrew (Israel)":"he","Hungarian (Hungary)":"hu","Italian (Italy)":"it","Japanese (Japan)":"ja","Korean (Korea)":"ko","Latvian (Latvia)":"lv","Lithuanian (Lithuania)":"lt","Norwegian, Bokmål (Norway)":"nb","Polish (Poland)":"pl","Portuguese (Brazil)":"pt","Portuguese (Portugal)":"pt","Romanian (Romania)":"ro","Russian (Russia)":"ru","Serbian (Latin, Serbia)":"sr","Serbian (Latin, Serbia)":"sr","Slovak (Slovakia)":"sk","Slovenian (Slovenia)":"sl","Spanish (Spain)":"es","Swedish (Sweden)":"sv","Thai (Thailand)":"th","Turkish (Turkey)":"tr","Ukrainian (Ukraine)":"uk"}
+
+		IniRead, currLang, % script.config, OCR, lang, en
+
+		for lang,code in langList
+			var .= lang (langList[lang] == (currLang ? currLang : "en") ? "||" : "|")
+
 		IniRead, currHK, % script.config, Hotkeys, OCR
 
 		if (firstRun)
@@ -1706,6 +1723,8 @@ Hotkeys:
 		Gui Add, Checkbox, % (instr(currHK, "+") ? "checked" : "") " x+10 vSpo gdisableHK", Shift
 		Gui Add, Checkbox, % (instr(currHK, "!") ? "checked" : "") " x+10 vApo gdisableHK", Alt
 		Gui Add, Checkbox, % (instr(currHK, "disabled") ? "checked" : "") " x+10 gdisableHK vDisabledpo", Disabled
+		Gui Add, Text, w220 x0 y+10 right, Select OCR Language :
+		Gui Add, DropDownList, w185 x+10 vselLanguage, % RegExReplace(var, "|$")
 	}
 
 	IniRead, currHK, % script.config, Hotkeys, Desktop
@@ -1802,6 +1821,8 @@ SetHotkeys:
 				IniWrite, % %newHK% ? %newHK% : currHK, % script.config, Hotkeys, % A_LoopField
 		}
 	}
+	if (selLanguage)
+		IniWrite, % langList[selLanguage], % script.config, OCR, lang
 return
 
 disableHK:
