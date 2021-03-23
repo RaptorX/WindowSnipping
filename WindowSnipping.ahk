@@ -1507,10 +1507,13 @@ OCR(IRandomAccessStream, language := "en"){
 
 notUnique(mod1, mod2, mod3)
 {
+	if (mod1 && mod2 || mod1 && mod3 || mod2 && mod3) ; at least 2 of them are set
+	{
 	if (mod1 == mod2 || mod1 == mod3 || mod2 == mod3)
 		return true
 	else
 		return false
+}
 }
 
 Base64Enc( ByRef Bin, nBytes, LineLength := 64, LeadingSpaces := 0 )
