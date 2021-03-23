@@ -60,20 +60,6 @@ Menu, Tray, Add, About, AboutGUI
 Menu, Tray, Add, Check for Updates, Update
 Menu, Tray,Add,Exit App,Exit
 
-defOCRHK := "#^"
-defScreenHK := "#"
-defOutlookHK := "#!"
-defDesktopHK := "^s"
-defaultSignature :=
-("%"
-"<HTML>
-Attached you will find the screenshot taken on %date%.<br><br>
-<span style='color:black'>Please let me know if you have any questions.<br><br>
-<H2 style='BACKGROUND-COLOR: red'><br></H2>
-<a href='mailto:info@the-Automator.com'>Joe Glines</a><br>682.xxx.xxxx</span>.
-</HTML>"
-)
-
 if (!FileExist(script.config))
 {
 	FileCreateDir % regexreplace(script.config, "^(.*)\\([^\\]*)$", "$1")
@@ -1661,9 +1647,22 @@ return
 Hotkeys:
 	Gui Hotkeys:New,, Hotkey Settings
 	
-	hotkeys := "Screen|Outlook|OCR|Desktop"
-	preffix := "wcsa"
-	suffix := ["sc", "om", "po", "dt"]
+	defOCRHK 			:= "#^"
+	defScreenHK 		:= "#"
+	defOutlookHK 		:= "#!"
+	defDesktopHK 		:= "^s"
+	preffix 			:= "wcsa"
+	suffix 				:= ["sc", "om", "po", "dt"]
+	hotkeys 			:= "Screen|Outlook|OCR|Desktop"
+	defaultSignature 	:=
+	("%"
+	"<HTML>
+	Attached you will find the screenshot taken on %date%.<br><br>
+	<span style='color:black'>Please let me know if you have any questions.<br><br>
+	<H2 style='BACKGROUND-COLOR: red'><br></H2>
+	<a href='mailto:info@the-Automator.com'>Joe Glines</a><br>682.xxx.xxxx</span>.
+	</HTML>"
+	)
 
 	IniRead, firstRun, % script.config, Settings, FirstRun
 	IniRead, currHK, % script.config, Hotkeys, Screen
@@ -1719,9 +1718,28 @@ Hotkeys:
 
 
 	Gui Add, Text, w500 x0 y+20 0x10
-	Gui Add, Button, w75 x255 yp+10 gHokeysSave, Save
+	Gui Add, Button, x230 yp+10 gHokeysReset, Reset Hotkeys
+	Gui Add, Button, w75 x+10 gHokeysSave, Save
 	Gui Add, Button, w75 x+10 gHokeysSave, Cancel
 	Gui Hotkeys:show, w495
+return
+
+HokeysReset:
+	Loop, Parse, hotkeys, |
+	{
+		if (A_LoopField == "Desktop")
+			GuiControl,, % "deshk", % defDesktopHK
+		else
+		{
+			currDef := "def" A_LoopField "HK"
+			GuiControl,, % "W" suffix[A_Index], % (instr(%currDef%, "#") ? true : false)
+			GuiControl,, % "C" suffix[A_Index], % (instr(%currDef%, "^") ? true : false)
+			GuiControl,, % "S" suffix[A_Index], % (instr(%currDef%, "+") ? true : false)
+			GuiControl,, % "A" suffix[A_Index], % (instr(%currDef%, "!") ? true : false)
+		}
+	}
+	for i, suf in suffix
+		GuiControl,, % "Disabled" suf, % false
 return
 
 HokeysSave:
