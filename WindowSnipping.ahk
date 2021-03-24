@@ -183,12 +183,12 @@ SCW_ScreenClip2Win(clip=0,email=0,OCR=0) {
 
 		IniRead, currLang, % script.configfile, OCR, lang, en
 
-		Clipboard:= ocr(pIRandomAccessStream, currLang)
+		Clipboard:=ocr(pIRandomAccessStream, currLang)
 		ObjRelease(pIRandomAccessStream)
 
 		if !Clipboard
-			MsgBox % 0x10, "Error"
-						 , "No text was captured by the OCR engine.`nPlease Try again."
+			MsgBox % 0x10, % "Error"
+						 , % "No text was captured by the OCR engine.`nPlease Try again."
 		else
 		{
 			Gui, ocrResult:new
@@ -1497,9 +1497,10 @@ OCR(IRandomAccessStream, language := "en"){
 		DeleteHString(hString)
 		DllCall(NumGet(NumGet(OcrEngineClass+0)+9*A_PtrSize), "ptr", OcrEngineClass, ptr, LanguageObject, "ptr*", OcrEngineObject)   ; TryCreateFromLanguage
 		if (OcrEngineObject = 0){
+			Run % "ms-settings:regionlanguage"
 			MsgBox % 0x10, % "OCR Error"
 						 , % "Can not use language """ rlangList[language] """ for OCR, please install the corresponding language pack."
-			return
+			return "error"
 		}
 		CurrentLanguage := language
 	}
