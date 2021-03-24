@@ -149,7 +149,7 @@ SCW_SetUp(Options="") {
 
 SCW_ScreenClip2Win(clip=0,email=0,OCR=0) {
 	static c
-	global defaultSignature, selLanguage
+	global defaultSignature, origText
 
 	if !(SCW_Reg("WasSetUp"))
 		SCW_SetUp()
@@ -183,22 +183,29 @@ SCW_ScreenClip2Win(clip=0,email=0,OCR=0) {
 
 		Clipboard:= ocr(pIRandomAccessStream, currLang)
 		ObjRelease(pIRandomAccessStream)
-		;Notify().AddWindow(Clipboard,{Icon:300,Background:"0x0000FF",Title:"OCR Performed, now on clipboard",TitleSize:16,size:15,Time:4000})
+
 		if !Clipboard
 			MsgBox % 0x10, "Error"
 						 , "No text was captured by the OCR engine.`nPlease Try again."
 		else
 		{
-			url := "https://translate.google.com/?sl=" currLang "&tl=en&text=" UriEncode(Clipboard) "&op=translate"
-			
 			Gui, ocrResult:new
-			Gui, add, edit, w600 r20, % Clipboard
-			
-			if (currLang != "en")
-				Gui, add, link,, % "<a href=""" url """>Translate using Google</a>"
+			Gui, font, s14 Courier New
+			Gui, add, edit, w600 r20 vorigText, % Clipboard
+			Gui, add, button, gtranslate, % "Translate using Google"
 			Gui, show
 		}
 		Gdip_Shutdown("pToken") ;clear selection
+		return
+
+		translate:
+			Gui, ocrResult:Submit, NoHide
+
+			IniRead, currLang, % script.config, OCR, lang, en
+			IniRead, trgtLang, % script.config, OCR, tgtlang, en
+
+			Run % "https://translate.google.com/?sl=" currLang "&tl=" trgtLang "&text=" UriEncode(origText) "&op=translate"
+		return
 	}
 
 	if (email=1){
