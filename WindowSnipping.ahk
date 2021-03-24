@@ -47,7 +47,7 @@ if !fileExist(script.resfolder)
 Menu, Tray, Icon, % script.iconfile
 
 ;~ Menu,Tray,Add,"Windows and left mouse click"
-IniRead, ShowUsage, % script.config, Settings, ShowUsage, % true
+IniRead, ShowUsage, % script.configfile, Settings, ShowUsage, % true
 
 Menu, Tray, NoStandard ;removes default options
 Menu, Tray, Add	; to divide from standard menu, remove when above line is uncommented
@@ -63,18 +63,18 @@ Menu, Tray, Add, Clear Settings, ClearSettings
 Menu, Tray,Add,Exit App,Exit
 Menu, Tray, Default, Hotkeys
 
-if (!FileExist(script.config))
+if (!FileExist(script.configfile))
 {
-	FileCreateDir % regexreplace(script.config, "^(.*)\\([^\\]*)$", "$1")
-	FileAppend,, % script.config, UTF-8-RAW
+	FileCreateDir % regexreplace(script.configfile, "^(.*)\\([^\\]*)$", "$1")
+	FileAppend,, % script.configfile, UTF-8-RAW
 
-	IniWrite, % true, % script.config, Settings, FirstRun
-	IniWrite, % true, % script.config, Settings, ShowUsage
+	IniWrite, % true, % script.configfile, Settings, FirstRun
+	IniWrite, % true, % script.configfile, Settings, ShowUsage
 	Gosub Hotkeys
 }
 else
 {
-	IniWrite, % false, % script.config, Settings, FirstRun
+	IniWrite, % false, % script.configfile, Settings, FirstRun
 	Gosub SetHotkeys
 }
 
@@ -181,7 +181,7 @@ SCW_ScreenClip2Win(clip=0,email=0,OCR=0) {
 		pIRandomAccessStream := HBitmapToRandomAccessStream(hBitmap) ;OCR function needs a randome access stream (so it isn't "locked down")
 		DllCall("DeleteObject", "Ptr", hBitmap)
 
-		IniRead, currLang, % script.config, OCR, lang, en
+		IniRead, currLang, % script.configfile, OCR, lang, en
 
 		Clipboard:= ocr(pIRandomAccessStream, currLang)
 		ObjRelease(pIRandomAccessStream)
@@ -203,8 +203,8 @@ SCW_ScreenClip2Win(clip=0,email=0,OCR=0) {
 		translate:
 			Gui, ocrResult:Submit, NoHide
 
-			IniRead, currLang, % script.config, OCR, lang, en
-			IniRead, tgtlang, % script.config, OCR, tgtlang, en
+			IniRead, currLang, % script.configfile, OCR, lang, en
+			IniRead, tgtlang, % script.configfile, OCR, tgtlang, en
 
 			Run % "https://translate.google.com/?sl=" currLang "&tl=" tgtlang "&text=" UriEncode(origText) "&op=translate"
 		return
@@ -246,8 +246,8 @@ SCW_ScreenClip2Win(clip=0,email=0,OCR=0) {
 		FormatTime, TodayDate , YYYYMMDDHH24MISS, dddd MMMM d, yyyy h:mm:ss tt
 		MailItem.Subject :="Screen shot taken : " (TodayDate) ;Subject line of email
 
-		if (FileExist(script.config))
-		IniRead, currSig, % script.config, Email, signature
+		if (FileExist(script.configfile))
+		IniRead, currSig, % script.configfile, Email, signature
 
 		if (!currSig || currSig == "ERROR")
 			currSig :=  defaultSignature
@@ -263,7 +263,7 @@ SCW_ScreenClip2Win(clip=0,email=0,OCR=0) {
 
 		MailItem.HTMLBody := currSig
 
-		IniRead, currImg, % script.config, Email, images
+		IniRead, currImg, % script.configfile, Email, images
 		if (!currImg || currImg == "ERROR")
 			currImg := 11
 
@@ -331,7 +331,7 @@ SCW_CreateLayeredWinMod(GuiNum,pBitmap,x,y,DrawCloseButton=0) {
 	static CloseButton := 16
 	BorderAColor := SCW_Reg("BorderAColor"), BorderBColor := SCW_Reg("BorderBColor")
 
-	; IniRead, ClipBorder, % script.config, Settings, ClipBorder, % false
+	; IniRead, ClipBorder, % script.configfile, Settings, ClipBorder, % false
 
 	Gui %GuiNum%: -Caption +E0x80000 +LastFound +ToolWindow +AlwaysOnTop +OwnDialogs
 	Gui %GuiNum%: Show, Na, ScreenClippingWindow
@@ -1567,12 +1567,12 @@ Base64Enc( ByRef Bin, nBytes, LineLength := 64, LeadingSpaces := 0 )
 
 ;*******************************************************
 ShowUsageSet:
-	IniRead, ShowUsage, % script.config, Settings, ShowUsage, % true ; read value in case variable was reset
+	IniRead, ShowUsage, % script.configfile, Settings, ShowUsage, % true ; read value in case variable was reset
 	Menu, Tray, ToggleCheck, Show Usage at Startup
 
 	if (ShowUsage := !ShowUsage) ; set variable for later use on the gui
 		Gosub, ShowUsageGUI
-	IniWrite, % ShowUsage, % script.config, Settings, ShowUsage
+	IniWrite, % ShowUsage, % script.configfile, Settings, ShowUsage
 return
 
 ShowUsageGUI:
@@ -1656,8 +1656,8 @@ Update:
 return
 
 SignatureGUI:
-	IniRead, currSig, % script.config, Email, signature
-	IniRead, currImg, % script.config, Email, images
+	IniRead, currSig, % script.configfile, Email, signature
+	IniRead, currImg, % script.configfile, Email, images
 
 	if (!currSig || currSig == "ERROR")
 		currSig :=  defaultSignature
@@ -1690,15 +1690,15 @@ SignatureSave:
 	Gui Signature:Submit
 
 	StringReplace, SigEdit, SigEdit, `n, |, All
-	IniWrite, % SigEdit, % script.config, Email, signature
-	IniWrite, % bmp jpg, % script.config, Email, images
+	IniWrite, % SigEdit, % script.configfile, Email, signature
+	IniWrite, % bmp jpg, % script.configfile, Email, images
 return
 
 Hotkeys:
 	Gui Hotkeys:New,, Hotkey Settings
 
-	IniRead, firstRun, % script.config, Settings, FirstRun
-	IniRead, currHK, % script.config, Hotkeys, Screen
+	IniRead, firstRun, % script.configfile, Settings, FirstRun
+	IniRead, currHK, % script.configfile, Hotkeys, Screen
 
 	if (firstRun)
 		currHK := "#"
@@ -1712,7 +1712,7 @@ Hotkeys:
 	Gui Add, Checkbox, % (instr(currHK, "disabled") ? "checked" : "") " x+10 gdisableHK vDisabledsc", Disabled
 
 
-	IniRead, currHK, % script.config, Hotkeys, Outlook
+	IniRead, currHK, % script.configfile, Hotkeys, Outlook
 
 	if (firstRun)
 		currHK := "#!"
@@ -1730,17 +1730,17 @@ Hotkeys:
 		;~ Language CodeDescription (informative)BCP 47 Code
 		langList := {"Arabic (Saudi Arabia)":"ar","Bulgarian (Bulgaria)":"bg","Chinese (Hong Kong S.A.R.)":"zh","Chinese (PRC)":"zh","Chinese (Taiwan)":"zh","Croatian (Croatia)":"hr","Czech (Czech Republic)":"cs","Danish (Denmark)":"da","Dutch (Netherlands)":"nl","English (Great Britain)":"En","English (United States)":"en","Estonian (Estonia)":"et","Finnish (Finland)":"fi","French (France)":"fr","German (Germany)":"de","Greek (Greece)":"el","Hebrew (Israel)":"he","Hungarian (Hungary)":"hu","Italian (Italy)":"it","Japanese (Japan)":"ja","Korean (Korea)":"ko","Latvian (Latvia)":"lv","Lithuanian (Lithuania)":"lt","Norwegian, Bokmål (Norway)":"nb","Polish (Poland)":"pl","Portuguese (Brazil)":"pt","Portuguese (Portugal)":"pt","Romanian (Romania)":"ro","Russian (Russia)":"ru","Serbian (Latin, Serbia)":"sr","Serbian (Latin, Serbia)":"sr","Slovak (Slovakia)":"sk","Slovenian (Slovenia)":"sl","Spanish (Spain)":"es","Swedish (Sweden)":"sv","Thai (Thailand)":"th","Turkish (Turkey)":"tr","Ukrainian (Ukraine)":"uk"}
 
-		IniRead, currLang, % script.config, OCR, lang, en
+		IniRead, currLang, % script.configfile, OCR, lang, en
 
 		for lang,code in langList
 			curvar .= lang (langList[lang] == (currLang ? currLang : "en") ? "||" : "|")
 		
-		IniRead, currtgtLang, % script.config, OCR, tgtlang, en
+		IniRead, currtgtLang, % script.configfile, OCR, tgtlang, en
 
 		for lang,code in langList
 			tgtvar .= lang (langList[lang] == (currtgtLang ? currtgtLang : "en") ? "||" : "|")
 
-		IniRead, currHK, % script.config, Hotkeys, OCR
+		IniRead, currHK, % script.configfile, Hotkeys, OCR
 
 		if (firstRun)
 			currHK := "#^"
@@ -1757,7 +1757,7 @@ Hotkeys:
 		Gui Add, DropDownList, w185 x+10 yp-3 vtgtLanguage, % RegExReplace(tgtvar, "|$")
 	}
 
-	IniRead, currHK, % script.config, Hotkeys, Desktop
+	IniRead, currHK, % script.configfile, Hotkeys, Desktop
 
 	if (firstRun)
 		currHK := "^s"
@@ -1845,7 +1845,7 @@ SetHotkeys:
 		if (A_loopField == "Desktop")
 			Hotkey, IfWinActive, % "ScreenClippingWindow ahk_class AutoHotkeyGUI"
 
-		IniRead, currHK, % script.config, Hotkeys, % A_LoopField, % %defHK%
+		IniRead, currHK, % script.configfile, Hotkeys, % A_LoopField, % %defHK%
 		try
 			Hotkey, % currHK (A_LoopField != "Desktop" ? "Lbutton" : ""), OFF
 		catch e
@@ -1863,15 +1863,15 @@ SetHotkeys:
 		else
 		{
 			if (%disHK%)
-				IniWrite, % "disabled", % script.config, Hotkeys, % A_LoopField
+				IniWrite, % "disabled", % script.configfile, Hotkeys, % A_LoopField
 			else
-				IniWrite, % %newHK% ? %newHK% : currHK, % script.config, Hotkeys, % A_LoopField
+				IniWrite, % %newHK% ? %newHK% : currHK, % script.configfile, Hotkeys, % A_LoopField
 		}
 	}
 	if (selLanguage)
-		IniWrite, % langList[selLanguage], % script.config, OCR, lang
+		IniWrite, % langList[selLanguage], % script.configfile, OCR, lang
 	if (tgtLanguage)
-		IniWrite, % langList[tgtLanguage], % script.config, OCR, tgtlang
+		IniWrite, % langList[tgtLanguage], % script.configfile, OCR, tgtlang
 return
 
 disableHK:
@@ -1920,7 +1920,7 @@ DesktopHK:
 return
 
 ClearSettings:
-	FileRemoveDir, % script.configfolder, true
+	FileRemoveDir, % script.configfilefolder, true
 	Reload
 return
 
