@@ -29,7 +29,8 @@ global script := {base			: script
 				 ,donateLink	: "https://www.paypal.com/donate?hosted_button_id=MBT5HSD9G94N6"
 				 ,resfolder		: appdata "\res"
 				 ,iconfile		: appdata "\res\sct.ico"
-				 ,config 		: appdata "\settings.ini"}
+				 ,configfolder	: appdata
+				 ,configfile	: appdata "\settings.ini"}
 
 /*  ; Credits   I borrowed heavily from ...
 	Screen clipping by Learning one  https://autohotkey.com/boards/viewtopic.php?f=6&t=12088
@@ -58,6 +59,7 @@ Menu, Tray, % ShowUsage ? "Check" : "Uncheck", Show Usage at Startup
 Menu, Tray, Add
 Menu, Tray, Add, About, AboutGUI
 Menu, Tray, Add, Check for Updates, Update
+Menu, Tray, Add, Clear Settings, ClearSettings
 Menu, Tray,Add,Exit App,Exit
 Menu, Tray, Default, Hotkeys
 
@@ -1915,6 +1917,11 @@ return
 
 DesktopHK:
 	SCW_Win2File(0)
+return
+
+ClearSettings:
+	FileRemoveDir, % script.configfolder, true
+	Reload
 return
 
 Exit:
