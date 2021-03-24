@@ -14,25 +14,30 @@ if((A_PtrSize=8&&A_IsCompiled="")||!A_IsUnicode){ ;32 bit=4  ;64 bit=8
 	 ExitApp
 }
 
+if !InStr(A_OSVersion, "10.")
+	appdata := A_ScriptDir
+else
+	appdata := A_AppData "\" regexreplace(A_ScriptName, "\.\w+"), isWin10 := true
 
 global script := {base			: script
 				 ,name			: regexreplace(A_ScriptName, "\.\w+")
-				 ,version		: "1.19.29"
+				 ,version		: "1.26.8"
 				 ,author		: "Joe Glines"
 				 ,email			: "joe@the-automator.com"
-				 ,homepagetext	: "www.the-automator.com"
-				 ,homepagelink	: "www.the-automator.com"
+				 ,homepagetext	: "www.the-automator.com/snip"
+				 ,homepagelink	: "www.the-automator.com/snip?src=app"
 				 ,donateLink	: "https://www.paypal.com/donate?hosted_button_id=MBT5HSD9G94N6"
-				 ,resfolder		: A_AppData "\" regexreplace(A_ScriptName, "\.\w+") "\res"
-				 ,iconfile		: A_AppData "\" regexreplace(A_ScriptName, "\.\w+") "\res\sct.ico"
-				 ,config 		: A_AppData "\" regexreplace(A_ScriptName, "\.\w+") "\settings.ini"}
+				 ,resfolder		: appdata "\res"
+				 ,iconfile		: appdata "\res\sct.ico"
+				 ,configfolder	: appdata
+				 ,configfile	: appdata "\settings.ini"}
 
 /*  ; Credits   I borrowed heavily from ...
 	Screen clipping by Learning one  https://autohotkey.com/boards/viewtopic.php?f=6&t=12088
 	OCR by malcev https://www.autohotkey.com/boards/viewtopic.php?f=6&t=72674
 */
 
-if !fileExist(script.iconfile)
+if !fileExist(script.resfolder)
 {
 	FileCreateDir, % script.resfolder
 	FileInstall, res\sct.ico, % script.iconfile
@@ -54,17 +59,9 @@ Menu, Tray, % ShowUsage ? "Check" : "Uncheck", Show Usage at Startup
 Menu, Tray, Add
 Menu, Tray, Add, About, AboutGUI
 Menu, Tray, Add, Check for Updates, Update
+Menu, Tray, Add, Clear Settings, ClearSettings
 Menu, Tray,Add,Exit App,Exit
-
-defaultSignature =
-(
-<HTML>
-Attached you will find the screenshot taken on `%date`%.<br><br>
-<span style='color:black'>Please let me know if you have any questions.<br><br>
-<H2 style='BACKGROUND-COLOR: red'><br></H2>
-<a href='mailto:info@the-Automator.com'>Joe Glines</a><br>682.xxx.xxxx</span>.
-</HTML>
-)
+Menu, Tray, Default, Hotkeys
 
 if (!FileExist(script.config))
 {
@@ -78,16 +75,42 @@ if (!FileExist(script.config))
 else
 {
 	IniWrite, % false, % script.config, Settings, FirstRun
-	GoSub SetHotkeys
+	Gosub SetHotkeys
 }
 
 if (ShowUsage)
-	gosub ShowUsageGUI
+	Gosub ShowUsageGUI
 return
 
 ;===Functions==========================================================================
 SCW_Version() {
-	return "1.19.29"
+	return "1.26.8"
+}
+
+UriEncode(Uri, Enc = "UTF-8"){
+	StrPutVar(Uri, Var, Enc)
+	f := A_FormatInteger
+	SetFormat, IntegerFast, H
+	Loop
+	{
+		Code := NumGet(Var, A_Index - 1, "UChar")
+		If (!Code)
+			Break
+		If (Code >= 0x30 && Code <= 0x39 ; 0-9
+			|| Code >= 0x41 && Code <= 0x5A ; A-Z
+			|| Code >= 0x61 && Code <= 0x7A) ; a-z
+			Res .= Chr(Code)
+		Else
+			Res .= "%" . SubStr(Code + 0x100, -1)
+	}
+	SetFormat, IntegerFast, %f%
+	Return, Res
+}
+
+StrPutVar(Str, ByRef Var, Enc = ""){
+	Len := StrPut(Str, Enc) * (Enc = "UTF-16" || Enc = "CP1200" ? 2 : 1)
+	VarSetCapacity(Var, Len, 0)
+	Return, StrPut(Str, &Var, Enc)
 }
 
 SCW_DestroyAllClipWins() {
@@ -128,7 +151,7 @@ SCW_SetUp(Options="") {
 
 SCW_ScreenClip2Win(clip=0,email=0,OCR=0) {
 	static c
-	global defaultSignature
+	global defaultSignature, origText
 
 	if !(SCW_Reg("WasSetUp"))
 		SCW_SetUp()
@@ -152,21 +175,39 @@ SCW_ScreenClip2Win(clip=0,email=0,OCR=0) {
 	Sleep, 100
 
 	pBitmap := Gdip_BitmapFromScreen(Area)
-	if (OCR=1){
+	if (OCR=1)
+	{
 		hBitmap:=Gdip_CreateHBITMAPFromBitmap(pBitmap) ;Convert an hBitmap from the pBitmap
 		pIRandomAccessStream := HBitmapToRandomAccessStream(hBitmap) ;OCR function needs a randome access stream (so it isn't "locked down")
 		DllCall("DeleteObject", "Ptr", hBitmap)
 
-		Clipboard:= ocr(pIRandomAccessStream, "en")
+		IniRead, currLang, % script.config, OCR, lang, en
+
+		Clipboard:= ocr(pIRandomAccessStream, currLang)
 		ObjRelease(pIRandomAccessStream)
-		;Notify().AddWindow(Clipboard,{Icon:300,Background:"0x0000FF",Title:"OCR Performed, now on clipboard",TitleSize:16,size:15,Time:4000})
+
 		if !Clipboard
-			ToolTip, % "Sorry, no text was captured.`nPlease Try again."
+			MsgBox % 0x10, "Error"
+						 , "No text was captured by the OCR engine.`nPlease Try again."
 		else
-			ToolTip, % "Now on Clipboard:`n`n" clipboard
-		sleep, 2000
-		ToolTip
+		{
+			Gui, ocrResult:new
+			Gui, font, s14 Courier New
+			Gui, add, edit, w600 r20 vorigText, % Clipboard
+			Gui, add, button, gtranslate, % "Translate using Google"
+			Gui, show
+		}
 		Gdip_Shutdown("pToken") ;clear selection
+		return
+
+		translate:
+			Gui, ocrResult:Submit, NoHide
+
+			IniRead, currLang, % script.config, OCR, lang, en
+			IniRead, tgtlang, % script.config, OCR, tgtlang, en
+
+			Run % "https://translate.google.com/?sl=" currLang "&tl=" tgtlang "&text=" UriEncode(origText) "&op=translate"
+		return
 	}
 
 	if (email=1){
@@ -1437,6 +1478,8 @@ CLSIDFromString(IID, ByRef CLSID) {
 ;********************teadrinker OCR ***********************************
 OCR(IRandomAccessStream, language := "en"){
 	static OcrEngineClass, OcrEngineObject, MaxDimension, LanguageClass, LanguageObject, CurrentLanguage, StorageFileClass, BitmapDecoderClass
+	static rlangList := {"ar":"Arabic (Saudi Arabia)","bg":"Bulgarian (Bulgaria)","zh":"Chinese (Hong Kong S.A.R.)","zh":"Chinese (PRC)","zh":"Chinese (Taiwan)","hr":"Croatian (Croatia)","cs":"Czech (Czech Republic)","da":"Danish (Denmark)","nl":"Dutch (Netherlands)","En":"English (Great Britain)","en":"English (United States)","et":"Estonian (Estonia)","fi":"Finnish (Finland)","fr":"French (France)","de":"German (Germany)","el":"Greek (Greece)","he":"Hebrew (Israel)","hu":"Hungarian (Hungary)","it":"Italian (Italy)","ja":"Japanese (Japan)","ko":"Korean (Korea)","lv":"Latvian (Latvia)","lt":"Lithuanian (Lithuania)","nb":"Norwegian, Bokmål (Norway)","pl":"Polish (Poland)","pt":"Portuguese (Brazil)","pt":"Portuguese (Portugal)","ro":"Romanian (Romania)","ru":"Russian (Russia)","sr":"Serbian (Latin, Serbia)","sr":"Serbian (Latin, Serbia)","sk":"Slovak (Slovakia)","sl":"Slovenian (Slovenia)","es":"Spanish (Spain)","sv":"Swedish (Sweden)","th":"Thai (Thailand)","tr":"Turkish (Turkey)","uk":"Ukrainian (Ukraine)"}
+
 	if (OcrEngineClass = "")	{
 		CreateClass("Windows.Globalization.Language", ILanguageFactory := "{9B0252AC-0C27-44F8-B792-9793FB66C63E}", LanguageClass)
 		CreateClass("Windows.Graphics.Imaging.BitmapDecoder", IStorageFileStatics := "{438CCB26-BCEF-4E95-BAD6-23A822E58D01}", BitmapDecoderClass)
@@ -1454,8 +1497,9 @@ OCR(IRandomAccessStream, language := "en"){
 		DeleteHString(hString)
 		DllCall(NumGet(NumGet(OcrEngineClass+0)+9*A_PtrSize), "ptr", OcrEngineClass, ptr, LanguageObject, "ptr*", OcrEngineObject)   ; TryCreateFromLanguage
 		if (OcrEngineObject = 0){
-			msgbox Can not use language "%language%" for OCR, please install language pack.
-			ExitApp
+			MsgBox % 0x10, % "OCR Error"
+						 , % "Can not use language """ rlangList[language] """ for OCR, please install the corresponding language pack."
+			return
 		}
 		CurrentLanguage := language
 	}
@@ -1466,7 +1510,7 @@ OCR(IRandomAccessStream, language := "en"){
 	DllCall(NumGet(NumGet(BitmapFrame+0)+13*A_PtrSize), "ptr", BitmapFrame, "uint*", height)   ; get_PixelHeight
 	if (width > MaxDimension) or (height > MaxDimension){
 		msgbox Image is to big - %width%x%height%.`nIt should be maximum - %MaxDimension% pixels
-		ExitApp
+		return
 	}
 	SoftwareBitmap := ComObjQuery(BitmapDecoderObject1, IBitmapFrameWithSoftwareBitmap := "{FE287C9A-420C-4963-87AD-691436E08383}")
 	DllCall(NumGet(NumGet(SoftwareBitmap+0)+6*A_PtrSize), "ptr", SoftwareBitmap, "ptr*", BitmapFrame1)   ; GetSoftwareBitmapAsync
@@ -1498,10 +1542,13 @@ OCR(IRandomAccessStream, language := "en"){
 
 notUnique(mod1, mod2, mod3)
 {
-	if (mod1 == mod2 || mod1 == mod3 || mod2 == mod3)
-		return true
-	else
-		return false
+	if (mod1 && mod2 || mod1 && mod3 || mod2 && mod3) ; at least 2 of them are set
+	{
+		if (mod1 == mod2 || mod1 == mod3 || mod2 == mod3)
+			return true
+		else
+			return false
+	}
 }
 
 Base64Enc( ByRef Bin, nBytes, LineLength := 64, LeadingSpaces := 0 )
@@ -1524,7 +1571,7 @@ ShowUsageSet:
 	Menu, Tray, ToggleCheck, Show Usage at Startup
 
 	if (ShowUsage := !ShowUsage) ; set variable for later use on the gui
-		gosub, ShowUsageGUI
+		Gosub, ShowUsageGUI
 	IniWrite, % ShowUsage, % script.config, Settings, ShowUsage
 return
 
@@ -1566,7 +1613,7 @@ ShowUsageGUI:
 			</head>
 			<body>
 				<h2>Thank you for using WindowSnipping!</h2>
-				<p>To learn how to use the tool you can watch <a>this video</a>, however here are some quick tips.</p>
+				<p>To learn how to use the tool you can watch <a href="https://www.the-automator.com/WindowSnippingVideo">this video</a>, however here are some quick tips.</p>
 				<hr>
 				<ol>
 					<li>After launching WindowSnipping you will see this icon in your system tray
@@ -1599,8 +1646,8 @@ return
 
 Update:
 	try
-		script.update("https://www.the-automator.com/WindowSnippingUpdate/ver"
-					 ,"https://www.the-automator.com/WindowSnippingUpdate/WindowSnipping.zip")
+		script.update("https://www.the-automator.com/update/WindowSnipping/ver"
+					 ,"https://www.the-automator.com/update/WindowSnipping/WindowSnipping.zip")
 	catch e
 	{
 		if (e.code == 6)
@@ -1658,10 +1705,11 @@ Hotkeys:
 
 	Gui Add,Text,, Please select the hotkeys of your choice:`n
 	Gui Add, Text, w220 x0 right, Left mouse drag to screen capture +
-	Gui Add, Checkbox, % (instr(currHK, "#") ? "checked" : "") " x+10 section vWsc", Win
-	Gui Add, Checkbox, % (instr(currHK, "^") ? "checked" : "") " x+10 vCsc", Ctrl
-	Gui Add, Checkbox, % (instr(currHK, "+") ? "checked" : "") " x+10 vSsc", Shift
-	Gui Add, Checkbox, % (instr(currHK, "!") ? "checked" : "") " x+10 vAsc", Alt
+	Gui Add, Checkbox, % (instr(currHK, "#") ? "checked" : "") " x+10 section vWsc gdisableHK", Win
+	Gui Add, Checkbox, % (instr(currHK, "^") ? "checked" : "") " x+10 vCsc gdisableHK", Ctrl
+	Gui Add, Checkbox, % (instr(currHK, "+") ? "checked" : "") " x+10 vSsc gdisableHK", Shift
+	Gui Add, Checkbox, % (instr(currHK, "!") ? "checked" : "") " x+10 vAsc gdisableHK", Alt
+	Gui Add, Checkbox, % (instr(currHK, "disabled") ? "checked" : "") " x+10 gdisableHK vDisabledsc", Disabled
 
 
 	IniRead, currHK, % script.config, Hotkeys, Outlook
@@ -1670,24 +1718,43 @@ Hotkeys:
 		currHK := "#!"
 
 	Gui Add, Text, w220 x0 right, Left mouse drag to Attach to Outlook email +
-	Gui Add, Checkbox, % (instr(currHK, "#") ? "checked" : "") " xs yp vWom", Win
-	Gui Add, Checkbox, % (instr(currHK, "^") ? "checked" : "") " x+10 vCom", Ctrl
-	Gui Add, Checkbox, % (instr(currHK, "+") ? "checked" : "") " x+10 vSom", Shift
-	Gui Add, Checkbox, % (instr(currHK, "!") ? "checked" : "") " x+10 vAom", Alt
+	Gui Add, Checkbox, % (instr(currHK, "#") ? "checked" : "") " xs yp vWom gdisableHK", Win
+	Gui Add, Checkbox, % (instr(currHK, "^") ? "checked" : "") " x+10 vCom gdisableHK", Ctrl
+	Gui Add, Checkbox, % (instr(currHK, "+") ? "checked" : "") " x+10 vSom gdisableHK", Shift
+	Gui Add, Checkbox, % (instr(currHK, "!") ? "checked" : "") " x+10 vAom gdisableHK", Alt
+	Gui Add, Checkbox, % (instr(currHK, "disabled") ? "checked" : "") " x+10 gdisableHK vDisabledom", Disabled
 
 
-	if A_OSVersion NOT in WIN_7,WIN_8,WIN_8.1,WIN_VISTA,WIN_2003,WIN_XP,WIN_2000
+	if (isWin10)
 	{
+		;~ Language CodeDescription (informative)BCP 47 Code
+		langList := {"Arabic (Saudi Arabia)":"ar","Bulgarian (Bulgaria)":"bg","Chinese (Hong Kong S.A.R.)":"zh","Chinese (PRC)":"zh","Chinese (Taiwan)":"zh","Croatian (Croatia)":"hr","Czech (Czech Republic)":"cs","Danish (Denmark)":"da","Dutch (Netherlands)":"nl","English (Great Britain)":"En","English (United States)":"en","Estonian (Estonia)":"et","Finnish (Finland)":"fi","French (France)":"fr","German (Germany)":"de","Greek (Greece)":"el","Hebrew (Israel)":"he","Hungarian (Hungary)":"hu","Italian (Italy)":"it","Japanese (Japan)":"ja","Korean (Korea)":"ko","Latvian (Latvia)":"lv","Lithuanian (Lithuania)":"lt","Norwegian, Bokmål (Norway)":"nb","Polish (Poland)":"pl","Portuguese (Brazil)":"pt","Portuguese (Portugal)":"pt","Romanian (Romania)":"ro","Russian (Russia)":"ru","Serbian (Latin, Serbia)":"sr","Serbian (Latin, Serbia)":"sr","Slovak (Slovakia)":"sk","Slovenian (Slovenia)":"sl","Spanish (Spain)":"es","Swedish (Sweden)":"sv","Thai (Thailand)":"th","Turkish (Turkey)":"tr","Ukrainian (Ukraine)":"uk"}
+
+		IniRead, currLang, % script.config, OCR, lang, en
+
+		for lang,code in langList
+			curvar .= lang (langList[lang] == (currLang ? currLang : "en") ? "||" : "|")
+		
+		IniRead, currtgtLang, % script.config, OCR, tgtlang, en
+
+		for lang,code in langList
+			tgtvar .= lang (langList[lang] == (currtgtLang ? currtgtLang : "en") ? "||" : "|")
+
 		IniRead, currHK, % script.config, Hotkeys, OCR
 
 		if (firstRun)
 			currHK := "#^"
 
 		Gui Add, Text, w220 x0 right, Left mouse drag to perform OCR +
-		Gui Add, Checkbox, % (instr(currHK, "#") ? "checked" : "") " xs yp vWpo", Win
-		Gui Add, Checkbox, % (instr(currHK, "^") ? "checked" : "") " x+10 vCpo", Ctrl
-		Gui Add, Checkbox, % (instr(currHK, "+") ? "checked" : "") " x+10 vSpo", Shift
-		Gui Add, Checkbox, % (instr(currHK, "!") ? "checked" : "") " x+10 vApo", Alt
+		Gui Add, Checkbox, % (instr(currHK, "#") ? "checked" : "") " xs yp vWpo gdisableHK", % "Win"
+		Gui Add, Checkbox, % (instr(currHK, "^") ? "checked" : "") " x+10 vCpo gdisableHK", % "Ctrl"
+		Gui Add, Checkbox, % (instr(currHK, "+") ? "checked" : "") " x+10 vSpo gdisableHK", % "Shift"
+		Gui Add, Checkbox, % (instr(currHK, "!") ? "checked" : "") " x+10 vApo gdisableHK", % "Alt"
+		Gui Add, Checkbox, % (instr(currHK, "disabled") ? "checked" : "") " x+10 gdisableHK vDisabledpo", % "Disabled"
+		Gui Add, Text, w220 x0 y+10 right, % "Select OCR Language"
+		Gui Add, DropDownList, w185 x+10 yp-3 vselLanguage, % RegExReplace(curvar, "|$")
+		Gui Add, Text, w220 x0 y+10 right, % "Translate to"
+		Gui Add, DropDownList, w185 x+10 yp-3 vtgtLanguage, % RegExReplace(tgtvar, "|$")
 	}
 
 	IniRead, currHK, % script.config, Hotkeys, Desktop
@@ -1696,14 +1763,33 @@ Hotkeys:
 		currHK := "^s"
 
 	Gui Add, Text, w220 x0 y+13 right, Save clip to desktop
-	Gui Add, Hotkey, w185 xs yp-3 vDesktopSave, % currHK
+	Gui Add, Hotkey, w185 xs yp-3 vdeshk, % currHK
+	Gui Add, Checkbox, % (instr(currHK, "disabled") ? "checked" : "") " x+10 yp+3 gdisableHK vDisableddt", Disabled
 
 
-	Gui Add, Text, w450 x0 y+20 0x10
-	Gui Add, Button, w75 x255 yp+10 gHokeysSave, Save
+	Gui Add, Text, w500 x0 y+20 0x10
+	Gui Add, Button, x230 yp+10 gHokeysReset, Reset Hotkeys
+	Gui Add, Button, w75 x+10 gHokeysSave, Save
 	Gui Add, Button, w75 x+10 gHokeysSave, Cancel
+	Gui Hotkeys:show, w495
+return
 
-	Gui Hotkeys:show, w425
+HokeysReset:
+	Loop, Parse, hotkeys, |
+	{
+		if (A_LoopField == "Desktop")
+			GuiControl,, % "deshk", % defDesktopHK
+		else
+		{
+			currDef := "def" A_LoopField "HK"
+			GuiControl,, % "W" suffix[A_Index], % (instr(%currDef%, "#") ? true : false)
+			GuiControl,, % "C" suffix[A_Index], % (instr(%currDef%, "^") ? true : false)
+			GuiControl,, % "S" suffix[A_Index], % (instr(%currDef%, "+") ? true : false)
+			GuiControl,, % "A" suffix[A_Index], % (instr(%currDef%, "!") ? true : false)
+		}
+	}
+	for i, suf in suffix
+		GuiControl,, % "Disabled" suf, % false
 return
 
 HokeysSave:
@@ -1715,15 +1801,12 @@ HokeysSave:
 		return
 	}
 
-	hotkeys := "Screen|Outlook|OCR|Desktop"
-
 	scrhk := (Wsc ? "#" : "") (Csc ? "^" : "") (Ssc ? "+" : "") (Asc ? "!" : "")
 	outhk := (Wom ? "#" : "") (Com ? "^" : "") (Som ? "+" : "") (Aom ? "!" : "")
+	ocrhk := (Wpo ? "#" : "") (Cpo ? "^" : "") (Spo ? "+" : "") (Apo ? "!" : "")
 
-	if A_OSVersion NOT in WIN_7,WIN_8,WIN_8.1,WIN_VISTA,WIN_2003,WIN_XP,WIN_2000
-		ocrhk := (Wpo ? "#" : "") (Cpo ? "^" : "") (Spo ? "+" : "") (Apo ? "!" : "")
-
-	if (notUnique(scrhk, outhk, ocrhk)){
+	if (notUnique(scrhk, outhk, ocrhk))
+	{
 		msgbox  % 0x10
 				,% "Error"
 				,% "One of the hotkeys you tried to setup is already used by another"
@@ -1733,49 +1816,83 @@ HokeysSave:
 
 	Gui Hotkeys:Submit
 
+SetHotkeys:
+	defOCRHK 			:= "#^"
+	defScreenHK 		:= "#"
+	defOutlookHK 		:= "#!"
+	defDesktopHK 		:= "^s"
+	preffix 			:= "wcsa"
+	suffix 				:= ["sc", "om", "po", "dt"]
+	hotkeys 			:= "Screen|Outlook|OCR|Desktop"
+	defaultSignature 	:=
+	("%"
+	"<HTML>
+	Attached you will find the screenshot taken on %date%.<br><br>
+	<span style='color:black'>Please let me know if you have any questions.<br><br>
+	<H2 style='BACKGROUND-COLOR: red'><br></H2>
+	<a href='mailto:info@the-Automator.com'>Joe Glines</a><br>682.xxx.xxxx</span>.
+	</HTML>"
+	)
+
+	; we make sure to disable all hotkeys to be able to set the new ones without issues
+	; without this the new hotkeys wont work
 	Loop parse, hotkeys, |
 	{
-		; for some reason the hotkey command doesnt get the correct context for the ifWin directive
-		; to fix this I manually setup the context for the hotkeys below
-		Hotkey, IfWinActive, % (a_loopfield != "Desktop" ? "" : "ScreenClippingWindow ahk_class AutoHotkeyGUI")
-		IniRead, currHK, % script.config, Hotkeys, % a_loopfield
+		defHK := "def" A_LoopField "HK"
+		newHK := SubStr(A_LoopField, 1, 3) "HK"
+		disHK := "Disabled" suffix[A_Index]
 
-		if (currHK == "ERROR" || currHK == "")
-			break
-		; we make sure to disable all hotkeys to be able to set the new ones without issues
-		; without this the new hotkey wont work
-		Hotkey, % currHK (a_loopfield != "Desktop" ? "Lbutton" : ""), OFF
-	}
-	; removed any context for later hotkey setup
-	Hotkey, IfWinActive
+		if (A_loopField == "Desktop")
+			Hotkey, IfWinActive, % "ScreenClippingWindow ahk_class AutoHotkeyGUI"
 
-	IniWrite, % scrhk, % script.config, Hotkeys, Screen
-	IniWrite, % outhk, % script.config, Hotkeys, Outlook
+		IniRead, currHK, % script.config, Hotkeys, % A_LoopField, % %defHK%
+		try
+			Hotkey, % currHK (A_LoopField != "Desktop" ? "Lbutton" : ""), OFF
+		catch e
+			if ((!currHK || currHK == "disabled") && !%disHK%)
+				currHK := %defHK%
+		Finally
+			if (!%disHK%)
+				Hotkey, % (%newHK% ? %newHK% : currHK) (A_LoopField != "Desktop" ? "Lbutton" : ""), % A_LoopField "HK", ON
 
-	if A_OSVersion NOT in WIN_7,WIN_8,WIN_8.1,WIN_VISTA,WIN_2003,WIN_XP,WIN_2000
-		IniWrite, % ocrhk, % script.config, Hotkeys, OCR
-
-	IniWrite, % DesktopSave, % script.config, Hotkeys, Desktop
-
-	SetHotkeys:
-		IniRead, currHK, % script.config, Hotkeys
-		if (currHK == "ERROR" || currHK == "")
-			return
-
-		IniRead, currHK, % script.config, Hotkeys, Screen
-		Hotkey, % currHK "Lbutton", ScreenHK, % currHK ? "ON" : "OFF"
-
-		IniRead, currHK, % script.config, Hotkeys, Outlook
-		Hotkey, % currHK "Lbutton", OutlookHK, % currHK ? "ON" : "OFF"
-
-		IniRead, currHK, % script.config, Hotkeys, OCR
-		Hotkey, % currHK "Lbutton", OCRHK, % currHK ? "ON" : "OFF"
-
-		;********************After clip exists***********************************
-		IniRead, currHK, % script.config, Hotkeys, Desktop
-		Hotkey, IfWinActive, ScreenClippingWindow ahk_class AutoHotkeyGUI
-		Hotkey, % currHK, DesktopHK, ON
+		; OutputDebug, % currHK ">" %newHK%
 		Hotkey, IfWinActive
+
+		if (newHK == "ocrhk" && !isWin10)
+			continue
+		else
+		{
+			if (%disHK%)
+				IniWrite, % "disabled", % script.config, Hotkeys, % A_LoopField
+			else
+				IniWrite, % %newHK% ? %newHK% : currHK, % script.config, Hotkeys, % A_LoopField
+		}
+	}
+	if (selLanguage)
+		IniWrite, % langList[selLanguage], % script.config, OCR, lang
+	if (tgtLanguage)
+		IniWrite, % langList[tgtLanguage], % script.config, OCR, tgtlang
+return
+
+disableHK:
+	Gui Hotkeys:Submit, NoHide
+
+	if (!InStr(A_GuiControl, "Disabled"))
+	{
+		GuiControl,, % "Disabled" SubStr(A_GuiControl, 2), % false
+		return
+	}
+
+	if (SubStr(A_GuiControl, -1) == "dt")
+		GuiControl,, deshk, % ""
+	else
+	{
+		loop parse, preffix
+		{
+			currCB := A_LoopField SubStr(A_GuiControl, -1)
+			GuiControl,, % currCB, % false
+		}
+	}
 return
 
 #IfWinActive ScreenClippingWindow ahk_class AutoHotkeyGUI ;activates last clipped window
@@ -1794,12 +1911,17 @@ OutlookHK:
 return
 
 OCRHK:
-	if A_OSVersion NOT in WIN_7,WIN_8,WIN_8.1,WIN_VISTA,WIN_2003,WIN_XP,WIN_2000
+	if (isWin10)
 		SCW_ScreenClip2Win(clip:=0,email:=0,OCR:=1)
 return
 
 DesktopHK:
 	SCW_Win2File(0)
+return
+
+ClearSettings:
+	FileRemoveDir, % script.configfolder, true
+	Reload
 return
 
 Exit:
