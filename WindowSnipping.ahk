@@ -178,7 +178,7 @@ SCW_ScreenClip2Win(clip=0,email=0,OCR=0) {
 		hBitmap:=Gdip_CreateHBITMAPFromBitmap(pBitmap) ;Convert an hBitmap from the pBitmap
 		pIRandomAccessStream := HBitmapToRandomAccessStream(hBitmap) ;OCR function needs a randome access stream (so it isn't "locked down")
 		DllCall("DeleteObject", "Ptr", hBitmap)
-		
+
 		IniRead, currLang, % script.config, OCR, lang, en
 
 		Clipboard:= ocr(pIRandomAccessStream, currLang)
@@ -202,9 +202,9 @@ SCW_ScreenClip2Win(clip=0,email=0,OCR=0) {
 			Gui, ocrResult:Submit, NoHide
 
 			IniRead, currLang, % script.config, OCR, lang, en
-			IniRead, trgtLang, % script.config, OCR, tgtlang, en
+			IniRead, tgtlang, % script.config, OCR, tgtlang, en
 
-			Run % "https://translate.google.com/?sl=" currLang "&tl=" trgtLang "&text=" UriEncode(origText) "&op=translate"
+			Run % "https://translate.google.com/?sl=" currLang "&tl=" tgtlang "&text=" UriEncode(origText) "&op=translate"
 		return
 	}
 
@@ -1694,7 +1694,7 @@ return
 
 Hotkeys:
 	Gui Hotkeys:New,, Hotkey Settings
-	
+
 	IniRead, firstRun, % script.config, Settings, FirstRun
 	IniRead, currHK, % script.config, Hotkeys, Screen
 
@@ -1731,7 +1731,12 @@ Hotkeys:
 		IniRead, currLang, % script.config, OCR, lang, en
 
 		for lang,code in langList
-			var .= lang (langList[lang] == (currLang ? currLang : "en") ? "||" : "|")
+			curvar .= lang (langList[lang] == (currLang ? currLang : "en") ? "||" : "|")
+		
+		IniRead, currtgtLang, % script.config, OCR, tgtlang, en
+
+		for lang,code in langList
+			tgtvar .= lang (langList[lang] == (currtgtLang ? currtgtLang : "en") ? "||" : "|")
 
 		IniRead, currHK, % script.config, Hotkeys, OCR
 
@@ -1739,13 +1744,15 @@ Hotkeys:
 			currHK := "#^"
 
 		Gui Add, Text, w220 x0 right, Left mouse drag to perform OCR +
-		Gui Add, Checkbox, % (instr(currHK, "#") ? "checked" : "") " xs yp vWpo gdisableHK", Win
-		Gui Add, Checkbox, % (instr(currHK, "^") ? "checked" : "") " x+10 vCpo gdisableHK", Ctrl
-		Gui Add, Checkbox, % (instr(currHK, "+") ? "checked" : "") " x+10 vSpo gdisableHK", Shift
-		Gui Add, Checkbox, % (instr(currHK, "!") ? "checked" : "") " x+10 vApo gdisableHK", Alt
-		Gui Add, Checkbox, % (instr(currHK, "disabled") ? "checked" : "") " x+10 gdisableHK vDisabledpo", Disabled
-		Gui Add, Text, w220 x0 y+10 right, Select OCR Language :
-		Gui Add, DropDownList, w185 x+10 vselLanguage, % RegExReplace(var, "|$")
+		Gui Add, Checkbox, % (instr(currHK, "#") ? "checked" : "") " xs yp vWpo gdisableHK", % "Win"
+		Gui Add, Checkbox, % (instr(currHK, "^") ? "checked" : "") " x+10 vCpo gdisableHK", % "Ctrl"
+		Gui Add, Checkbox, % (instr(currHK, "+") ? "checked" : "") " x+10 vSpo gdisableHK", % "Shift"
+		Gui Add, Checkbox, % (instr(currHK, "!") ? "checked" : "") " x+10 vApo gdisableHK", % "Alt"
+		Gui Add, Checkbox, % (instr(currHK, "disabled") ? "checked" : "") " x+10 gdisableHK vDisabledpo", % "Disabled"
+		Gui Add, Text, w220 x0 y+10 right, % "Select OCR Language"
+		Gui Add, DropDownList, w185 x+10 yp-3 vselLanguage, % RegExReplace(curvar, "|$")
+		Gui Add, Text, w220 x0 y+10 right, % "Translate to"
+		Gui Add, DropDownList, w185 x+10 yp-3 vtgtLanguage, % RegExReplace(tgtvar, "|$")
 	}
 
 	IniRead, currHK, % script.config, Hotkeys, Desktop
@@ -1824,7 +1831,7 @@ SetHotkeys:
 	<a href='mailto:info@the-Automator.com'>Joe Glines</a><br>682.xxx.xxxx</span>.
 	</HTML>"
 	)
-	
+
 	; we make sure to disable all hotkeys to be able to set the new ones without issues
 	; without this the new hotkeys wont work
 	Loop parse, hotkeys, |
@@ -1835,7 +1842,7 @@ SetHotkeys:
 
 		if (A_loopField == "Desktop")
 			Hotkey, IfWinActive, % "ScreenClippingWindow ahk_class AutoHotkeyGUI"
-		
+
 		IniRead, currHK, % script.config, Hotkeys, % A_LoopField, % %defHK%
 		try
 			Hotkey, % currHK (A_LoopField != "Desktop" ? "Lbutton" : ""), OFF
@@ -1848,10 +1855,10 @@ SetHotkeys:
 
 		; OutputDebug, % currHK ">" %newHK%
 		Hotkey, IfWinActive
-		
+
 		if (newHK == "ocrhk" && !isWin10)
 			continue
-		else 
+		else
 		{
 			if (%disHK%)
 				IniWrite, % "disabled", % script.config, Hotkeys, % A_LoopField
@@ -1861,11 +1868,13 @@ SetHotkeys:
 	}
 	if (selLanguage)
 		IniWrite, % langList[selLanguage], % script.config, OCR, lang
+	if (tgtLanguage)
+		IniWrite, % langList[tgtLanguage], % script.config, OCR, tgtlang
 return
 
 disableHK:
 	Gui Hotkeys:Submit, NoHide
-	
+
 	if (!InStr(A_GuiControl, "Disabled"))
 	{
 		GuiControl,, % "Disabled" SubStr(A_GuiControl, 2), % false
