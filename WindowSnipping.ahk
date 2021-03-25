@@ -1647,7 +1647,7 @@ return
 
 Update:
 	try
-		script.update("https://github.com/RaptorX/WindowSnipping/blob/master/ver"
+		script.update("https://raw.githubusercontent.com/RaptorX/WindowSnipping/master/ver"
 					 ,"https://github.com/RaptorX/WindowSnipping/archive/refs/tags/latest.zip")
 	catch e
 	{
