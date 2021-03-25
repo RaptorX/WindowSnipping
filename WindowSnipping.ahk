@@ -186,10 +186,10 @@ SCW_ScreenClip2Win(clip=0,email=0,OCR=0) {
 		Clipboard:=ocr(pIRandomAccessStream, currLang)
 		ObjRelease(pIRandomAccessStream)
 
-		if !Clipboard
+		if (!Clipboard)
 			MsgBox % 0x10, % "Error"
 						 , % "No text was captured by the OCR engine.`nPlease Try again."
-		else
+		else if (Clipboard != "error")
 		{
 			Gui, ocrResult:new
 			Gui, font, s14 Courier New
