@@ -171,7 +171,7 @@ SCW_ScreenClip2Win(clip=0,email=0,OCR=0) {
 	Sleep, 100
 
 	pBitmap := Gdip_BitmapFromScreen(Area)
-	if (OCR=1)
+	if (OCR)
 	{
 		hBitmap:=Gdip_CreateHBITMAPFromBitmap(pBitmap) ;Convert an hBitmap from the pBitmap
 		pIRandomAccessStream := HBitmapToRandomAccessStream(hBitmap) ;OCR function needs a randome access stream (so it isn't "locked down")
@@ -187,22 +187,16 @@ SCW_ScreenClip2Win(clip=0,email=0,OCR=0) {
 						 , % "No text was captured by the OCR engine.`nPlease Try again."
 		else if (Clipboard != "error")
 		{
-			Gui, ocrResult:new
-			Gui, font, s14 Courier New
-			Gui, add, edit, w600 r20 vorigText, % Clipboard
-			Gui, add, button, gtranslate, % "Translate using Google"
-			Gui, show
-		}
-		Gdip_Shutdown("pToken") ;clear selection
-		return
-
-		translate:
-			Gui, ocrResult:Submit, NoHide
-
+			ToolTip, % Clipboard
+			if (OCR == 2)
+			{
 			IniRead, currLang, % script.configfile, OCR, lang, en
 			IniRead, tgtlang, % script.configfile, OCR, tgtlang, en
 
-			Run % "https://translate.google.com/?sl=" currLang "&tl=" tgtlang "&text=" UriEncode(origText) "&op=translate"
+				Run % "https://translate.google.com/?sl=" currLang "&tl=" tgtlang "&text=" UriEncode(Clipboard) "&op=translate"
+			}
+		}
+		Gdip_Shutdown("pToken") ;clear selection
 		return
 	}
 
@@ -1537,11 +1531,13 @@ OCR(IRandomAccessStream, language := "en"){
 	return text
 }
 
-notUnique(mod1, mod2, mod3)
+notUnique(mod1, mod2, mod3, mod4)
 {
-	if (mod1 && mod2 || mod1 && mod3 || mod2 && mod3) ; at least 2 of them are set
+	if (mod1 && mod2 || mod1 && mod3 || mod2 && mod3
+	.	mod1 && mod4 || mod2 && mod4 || mod3 && mod4) ; at least 2 of them are set
 	{
-		if (mod1 == mod2 || mod1 == mod3 || mod2 == mod3)
+		if (mod1 == mod2 || mod1 == mod3 || mod2 == mod3
+		.	mod1 == mod4 || mod2 == mod4 || mod3 == mod4)
 			return true
 		else
 			return false
@@ -1748,6 +1744,18 @@ Hotkeys:
 		Gui Add, Checkbox, % (instr(currHK, "+") ? "checked" : "") " x+10 vSpo gdisableHK", % "Shift"
 		Gui Add, Checkbox, % (instr(currHK, "!") ? "checked" : "") " x+10 vApo gdisableHK", % "Alt"
 		Gui Add, Checkbox, % (instr(currHK, "disabled") ? "checked" : "") " x+10 gdisableHK vDisabledpo", % "Disabled"
+		
+		IniRead, currHK, % script.configfile, Hotkeys, OTR, #+
+		if (firstRun)
+			currHK := "#+"
+
+		Gui Add, Text, w220 x0 right, % "Left mouse drag to OCR && Translate +"
+		Gui Add, Checkbox, % (instr(currHK, "#") ? "checked" : "") " xs yp vWot gdisableHK", % "Win"
+		Gui Add, Checkbox, % (instr(currHK, "^") ? "checked" : "") " x+10 vCot gdisableHK", % "Ctrl"
+		Gui Add, Checkbox, % (instr(currHK, "+") ? "checked" : "") " x+10 vSot gdisableHK", % "Shift"
+		Gui Add, Checkbox, % (instr(currHK, "!") ? "checked" : "") " x+10 vAot gdisableHK", % "Alt"
+		Gui Add, Checkbox, % (instr(currHK, "disabled") ? "checked" : "") " x+10 gdisableHK vDisabledot", % "Disabled"
+		
 		Gui Add, Text, w220 x0 y+10 right, % "Select OCR Language"
 		Gui Add, DropDownList, w185 x+10 yp-3 vselLanguage, % RegExReplace(curvar, "|$")
 		Gui Add, Text, w220 x0 y+10 right, % "Translate to"
@@ -1801,8 +1809,9 @@ HokeysSave:
 	scrhk := (Wsc ? "#" : "") (Csc ? "^" : "") (Ssc ? "+" : "") (Asc ? "!" : "")
 	outhk := (Wom ? "#" : "") (Com ? "^" : "") (Som ? "+" : "") (Aom ? "!" : "")
 	ocrhk := (Wpo ? "#" : "") (Cpo ? "^" : "") (Spo ? "+" : "") (Apo ? "!" : "")
+	otrhk := (Wot ? "#" : "") (Cot ? "^" : "") (Sot ? "+" : "") (Aot ? "!" : "")
 
-	if (notUnique(scrhk, outhk, ocrhk))
+	if (notUnique(scrhk, outhk, ocrhk, otrhk))
 	{
 		msgbox  % 0x10
 				,% "Error"
@@ -1815,12 +1824,13 @@ HokeysSave:
 
 SetHotkeys:
 	defOCRHK 			:= "#^"
+	defOTRHK 			:= "#+"
 	defScreenHK 		:= "#"
 	defOutlookHK 		:= "#!"
 	defDesktopHK 		:= "^s"
 	preffix 			:= "wcsa"
-	suffix 				:= ["sc", "om", "po", "dt"]
-	hotkeys 			:= "Screen|Outlook|OCR|Desktop"
+	suffix 				:= ["sc", "om", "po", "ot", "dt"]
+	hotkeys 			:= "Screen|Outlook|OCR|OTR|Desktop"
 	defaultSignature 	:=
 	("%"
 	"<HTML>
@@ -1910,6 +1920,11 @@ return
 OCRHK:
 	if (isWin10)
 		SCW_ScreenClip2Win(clip:=0,email:=0,OCR:=1)
+return
+
+OTRHK:
+	if (isWin10)
+		SCW_ScreenClip2Win(clip:=0,email:=0,OCR:=2)
 return
 
 DesktopHK:
