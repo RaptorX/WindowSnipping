@@ -21,7 +21,7 @@ else
 
 global script := {base			: script
 				 ,name			: regexreplace(A_ScriptName, "\.\w+")
-				 ,version		: "1.27.1"
+				 ,version		: "1.27.2"
 				 ,author		: "Joe Glines"
 				 ,email			: "joe@the-automator.com"
 				 ,homepagetext	: "www.the-automator.com/snip"
@@ -84,7 +84,7 @@ return
 
 ;===Functions==========================================================================
 SCW_Version() {
-	return "1.27.1"
+	return "1.27.2"
 }
 
 UriEncode(Uri, Enc = "UTF-8"){
