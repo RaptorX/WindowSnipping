@@ -21,7 +21,7 @@ else
 
 global script := {base			: script
 				 ,name			: regexreplace(A_ScriptName, "\.\w+")
-				 ,version		: "1.29.0"
+				 ,version		: "1.29.1"
 				 ,author		: "Joe Glines"
 				 ,email			: "joe@the-automator.com"
 				 ,homepagetext	: "www.the-automator.com/snip"
@@ -197,6 +197,8 @@ SCW_ScreenClip2Win(clip=0,email=0,OCR=0) {
 			}
 		}
 		Gdip_Shutdown("pToken") ;clear selection
+		sleep 2000
+		ToolTip
 		return
 	}
 
