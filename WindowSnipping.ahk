@@ -21,7 +21,7 @@ else
 
 global script := {base			: script
 				 ,name			: regexreplace(A_ScriptName, "\.\w+")
-				 ,version		: "1.27.0"
+				 ,version		: "1.27.1"
 				 ,author		: "Joe Glines"
 				 ,email			: "joe@the-automator.com"
 				 ,homepagetext	: "www.the-automator.com/snip"
@@ -84,7 +84,7 @@ return
 
 ;===Functions==========================================================================
 SCW_Version() {
-	return "1.27.0"
+	return "1.27.1"
 }
 
 UriEncode(Uri, Enc = "UTF-8"){
@@ -186,10 +186,10 @@ SCW_ScreenClip2Win(clip=0,email=0,OCR=0) {
 		Clipboard:=ocr(pIRandomAccessStream, currLang)
 		ObjRelease(pIRandomAccessStream)
 
-		if !Clipboard
+		if (!Clipboard)
 			MsgBox % 0x10, % "Error"
 						 , % "No text was captured by the OCR engine.`nPlease Try again."
-		else
+		else if (Clipboard != "error")
 		{
 			Gui, ocrResult:new
 			Gui, font, s14 Courier New
@@ -1647,8 +1647,8 @@ return
 
 Update:
 	try
-		script.update("https://www.the-automator.com/update/WindowSnipping/ver"
-					 ,"https://www.the-automator.com/update/WindowSnipping/WindowSnipping.zip")
+		script.update("https://github.com/RaptorX/WindowSnipping/blob/master/ver"
+					 ,"https://github.com/RaptorX/WindowSnipping/archive/refs/tags/latest.zip")
 	catch e
 	{
 		if (e.code == 6)
