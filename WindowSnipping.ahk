@@ -1647,8 +1647,8 @@ return
 
 Update:
 	try
-		script.update("https://www.the-automator.com/update/WindowSnipping/ver"
-					 ,"https://www.the-automator.com/update/WindowSnipping/WindowSnipping.zip")
+		script.update("https://github.com/RaptorX/WindowSnipping/blob/master/ver"
+					 ,"https://github.com/RaptorX/WindowSnipping/archive/refs/tags/latest.zip")
 	catch e
 	{
 		if (e.code == 6)
