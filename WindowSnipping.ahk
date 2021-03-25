@@ -21,7 +21,7 @@ else
 
 global script := {base			: script
 				 ,name			: regexreplace(A_ScriptName, "\.\w+")
-				 ,version		: "1.27.1"
+				 ,version		: "1.27.2"
 				 ,author		: "Joe Glines"
 				 ,email			: "joe@the-automator.com"
 				 ,homepagetext	: "www.the-automator.com/snip"
@@ -84,7 +84,7 @@ return
 
 ;===Functions==========================================================================
 SCW_Version() {
-	return "1.27.1"
+	return "1.27.2"
 }
 
 UriEncode(Uri, Enc = "UTF-8"){
@@ -1647,7 +1647,7 @@ return
 
 Update:
 	try
-		script.update("https://github.com/RaptorX/WindowSnipping/blob/master/ver"
+		script.update("https://raw.githubusercontent.com/RaptorX/WindowSnipping/master/ver"
 					 ,"https://github.com/RaptorX/WindowSnipping/archive/refs/tags/latest.zip")
 	catch e
 	{
