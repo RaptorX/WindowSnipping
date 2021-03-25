@@ -190,8 +190,8 @@ SCW_ScreenClip2Win(clip=0,email=0,OCR=0) {
 			ToolTip, % Clipboard
 			if (OCR == 2)
 			{
-			IniRead, currLang, % script.configfile, OCR, lang, en
-			IniRead, tgtlang, % script.configfile, OCR, tgtlang, en
+				IniRead, currLang, % script.configfile, OCR, lang, en
+				IniRead, tgtlang, % script.configfile, OCR, tgtlang, en
 
 				Run % "https://translate.google.com/?sl=" currLang "&tl=" tgtlang "&text=" UriEncode(Clipboard) "&op=translate"
 			}
@@ -1691,8 +1691,8 @@ Hotkeys:
 	Gui Hotkeys:New,, Hotkey Settings
 
 	IniRead, firstRun, % script.configfile, Settings, FirstRun
-	IniRead, currHK, % script.configfile, Hotkeys, Screen
 
+	IniRead, currHK, % script.configfile, Hotkeys, Screen, #
 	if (firstRun)
 		currHK := "#"
 
@@ -1704,9 +1704,7 @@ Hotkeys:
 	Gui Add, Checkbox, % (instr(currHK, "!") ? "checked" : "") " x+10 vAsc gdisableHK", Alt
 	Gui Add, Checkbox, % (instr(currHK, "disabled") ? "checked" : "") " x+10 gdisableHK vDisabledsc", Disabled
 
-
-	IniRead, currHK, % script.configfile, Hotkeys, Outlook
-
+	IniRead, currHK, % script.configfile, Hotkeys, Outlook, #!
 	if (firstRun)
 		currHK := "#!"
 
@@ -1716,7 +1714,6 @@ Hotkeys:
 	Gui Add, Checkbox, % (instr(currHK, "+") ? "checked" : "") " x+10 vSom gdisableHK", Shift
 	Gui Add, Checkbox, % (instr(currHK, "!") ? "checked" : "") " x+10 vAom gdisableHK", Alt
 	Gui Add, Checkbox, % (instr(currHK, "disabled") ? "checked" : "") " x+10 gdisableHK vDisabledom", Disabled
-
 
 	if (isWin10)
 	{
@@ -1733,12 +1730,11 @@ Hotkeys:
 		for lang,code in langList
 			tgtvar .= lang (langList[lang] == (currtgtLang ? currtgtLang : "en") ? "||" : "|")
 
-		IniRead, currHK, % script.configfile, Hotkeys, OCR
-
+		IniRead, currHK, % script.configfile, Hotkeys, OCR, #^
 		if (firstRun)
 			currHK := "#^"
 
-		Gui Add, Text, w220 x0 right, Left mouse drag to perform OCR +
+		Gui Add, Text, w220 x0 right, % "Left mouse drag to perform OCR +"
 		Gui Add, Checkbox, % (instr(currHK, "#") ? "checked" : "") " xs yp vWpo gdisableHK", % "Win"
 		Gui Add, Checkbox, % (instr(currHK, "^") ? "checked" : "") " x+10 vCpo gdisableHK", % "Ctrl"
 		Gui Add, Checkbox, % (instr(currHK, "+") ? "checked" : "") " x+10 vSpo gdisableHK", % "Shift"
@@ -1762,15 +1758,13 @@ Hotkeys:
 		Gui Add, DropDownList, w185 x+10 yp-3 vtgtLanguage, % RegExReplace(tgtvar, "|$")
 	}
 
-	IniRead, currHK, % script.configfile, Hotkeys, Desktop
-
+	IniRead, currHK, % script.configfile, Hotkeys, Desktop, ^s
 	if (firstRun)
 		currHK := "^s"
 
-	Gui Add, Text, w220 x0 y+13 right, Save clip to desktop
+	Gui Add, Text, w220 x0 y+13 right, % "Save clip to desktop"
 	Gui Add, Hotkey, w185 xs yp-3 vdeshk, % currHK
 	Gui Add, Checkbox, % (instr(currHK, "disabled") ? "checked" : "") " x+10 yp+3 gdisableHK vDisableddt", Disabled
-
 
 	Gui Add, Text, w500 x0 y+20 0x10
 	Gui Add, Button, x230 yp+10 gHokeysReset, Reset Hotkeys
