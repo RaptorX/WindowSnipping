@@ -197,6 +197,8 @@ SCW_ScreenClip2Win(clip=0,email=0,OCR=0) {
 			}
 		}
 		Gdip_Shutdown("pToken") ;clear selection
+		sleep 2000
+		ToolTip
 		return
 	}
 
