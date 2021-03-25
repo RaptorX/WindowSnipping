@@ -21,7 +21,7 @@ else
 
 global script := {base			: script
 				 ,name			: regexreplace(A_ScriptName, "\.\w+")
-				 ,version		: "1.27.2"
+				 ,version		: "1.28.0"
 				 ,author		: "Joe Glines"
 				 ,email			: "joe@the-automator.com"
 				 ,homepagetext	: "www.the-automator.com/snip"
@@ -83,10 +83,6 @@ if (ShowUsage)
 return
 
 ;===Functions==========================================================================
-SCW_Version() {
-	return "1.27.2"
-}
-
 UriEncode(Uri, Enc = "UTF-8"){
 	StrPutVar(Uri, Var, Enc)
 	f := A_FormatInteger
