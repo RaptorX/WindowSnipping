@@ -83,10 +83,6 @@ if (ShowUsage)
 return
 
 ;===Functions==========================================================================
-SCW_Version() {
-	return "1.27.2"
-}
-
 UriEncode(Uri, Enc = "UTF-8"){
 	StrPutVar(Uri, Var, Enc)
 	f := A_FormatInteger
