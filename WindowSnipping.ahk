@@ -1830,7 +1830,7 @@ SetHotkeys:
 	suffix 				:= ["sc", "om", "po", "ot", "dt"]
 	hotkeys 			:= "Screen|Outlook|OCR|OTR|Desktop"
 	defaultSignature 	:=
-	("%"
+	("% LTrim"
 	"<HTML>
 	Attached you will find the screenshot taken on %date%.<br><br>
 	<span style='color:black'>Please let me know if you have any questions.<br><br>
