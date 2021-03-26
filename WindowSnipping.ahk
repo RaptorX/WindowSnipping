@@ -51,7 +51,7 @@ IniRead, ShowUsage, % script.configfile, Settings, ShowUsage, % true
 
 Menu, Tray, NoStandard ;removes default options
 Menu, Tray, Add	; to divide from standard menu, remove when above line is uncommented
-Menu, Tray, Add, Hotkeys, Hotkeys
+Menu, Tray, Add, Hotkeys, HotkeysGUI
 Menu, Tray, Add, Email Signature, SignatureGUI
 Menu, Tray, Add
 Menu, Tray, Add, Show Usage at Startup, ShowUsageSet
@@ -70,7 +70,7 @@ if (!FileExist(script.configfile))
 
 	IniWrite, % true, % script.configfile, Settings, FirstRun
 	IniWrite, % true, % script.configfile, Settings, ShowUsage
-	Gosub Hotkeys
+	Gosub HotkeysGUI
 }
 else
 {
@@ -1689,8 +1689,7 @@ SignatureSave:
 	IniWrite, % bmp jpg, % script.configfile, Email, images
 return
 
-Hotkeys:
-	Gui Hotkeys:New,, Hotkey Settings
+HotkeysGUI:
 
 	IniRead, firstRun, % script.configfile, Settings, FirstRun
 
