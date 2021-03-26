@@ -1771,8 +1771,8 @@ HotkeysGUI:
 	Gui Add, Checkbox, % (instr(currHK, "disabled") ? "checked" : "") " x+10 yp+3 gdisableHK vDisableddt", Disabled
 
 	Gui Add, Text, w500 x0 y+20 0x10
-	Gui Add, Button, x230 yp+10 gHokeysReset, Reset Hotkeys
-	Gui Add, Button, w75 x+10 gHokeysSave, Save
+	Gui Add, Button, xm yp+10 gHokeysReset, Reset Hotkeys
+	Gui Add, Button, w75 x325 yp gHokeysSave, Save
 	Gui Add, Button, w75 x+10 gHokeysSave, Cancel
 	Gui Hotkeys:show, w495
 return
