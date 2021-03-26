@@ -57,10 +57,11 @@ Menu, Tray, Add
 Menu, Tray, Add, Show Usage at Startup, ShowUsageSet
 Menu, Tray, % ShowUsage ? "Check" : "Uncheck", Show Usage at Startup
 Menu, Tray, Add
-Menu, Tray, Add, About, AboutGUI
-Menu, Tray, Add, Check for Updates, Update
 Menu, Tray, Add, Clear Settings, ClearSettings
-Menu, Tray,Add,Exit App,Exit
+Menu, Tray, Add, Check for Updates, Update
+Menu, Tray, Add, About, AboutGUI
+Menu, Tray, Add
+Menu, Tray, Add,Exit App,Exit
 Menu, Tray, Default, Hotkeys
 
 if (!FileExist(script.configfile))
