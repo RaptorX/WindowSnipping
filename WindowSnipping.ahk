@@ -1623,7 +1623,7 @@ ShowUsageGUI:
 							<li>Exit app (Closes this program)</li>
 						</ol>
 				</ol>
-				<p>More tools at <a href="https://www.the-automator.com/">https://the-automator.com</a>
+				<p>More tools at <a href="https://www.the-automator.com/">the-Automator.com</a>
 			</body>
 		</html>
 	)
@@ -1664,7 +1664,7 @@ SignatureGUI:
 	StringReplace, currSig, currSig, |, `n, All
 	imgSet := StrSplit(currImg)
 
-	Gui Signature:New,, % "Signature Settings - https://the-automator.com"
+	Gui Signature:New,, % "Signature Settings - the-Automator.com"
 	Gui Add, GroupBox, w440 h55 section, Description
 	Gui Add, Text, w420 xp+10 yp+20, % "This signature will be used when creating a clip and attaching it to an email. `nYou can use HTML here."
 	Gui Add, GroupBox, w440 h145 xs, Signature
@@ -1692,7 +1692,7 @@ SignatureSave:
 return
 
 HotkeysGUI:
-	Gui Hotkeys:New,, % "Hotkey Settings - https://the-automator.com"
+	Gui Hotkeys:New,, % "Hotkey Settings - the-Automator.com"
 
 	IniRead, firstRun, % script.configfile, Settings, FirstRun
 
