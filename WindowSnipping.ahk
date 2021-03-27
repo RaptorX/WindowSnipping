@@ -21,7 +21,7 @@ else
 
 global script := {base			: script
 				 ,name			: regexreplace(A_ScriptName, "\.\w+")
-				 ,version		: "1.29.1"
+				 ,version		: "1.29.4"
 				 ,author		: "Joe Glines"
 				 ,email			: "joe@the-automator.com"
 				 ,homepagetext	: "www.the-automator.com/snip"
@@ -51,16 +51,17 @@ IniRead, ShowUsage, % script.configfile, Settings, ShowUsage, % true
 
 Menu, Tray, NoStandard ;removes default options
 Menu, Tray, Add	; to divide from standard menu, remove when above line is uncommented
-Menu, Tray, Add, Hotkeys, Hotkeys
+Menu, Tray, Add, Hotkeys, HotkeysGUI
 Menu, Tray, Add, Email Signature, SignatureGUI
 Menu, Tray, Add
 Menu, Tray, Add, Show Usage at Startup, ShowUsageSet
 Menu, Tray, % ShowUsage ? "Check" : "Uncheck", Show Usage at Startup
 Menu, Tray, Add
-Menu, Tray, Add, About, AboutGUI
-Menu, Tray, Add, Check for Updates, Update
 Menu, Tray, Add, Clear Settings, ClearSettings
-Menu, Tray,Add,Exit App,Exit
+Menu, Tray, Add, Check for Updates, Update
+Menu, Tray, Add, About, AboutGUI
+Menu, Tray, Add
+Menu, Tray, Add,Exit App,Exit
 Menu, Tray, Default, Hotkeys
 
 if (!FileExist(script.configfile))
@@ -70,7 +71,7 @@ if (!FileExist(script.configfile))
 
 	IniWrite, % true, % script.configfile, Settings, FirstRun
 	IniWrite, % true, % script.configfile, Settings, ShowUsage
-	Gosub Hotkeys
+	Gosub HotkeysGUI
 }
 else
 {
@@ -1622,13 +1623,14 @@ ShowUsageGUI:
 							<li>Exit app (Closes this program)</li>
 						</ol>
 				</ol>
+				<p>More tools at <a href="https://www.the-automator.com/">the-Automator.com</a>
 			</body>
 		</html>
 	)
 	gui showusage:new, +toolwindow
 	gui margin, 0,0
 	gui color, white
-	gui add, activex, w600 h360 vdoc, htmlfile
+	gui add, activex, w600 h380 vdoc, htmlfile
 	gui margin, 0,10
 	gui add, checkbox, x10 y+10 checked%ShowUsage% gShowUsageSet vShowUsageShow, % "Show Usage at Startup"
 	doc.write(info)
@@ -1662,19 +1664,19 @@ SignatureGUI:
 	StringReplace, currSig, currSig, |, `n, All
 	imgSet := StrSplit(currImg)
 
-	Gui Signature:New,,Signature Settings
-	Gui Add, GroupBox, w320 h55 section, Description
-	Gui Add, Text, w300 xp+10 yp+20,This signature will be used when creating a clip and attaching it to an email. You can use HTML here.
-	Gui Add, GroupBox, w320 h145 xs, Signature
-	Gui Add, Edit, w300 r8 xp+10 yp+20 vSigEdit, %currSig%
-	Gui Add, GroupBox, w320 h70 xs, Send Images as:
+	Gui Signature:New,, % "Signature Settings - the-Automator.com"
+	Gui Add, GroupBox, w440 h55 section, Description
+	Gui Add, Text, w420 xp+10 yp+20, % "This signature will be used when creating a clip and attaching it to an email. `nYou can use HTML here."
+	Gui Add, GroupBox, w440 h145 xs, Signature
+	Gui Add, Edit, w420 r8 xp+10 yp+20 vSigEdit, %currSig%
+	Gui Add, GroupBox, w440 h70 xs, Send Images as:
 	Gui Add, Checkbox, % "checked" imgSet[1] " xp+10 yp+20 vbmp", BMP
 	Gui Add, Checkbox, % "checked" imgSet[2] " y+10 vjpg", JPG
-	Gui Add, Text, w360 x0 y+20 0x10
-	Gui Add, Button, w75 x170 yp+10 gSignatureSave, Save
+	Gui Add, Text, w470 x0 y+20 0x10
+	Gui Add, Button, w75 x290 yp+10 gSignatureSave, Save
 	Gui Add, Button, w75 x+10 gSignatureHide, Cancel
 
-	Gui Show, w340
+	Gui Show, w460
 return
 
 SignatureHide:
@@ -1689,8 +1691,8 @@ SignatureSave:
 	IniWrite, % bmp jpg, % script.configfile, Email, images
 return
 
-Hotkeys:
-	Gui Hotkeys:New,, Hotkey Settings
+HotkeysGUI:
+	Gui Hotkeys:New,, % "Hotkey Settings - the-Automator.com"
 
 	IniRead, firstRun, % script.configfile, Settings, FirstRun
 
@@ -1769,8 +1771,8 @@ Hotkeys:
 	Gui Add, Checkbox, % (instr(currHK, "disabled") ? "checked" : "") " x+10 yp+3 gdisableHK vDisableddt", Disabled
 
 	Gui Add, Text, w500 x0 y+20 0x10
-	Gui Add, Button, x230 yp+10 gHokeysReset, Reset Hotkeys
-	Gui Add, Button, w75 x+10 gHokeysSave, Save
+	Gui Add, Button, xm yp+10 gHokeysReset, Reset Hotkeys
+	Gui Add, Button, w75 x325 yp gHokeysSave, Save
 	Gui Add, Button, w75 x+10 gHokeysSave, Cancel
 	Gui Hotkeys:show, w495
 return
@@ -1828,7 +1830,7 @@ SetHotkeys:
 	suffix 				:= ["sc", "om", "po", "ot", "dt"]
 	hotkeys 			:= "Screen|Outlook|OCR|OTR|Desktop"
 	defaultSignature 	:=
-	("%"
+	("% LTrim"
 	"<HTML>
 	Attached you will find the screenshot taken on %date%.<br><br>
 	<span style='color:black'>Please let me know if you have any questions.<br><br>
