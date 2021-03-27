@@ -1623,14 +1623,13 @@ ShowUsageGUI:
 							<li>Exit app (Closes this program)</li>
 						</ol>
 				</ol>
-				<p>More tools at <a href="https://www.the-automator.com/">the-Automator.com</a>
 			</body>
 		</html>
 	)
 	gui showusage:new, +toolwindow
 	gui margin, 0,0
 	gui color, white
-	gui add, activex, w600 h380 vdoc, htmlfile
+	gui add, activex, w600 h360 vdoc, htmlfile
 	gui margin, 0,10
 	gui add, checkbox, x10 y+10 checked%ShowUsage% gShowUsageSet vShowUsageShow, % "Show Usage at Startup"
 	doc.write(info)
@@ -1664,19 +1663,19 @@ SignatureGUI:
 	StringReplace, currSig, currSig, |, `n, All
 	imgSet := StrSplit(currImg)
 
-	Gui Signature:New,, % "Signature Settings - the-Automator.com"
-	Gui Add, GroupBox, w440 h55 section, Description
-	Gui Add, Text, w420 xp+10 yp+20, % "This signature will be used when creating a clip and attaching it to an email. `nYou can use HTML here."
-	Gui Add, GroupBox, w440 h145 xs, Signature
-	Gui Add, Edit, w420 r8 xp+10 yp+20 vSigEdit, %currSig%
-	Gui Add, GroupBox, w440 h70 xs, Send Images as:
+	Gui Signature:New,,Signature Settings
+	Gui Add, GroupBox, w320 h55 section, Description
+	Gui Add, Text, w300 xp+10 yp+20,This signature will be used when creating a clip and attaching it to an email. You can use HTML here.
+	Gui Add, GroupBox, w320 h145 xs, Signature
+	Gui Add, Edit, w300 r8 xp+10 yp+20 vSigEdit, %currSig%
+	Gui Add, GroupBox, w320 h70 xs, Send Images as:
 	Gui Add, Checkbox, % "checked" imgSet[1] " xp+10 yp+20 vbmp", BMP
 	Gui Add, Checkbox, % "checked" imgSet[2] " y+10 vjpg", JPG
-	Gui Add, Text, w470 x0 y+20 0x10
-	Gui Add, Button, w75 x290 yp+10 gSignatureSave, Save
+	Gui Add, Text, w360 x0 y+20 0x10
+	Gui Add, Button, w75 x170 yp+10 gSignatureSave, Save
 	Gui Add, Button, w75 x+10 gSignatureHide, Cancel
 
-	Gui Show, w460
+	Gui Show, w340
 return
 
 SignatureHide:
@@ -1692,7 +1691,6 @@ SignatureSave:
 return
 
 HotkeysGUI:
-	Gui Hotkeys:New,, % "Hotkey Settings - the-Automator.com"
 
 	IniRead, firstRun, % script.configfile, Settings, FirstRun
 
