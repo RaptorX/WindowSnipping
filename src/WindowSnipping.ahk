@@ -4,10 +4,12 @@
 #include lib
 #include ScriptObj/scriptobj.ahk
 
-if((A_PtrSize=8&&A_IsCompiled="")||!A_IsUnicode){ ;32 bit=4  ;64 bit=8
-	 SplitPath,A_AhkPath,,dir
-	 if(!FileExist(correct:=dir "\AutoHotkeyU32.exe")){
-		 MsgBox error
+if ((A_PtrSize != 4 || !A_IsUnicode) && !A_IsCompiled)
+{
+	 SplitPath,A_AhkPath,, ahkDir
+	 if (!FileExist(correct := ahkDir "\AutoHotkeyU32.exe"))
+	 {
+		 MsgBox, % 0x10, "Error", "Could not find the 32bit unicode version of Autohotkey in:`n" correct
 		 ExitApp
 	 }
 	 Run,"%correct%" "%A_ScriptName%",%A_ScriptDir%
