@@ -21,18 +21,18 @@ if !InStr(A_OSVersion, "10.")
 else
 	appdata := A_AppData "\" regexreplace(A_ScriptName, "\.\w+"), isWin10 := true
 
-global script := {base			: script
-				 ,name			: regexreplace(A_ScriptName, "\.\w+")
-				 ,version		: "1.29.6"
-				 ,author		: "Joe Glines"
-				 ,email			: "joe@the-automator.com"
-				 ,homepagetext	: "www.the-automator.com/snip"
-				 ,homepagelink	: "www.the-automator.com/snip?src=app"
-				 ,donateLink	: "https://www.paypal.com/donate?hosted_button_id=MBT5HSD9G94N6"
-				 ,resfolder		: appdata "\res"
-				 ,iconfile		: appdata "\res\sct.ico"
-				 ,configfolder	: appdata
-				 ,configfile	: appdata "\settings.ini"}
+global script := {base         : script
+                 ,name         : regexreplace(A_ScriptName, "\.\w+")
+                 ,version      : "1.29.6"
+                 ,author       : "Joe Glines"
+                 ,email        : "joe@the-automator.com"
+                 ,homepagetext : "www.the-automator.com/snip"
+                 ,homepagelink : "www.the-automator.com/snip?src=app"
+                 ,donateLink   : "https://www.paypal.com/donate?hosted_button_id=MBT5HSD9G94N6"
+                 ,resfolder    : appdata "\res"
+                 ,iconfile     : appdata "\res\sct.ico"
+                 ,configfolder : appdata
+                 ,configfile   : appdata "\settings.ini"}
 
 /*  ; Credits   I borrowed heavily from ...
 	Screen clipping by Learning one  https://autohotkey.com/boards/viewtopic.php?f=6&t=12088
