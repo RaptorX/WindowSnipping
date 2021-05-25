@@ -1,19 +1,18 @@
 #NoEnv
 #SingleInstance, Force
 
-#include lib
-#include ScriptObj/scriptobj.ahk
+#include <ScriptObj/ScriptObj>
 
 if ((A_PtrSize != 4 || !A_IsUnicode) && !A_IsCompiled)
 {
-	 SplitPath,A_AhkPath,, ahkDir
-	 if (!FileExist(correct := ahkDir "\AutoHotkeyU32.exe"))
-	 {
-		 MsgBox, % 0x10, "Error", "Could not find the 32bit unicode version of Autohotkey in:`n" correct
-		 ExitApp
-	 }
-	 Run,"%correct%" "%A_ScriptName%",%A_ScriptDir%
-	 ExitApp
+	SplitPath, A_AhkPath,, ahkDir
+	if (!FileExist(correct := ahkDir "\AutoHotkeyU32.exe"))
+	{
+		MsgBox, % 0x10, "Error", "Could not find the 32bit unicode version of Autohotkey in:`n" correct
+		ExitApp
+	}
+	Run,"%correct%" "%A_ScriptName%",%A_ScriptDir%
+	ExitApp
 }
 
 if !InStr(A_OSVersion, "10.")
