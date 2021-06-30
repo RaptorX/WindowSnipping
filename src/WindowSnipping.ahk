@@ -1,17 +1,25 @@
+﻿;******************************************************************************
+; Want a clear path for learning AutoHotkey?                                  *
+; Take a look at our AutoHotkey Udemy courses.                                *
+; They're structured in a way to make learning AHK EASY                       *
+; Right now you can  get a coupon code here: https://the-Automator.com/Learn  *
+;******************************************************************************
+
 #NoEnv
-#SingleInstance, Force
+#SingleInstance Force
 
-#include lib
-#include ScriptObj/scriptobj.ahk
+#include <ScriptObj/ScriptObj>
 
-if((A_PtrSize=8&&A_IsCompiled="")||!A_IsUnicode){ ;32 bit=4  ;64 bit=8
-	 SplitPath,A_AhkPath,,dir
-	 if(!FileExist(correct:=dir "\AutoHotkeyU32.exe")){
-		 MsgBox error
-		 ExitApp
-	 }
-	 Run,"%correct%" "%A_ScriptName%",%A_ScriptDir%
-	 ExitApp
+if ((A_PtrSize != 4 || !A_IsUnicode) && !A_IsCompiled)
+{
+	SplitPath, A_AhkPath,, ahkDir
+	if (!FileExist(correct := ahkDir "\AutoHotkeyU32.exe"))
+	{
+		MsgBox, % 0x10, "Error", "Could not find the 32bit unicode version of Autohotkey in:`n" correct
+		ExitApp
+	}
+	Run,"%correct%" "%A_ScriptName%",%A_ScriptDir%
+	ExitApp
 }
 
 if !InStr(A_OSVersion, "10.")
@@ -19,18 +27,18 @@ if !InStr(A_OSVersion, "10.")
 else
 	appdata := A_AppData "\" regexreplace(A_ScriptName, "\.\w+"), isWin10 := true
 
-global script := {base			: script
-				 ,name			: regexreplace(A_ScriptName, "\.\w+")
-				 ,version		: "1.29.6"
-				 ,author		: "Joe Glines"
-				 ,email			: "joe@the-automator.com"
-				 ,homepagetext	: "www.the-automator.com/snip"
-				 ,homepagelink	: "www.the-automator.com/snip?src=app"
-				 ,donateLink	: "https://www.paypal.com/donate?hosted_button_id=MBT5HSD9G94N6"
-				 ,resfolder		: appdata "\res"
-				 ,iconfile		: appdata "\res\sct.ico"
-				 ,configfolder	: appdata
-				 ,configfile	: appdata "\settings.ini"}
+global script := {base         : script
+                 ,name         : regexreplace(A_ScriptName, "\.\w+")
+                 ,version      : "1.32.0"
+                 ,author       : "Joe Glines"
+                 ,email        : "joe@the-automator.com"
+                 ,homepagetext : "www.the-automator.com/snip"
+                 ,homepagelink : "www.the-automator.com/snip?src=app"
+                 ,donateLink   : "https://www.paypal.com/donate?hosted_button_id=MBT5HSD9G94N6"
+                 ,resfolder    : appdata "\res"
+                 ,iconfile     : appdata "\res\sct.ico"
+                 ,configfolder : appdata
+                 ,configfile   : appdata "\settings.ini"}
 
 /*  ; Credits   I borrowed heavily from ...
 	Screen clipping by Learning one  https://autohotkey.com/boards/viewtopic.php?f=6&t=12088
@@ -1471,7 +1479,7 @@ CLSIDFromString(IID, ByRef CLSID) {
 ;********************teadrinker OCR ***********************************
 OCR(IRandomAccessStream, language := "en"){
 	static OcrEngineClass, OcrEngineObject, MaxDimension, LanguageClass, LanguageObject, CurrentLanguage, StorageFileClass, BitmapDecoderClass
-	static rlangList := {"ar":"Arabic (Saudi Arabia)","bg":"Bulgarian (Bulgaria)","zh":"Chinese (Hong Kong S.A.R.)","zh":"Chinese (PRC)","zh":"Chinese (Taiwan)","hr":"Croatian (Croatia)","cs":"Czech (Czech Republic)","da":"Danish (Denmark)","nl":"Dutch (Netherlands)","En":"English (Great Britain)","en":"English (United States)","et":"Estonian (Estonia)","fi":"Finnish (Finland)","fr":"French (France)","de":"German (Germany)","el":"Greek (Greece)","he":"Hebrew (Israel)","hu":"Hungarian (Hungary)","it":"Italian (Italy)","ja":"Japanese (Japan)","ko":"Korean (Korea)","lv":"Latvian (Latvia)","lt":"Lithuanian (Lithuania)","nb":"Norwegian, Bokmål (Norway)","pl":"Polish (Poland)","pt":"Portuguese (Brazil)","pt":"Portuguese (Portugal)","ro":"Romanian (Romania)","ru":"Russian (Russia)","sr":"Serbian (Latin, Serbia)","sr":"Serbian (Latin, Serbia)","sk":"Slovak (Slovakia)","sl":"Slovenian (Slovenia)","es":"Spanish (Spain)","sv":"Swedish (Sweden)","th":"Thai (Thailand)","tr":"Turkish (Turkey)","uk":"Ukrainian (Ukraine)"}
+	static rlangList := {"ar":"Arabic (Saudi Arabia)","bg":"Bulgarian (Bulgaria)","zh":"Chinese (Hong Kong S.A.R.)","zh":"Chinese (PRC)","zh":"Chinese (Taiwan)","hr":"Croatian (Croatia)","cs":"Czech (Czech Republic)","da":"Danish (Denmark)","nl":"Dutch (Netherlands)","En":"English (Great Britain)","en":"English (United States)","et":"Estonian (Estonia)","fi":"Finnish (Finland)","fr":"French (France)","de":"German (Germany)","el":"Greek (Greece)","he":"Hebrew (Israel)","hu":"Hungarian (Hungary)","it":"Italian (Italy)","ja":"Japanese (Japan)","ko":"Korean (Korea)","lv":"Latvian (Latvia)","lt":"Lithuanian (Lithuania)","nb":"Norwegian, BokmÃ¥l (Norway)","pl":"Polish (Poland)","pt":"Portuguese (Brazil)","pt":"Portuguese (Portugal)","ro":"Romanian (Romania)","ru":"Russian (Russia)","sr":"Serbian (Latin, Serbia)","sr":"Serbian (Latin, Serbia)","sk":"Slovak (Slovakia)","sl":"Slovenian (Slovenia)","es":"Spanish (Spain)","sv":"Swedish (Sweden)","th":"Thai (Thailand)","tr":"Turkish (Turkey)","uk":"Ukrainian (Ukraine)"}
 
 	if (OcrEngineClass = "")	{
 		CreateClass("Windows.Globalization.Language", ILanguageFactory := "{9B0252AC-0C27-44F8-B792-9793FB66C63E}", LanguageClass)
@@ -1722,7 +1730,7 @@ HotkeysGUI:
 	if (isWin10)
 	{
 		;~ Language CodeDescription (informative)BCP 47 Code
-		langList := {"Arabic (Saudi Arabia)":"ar","Bulgarian (Bulgaria)":"bg","Chinese (Hong Kong S.A.R.)":"zh","Chinese (PRC)":"zh","Chinese (Taiwan)":"zh","Croatian (Croatia)":"hr","Czech (Czech Republic)":"cs","Danish (Denmark)":"da","Dutch (Netherlands)":"nl","English (Great Britain)":"En","English (United States)":"en","Estonian (Estonia)":"et","Finnish (Finland)":"fi","French (France)":"fr","German (Germany)":"de","Greek (Greece)":"el","Hebrew (Israel)":"he","Hungarian (Hungary)":"hu","Italian (Italy)":"it","Japanese (Japan)":"ja","Korean (Korea)":"ko","Latvian (Latvia)":"lv","Lithuanian (Lithuania)":"lt","Norwegian, Bokmål (Norway)":"nb","Polish (Poland)":"pl","Portuguese (Brazil)":"pt","Portuguese (Portugal)":"pt","Romanian (Romania)":"ro","Russian (Russia)":"ru","Serbian (Latin, Serbia)":"sr","Serbian (Latin, Serbia)":"sr","Slovak (Slovakia)":"sk","Slovenian (Slovenia)":"sl","Spanish (Spain)":"es","Swedish (Sweden)":"sv","Thai (Thailand)":"th","Turkish (Turkey)":"tr","Ukrainian (Ukraine)":"uk"}
+		langList := {"Arabic (Saudi Arabia)":"ar","Bulgarian (Bulgaria)":"bg","Chinese (Hong Kong S.A.R.)":"zh","Chinese (PRC)":"zh","Chinese (Taiwan)":"zh","Croatian (Croatia)":"hr","Czech (Czech Republic)":"cs","Danish (Denmark)":"da","Dutch (Netherlands)":"nl","English (Great Britain)":"En","English (United States)":"en","Estonian (Estonia)":"et","Finnish (Finland)":"fi","French (France)":"fr","German (Germany)":"de","Greek (Greece)":"el","Hebrew (Israel)":"he","Hungarian (Hungary)":"hu","Italian (Italy)":"it","Japanese (Japan)":"ja","Korean (Korea)":"ko","Latvian (Latvia)":"lv","Lithuanian (Lithuania)":"lt","Norwegian, BokmÃ¥l (Norway)":"nb","Polish (Poland)":"pl","Portuguese (Brazil)":"pt","Portuguese (Portugal)":"pt","Romanian (Romania)":"ro","Russian (Russia)":"ru","Serbian (Latin, Serbia)":"sr","Serbian (Latin, Serbia)":"sr","Slovak (Slovakia)":"sk","Slovenian (Slovenia)":"sl","Spanish (Spain)":"es","Swedish (Sweden)":"sv","Thai (Thailand)":"th","Turkish (Turkey)":"tr","Ukrainian (Ukraine)":"uk"}
 
 		IniRead, currLang, % script.configfile, OCR, lang, en
 
