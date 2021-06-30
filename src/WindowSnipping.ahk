@@ -29,7 +29,7 @@ else
 
 global script := {base         : script
                  ,name         : regexreplace(A_ScriptName, "\.\w+")
-                 ,version      : "1.29.6"
+                 ,version      : "1.32.0"
                  ,author       : "Joe Glines"
                  ,email        : "joe@the-automator.com"
                  ,homepagetext : "www.the-automator.com/snip"
