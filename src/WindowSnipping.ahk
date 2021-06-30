@@ -1651,8 +1651,8 @@ return
 
 Update:
 	try
-		script.update("https://raw.githubusercontent.com/RaptorX/WindowSnipping/master/ver"
-					 ,"https://github.com/RaptorX/WindowSnipping/archive/refs/tags/latest.zip")
+		script.update("https://raw.githubusercontent.com/RaptorX/WindowSnipping/latest/ver"
+		             ,"https://github.com/RaptorX/WindowSnipping/archive/refs/tags/latest.zip")
 	catch e
 	{
 		if (e.code == 6)
