@@ -1,4 +1,4 @@
-﻿;******************************************************************************
+;******************************************************************************
 ; Want a clear path for learning AutoHotkey?                                  *
 ; Take a look at our AutoHotkey Udemy courses.                                *
 ; They're structured in a way to make learning AHK EASY                       *
@@ -258,7 +258,7 @@ SCW_ScreenClip2Win(clip=0,email=0,OCR=0) {
 		StringReplace, currSig, currSig, </HTML>,
 		(LTrim
 			<br>
-			This email and screen clipping was created from Screen Clipper by <a href="https://www.the-automator.com/screenclipping/">the-Automator</a>.
+			This email and screen clipping was created from WindowsSnipping Tool by <a href="https://www.the-automator.com/snip?src=app">the-Automator</a>.
 			</HTML>
 		), All
 
@@ -1829,15 +1829,15 @@ HokeysSave:
 	Gui Hotkeys:Submit
 
 SetHotkeys:
-	defOCRHK 			:= "#^"
-	defOTRHK 			:= "#+"
-	defScreenHK 		:= "#"
-	defOutlookHK 		:= "#!"
-	defDesktopHK 		:= "^s"
-	preffix 			:= "wcsa"
-	suffix 				:= ["sc", "om", "po", "ot", "dt"]
-	hotkeys 			:= "Screen|Outlook|OCR|OTR|Desktop"
-	defaultSignature 	:=
+	defOCRHK         := "#^"
+	defOTRHK         := "#+"
+	defScreenHK      := "#"
+	defOutlookHK     := "#!"
+	defDesktopHK     := "^s"
+	preffix          := "wcsa"
+	suffix           := ["sc", "om", "po", "ot", "dt"]
+	hotkeys          := "Screen|Outlook|OCR|OTR|Desktop"
+	defaultSignature :=
 	("% LTrim"
 	"<HTML>
 	Attached you will find the screenshot taken on %date%.<br><br>
@@ -1909,8 +1909,8 @@ disableHK:
 return
 
 #IfWinActive ScreenClippingWindow ahk_class AutoHotkeyGUI ;activates last clipped window
-~Esc::WinClose, ScreenClippingWindow ahk_class AutoHotkeyGUI
-^c::
+~Esc::WinClose, ScreenClippingWindow ahk_class AutoHotkeyGUI ;Close
+^c:: ;copy
 	SCW_Win2Clipboard(0)  ;copies to clipboard by default w/o border
 return
 #IfWinActive
