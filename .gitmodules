@@ -1,3 +1,2 @@
-[submodule "src/lib/scriptObj"]
-	path = src/lib/scriptObj
-	url = D:/Cloud/RaptorX/OneDrive/Documents/coding/AutoHotkey/v1/Libraries/scriptObj
+[submodule "src/lib/scriptObj/"]
+	url = D:/Cloud/RaptorX/OneDrive/Documents/AutoHotkey/lib/ScriptObj
