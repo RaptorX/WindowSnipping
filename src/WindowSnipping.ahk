@@ -34,7 +34,7 @@ global script := {base         : script
                  ,email        : "joe@the-automator.com"
                  ,homepagetext : "www.the-automator.com/snip"
                  ,homepagelink : "www.the-automator.com/snip?src=app"
-                 ,donateLink   : "https://www.paypal.com/donate?hosted_button_id=MBT5HSD9G94N6"
+                 ,donateLink   : "https://the-automator.com/PayPal"
                  ,resfolder    : appdata "\res"
                  ,iconfile     : appdata "\res\sct.ico"
                  ,configfolder : appdata
@@ -1652,7 +1652,7 @@ return
 Update:
 	try
 		script.update("https://raw.githubusercontent.com/RaptorX/WindowSnipping/latest/ver"
-		             ,"https://github.com/RaptorX/WindowSnipping/archive/refs/tags/latest.zip")
+		             ,"https://github.com/RaptorX/WindowSnipping/releases/download/latest/WindowSnipping.zip")
 	catch e
 	{
 		if (e.code == 6)
