@@ -4,10 +4,9 @@
 ; They're structured in a way to make learning AHK EASY                       *
 ; Right now you can  get a coupon code here: https://the-Automator.com/Learn  *
 ;******************************************************************************
-
 #NoEnv
 #SingleInstance Force
-
+#Requires AutoHotkey v1.1.1+
 #include <ScriptObj/ScriptObj>
 
 if ((A_PtrSize != 4 || !A_IsUnicode) && !A_IsCompiled)
