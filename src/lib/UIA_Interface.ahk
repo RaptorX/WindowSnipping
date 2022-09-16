@@ -1,4 +1,4 @@
-#Requires Autohotkey v1.1.33+
+ï»¿#Requires Autohotkey v1.1.33+
 ;~ UI Automation Constants: http://msdn.microsoft.com/en-us/library/windows/desktop/ee671207(v=vs.85).aspx
 ;~ UI Automation Enumerations: http://msdn.microsoft.com/en-us/library/windows/desktop/ee671210(v=vs.85).aspx
 ;~ http://www.autohotkey.com/board/topic/94619-ahk-l-screen-reader-a-tool-to-get-text-anywhere/
@@ -15,7 +15,7 @@
 	- returning varaint data other than vt=3|8|9|13|0x2000
 	- Cached Members?
 	- UIA Element existance - dependent on window being visible (non minimized)?
-	- function(params, ByRef out="……")
+	- function(params, ByRef out="ï¿½ï¿½")
 */
 
 class UIA_Base {
