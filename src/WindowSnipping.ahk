@@ -4,10 +4,9 @@
 ; They're structured in a way to make learning AHK EASY                       *
 ; Right now you can  get a coupon code here: https://the-Automator.com/Learn  *
 ;******************************************************************************
-
 #NoEnv
 #SingleInstance Force
-
+#Requires AutoHotkey v1.1.1+
 #include <ScriptObj/ScriptObj>
 
 if ((A_PtrSize != 4 || !A_IsUnicode) && !A_IsCompiled)
@@ -22,19 +21,19 @@ if ((A_PtrSize != 4 || !A_IsUnicode) && !A_IsCompiled)
 	ExitApp
 }
 
-if !InStr(A_OSVersion, "10.")
-	appdata := A_ScriptDir
-else
+if (A_OSVersion ~= "10\.")
 	appdata := A_AppData "\" regexreplace(A_ScriptName, "\.\w+"), isWin10 := true
+else
+	appdata := A_ScriptDir
 
 global script := {base         : script
                  ,name         : regexreplace(A_ScriptName, "\.\w+")
-                 ,version      : "1.32.0"
+                 ,version      : "1.56.5"
                  ,author       : "Joe Glines"
                  ,email        : "joe@the-automator.com"
                  ,homepagetext : "www.the-automator.com/snip"
                  ,homepagelink : "www.the-automator.com/snip?src=app"
-                 ,donateLink   : "https://www.paypal.com/donate?hosted_button_id=MBT5HSD9G94N6"
+                 ,donateLink   : "https://the-automator.com/PayPal"
                  ,resfolder    : appdata "\res"
                  ,iconfile     : appdata "\res\sct.ico"
                  ,configfolder : appdata
@@ -141,7 +140,7 @@ SCW_SetUp(Options="") {
 		}
 	}
 
-	SCW_Default(StartAfter,80), SCW_Default(MaxGuis,6)
+	SCW_Default(StartAfter,80), SCW_Default(MaxGuis,6) ;limit the # of snippets
 	SCW_Default(AutoMonitorWM_LBUTTONDOWN,1), SCW_Default(DrawCloseButton,0)
 	SCW_Default(BorderAColor,"ff6666ff"), SCW_Default(BorderBColor,"ffffffff")
 	SCW_Default(SelColor,"Yellow"), SCW_Default(SelTrans,80)
@@ -258,7 +257,7 @@ SCW_ScreenClip2Win(clip=0,email=0,OCR=0) {
 		StringReplace, currSig, currSig, </HTML>,
 		(LTrim
 			<br>
-			This email and screen clipping was created from Screen Clipper by <a href="https://www.the-automator.com/screenclipping/">the-Automator</a>.
+			This email and screen clipping was created from WindowsSnipping Tool by <a href="https://www.the-automator.com/snip?src=app">the-Automator</a>.
 			</HTML>
 		), All
 
@@ -1545,10 +1544,10 @@ OCR(IRandomAccessStream, language := "en"){
 notUnique(mod1, mod2, mod3, mod4)
 {
 	if (mod1 && mod2 || mod1 && mod3 || mod2 && mod3
-	.	mod1 && mod4 || mod2 && mod4 || mod3 && mod4) ; at least 2 of them are set
+	.   mod1 && mod4 || mod2 && mod4 || mod3 && mod4) ; at least 2 of them are set
 	{
 		if (mod1 == mod2 || mod1 == mod3 || mod2 == mod3
-		.	mod1 == mod4 || mod2 == mod4 || mod3 == mod4)
+		.   mod1 == mod4 || mod2 == mod4 || mod3 == mod4)
 			return true
 		else
 			return false
@@ -1651,8 +1650,8 @@ return
 
 Update:
 	try
-		script.update("https://raw.githubusercontent.com/RaptorX/WindowSnipping/master/ver"
-					 ,"https://github.com/RaptorX/WindowSnipping/archive/refs/tags/latest.zip")
+		script.update("https://raw.githubusercontent.com/RaptorX/WindowSnipping/latest/ver"
+		             ,"https://github.com/RaptorX/WindowSnipping/releases/download/latest/WindowSnipping.zip")
 	catch e
 	{
 		if (e.code == 6)
@@ -1736,7 +1735,7 @@ HotkeysGUI:
 
 		for lang,code in langList
 			curvar .= lang (langList[lang] == (currLang ? currLang : "en") ? "||" : "|")
-		
+
 		IniRead, currtgtLang, % script.configfile, OCR, tgtlang, en
 
 		for lang,code in langList
@@ -1752,7 +1751,7 @@ HotkeysGUI:
 		Gui Add, Checkbox, % (instr(currHK, "+") ? "checked" : "") " x+10 vSpo gdisableHK", % "Shift"
 		Gui Add, Checkbox, % (instr(currHK, "!") ? "checked" : "") " x+10 vApo gdisableHK", % "Alt"
 		Gui Add, Checkbox, % (instr(currHK, "disabled") ? "checked" : "") " x+10 gdisableHK vDisabledpo", % "Disabled"
-		
+
 		IniRead, currHK, % script.configfile, Hotkeys, OTR, #+
 		if (firstRun)
 			currHK := "#+"
@@ -1763,7 +1762,7 @@ HotkeysGUI:
 		Gui Add, Checkbox, % (instr(currHK, "+") ? "checked" : "") " x+10 vSot gdisableHK", % "Shift"
 		Gui Add, Checkbox, % (instr(currHK, "!") ? "checked" : "") " x+10 vAot gdisableHK", % "Alt"
 		Gui Add, Checkbox, % (instr(currHK, "disabled") ? "checked" : "") " x+10 gdisableHK vDisabledot", % "Disabled"
-		
+
 		Gui Add, Text, w220 x0 y+10 right, % "Select OCR Language"
 		Gui Add, DropDownList, w185 x+10 yp-3 vselLanguage, % RegExReplace(curvar, "|$")
 		Gui Add, Text, w220 x0 y+10 right, % "Translate to"
@@ -1819,25 +1818,28 @@ HokeysSave:
 
 	if (notUnique(scrhk, outhk, ocrhk, otrhk))
 	{
-		msgbox  % 0x10
-				,% "Error"
-				,% "One of the hotkeys you tried to setup is already used by another"
-				.  " command, please check and try again."
-		return
+		MsgBox, % 0x20 + 0x04
+		      , % "Warning"
+		      , % "One of the hotkeys you tried to setup is already used by another "
+		      .  " command. It means it will be replaced.`n`n"
+		      .  "Do you want to save it anyways?"
+
+		IfMsgBox, No
+			return
 	}
 
 	Gui Hotkeys:Submit
 
 SetHotkeys:
-	defOCRHK 			:= "#^"
-	defOTRHK 			:= "#+"
-	defScreenHK 		:= "#"
-	defOutlookHK 		:= "#!"
-	defDesktopHK 		:= "^s"
-	preffix 			:= "wcsa"
-	suffix 				:= ["sc", "om", "po", "ot", "dt"]
-	hotkeys 			:= "Screen|Outlook|OCR|OTR|Desktop"
-	defaultSignature 	:=
+	defOCRHK         := "#^"
+	defOTRHK         := "#+"
+	defScreenHK      := "#"
+	defOutlookHK     := "#!"
+	defDesktopHK     := "^s"
+	preffix          := "wcsa"
+	suffix           := ["sc", "om", "po", "ot", "dt"]
+	hotkeys          := "Screen|Outlook|OCR|OTR|Desktop"
+	defaultSignature :=
 	("% LTrim"
 	"<HTML>
 	Attached you will find the screenshot taken on %date%.<br><br>
@@ -1909,8 +1911,8 @@ disableHK:
 return
 
 #IfWinActive ScreenClippingWindow ahk_class AutoHotkeyGUI ;activates last clipped window
-~Esc::WinClose, ScreenClippingWindow ahk_class AutoHotkeyGUI
-^c::
+~^Esc::WinClose, ScreenClippingWindow ahk_class AutoHotkeyGUI ;Close
+^c:: ;copy
 	SCW_Win2Clipboard(0)  ;copies to clipboard by default w/o border
 return
 #IfWinActive

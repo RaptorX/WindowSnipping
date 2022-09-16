@@ -1,6 +1,7 @@
-*Backup
-example*
 *.zip
 *.bmp
 *.jpg
-*Backup/
+*backup*
+example*
+Hellbent
+tests
