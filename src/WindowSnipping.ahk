@@ -21,10 +21,10 @@ if ((A_PtrSize != 4 || !A_IsUnicode) && !A_IsCompiled)
 	ExitApp
 }
 
-if !InStr(A_OSVersion, "10.")
-	appdata := A_ScriptDir
-else
+if (A_OSVersion ~= "10\.")
 	appdata := A_AppData "\" regexreplace(A_ScriptName, "\.\w+"), isWin10 := true
+else
+	appdata := A_ScriptDir
 
 global script := {base         : script
                  ,name         : regexreplace(A_ScriptName, "\.\w+")
