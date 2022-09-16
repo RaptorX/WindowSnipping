@@ -140,7 +140,7 @@ SCW_SetUp(Options="") {
 		}
 	}
 
-	SCW_Default(StartAfter,80), SCW_Default(MaxGuis,6)
+	SCW_Default(StartAfter,80), SCW_Default(MaxGuis,6) ;limit the # of snippets
 	SCW_Default(AutoMonitorWM_LBUTTONDOWN,1), SCW_Default(DrawCloseButton,0)
 	SCW_Default(BorderAColor,"ff6666ff"), SCW_Default(BorderBColor,"ffffffff")
 	SCW_Default(SelColor,"Yellow"), SCW_Default(SelTrans,80)
@@ -1544,10 +1544,10 @@ OCR(IRandomAccessStream, language := "en"){
 notUnique(mod1, mod2, mod3, mod4)
 {
 	if (mod1 && mod2 || mod1 && mod3 || mod2 && mod3
-	.	mod1 && mod4 || mod2 && mod4 || mod3 && mod4) ; at least 2 of them are set
+	.   mod1 && mod4 || mod2 && mod4 || mod3 && mod4) ; at least 2 of them are set
 	{
 		if (mod1 == mod2 || mod1 == mod3 || mod2 == mod3
-		.	mod1 == mod4 || mod2 == mod4 || mod3 == mod4)
+		.   mod1 == mod4 || mod2 == mod4 || mod3 == mod4)
 			return true
 		else
 			return false
@@ -1735,7 +1735,7 @@ HotkeysGUI:
 
 		for lang,code in langList
 			curvar .= lang (langList[lang] == (currLang ? currLang : "en") ? "||" : "|")
-		
+
 		IniRead, currtgtLang, % script.configfile, OCR, tgtlang, en
 
 		for lang,code in langList
@@ -1751,7 +1751,7 @@ HotkeysGUI:
 		Gui Add, Checkbox, % (instr(currHK, "+") ? "checked" : "") " x+10 vSpo gdisableHK", % "Shift"
 		Gui Add, Checkbox, % (instr(currHK, "!") ? "checked" : "") " x+10 vApo gdisableHK", % "Alt"
 		Gui Add, Checkbox, % (instr(currHK, "disabled") ? "checked" : "") " x+10 gdisableHK vDisabledpo", % "Disabled"
-		
+
 		IniRead, currHK, % script.configfile, Hotkeys, OTR, #+
 		if (firstRun)
 			currHK := "#+"
@@ -1762,7 +1762,7 @@ HotkeysGUI:
 		Gui Add, Checkbox, % (instr(currHK, "+") ? "checked" : "") " x+10 vSot gdisableHK", % "Shift"
 		Gui Add, Checkbox, % (instr(currHK, "!") ? "checked" : "") " x+10 vAot gdisableHK", % "Alt"
 		Gui Add, Checkbox, % (instr(currHK, "disabled") ? "checked" : "") " x+10 gdisableHK vDisabledot", % "Disabled"
-		
+
 		Gui Add, Text, w220 x0 y+10 right, % "Select OCR Language"
 		Gui Add, DropDownList, w185 x+10 yp-3 vselLanguage, % RegExReplace(curvar, "|$")
 		Gui Add, Text, w220 x0 y+10 right, % "Translate to"
@@ -1818,11 +1818,14 @@ HokeysSave:
 
 	if (notUnique(scrhk, outhk, ocrhk, otrhk))
 	{
-		msgbox  % 0x10
-				,% "Error"
-				,% "One of the hotkeys you tried to setup is already used by another"
-				.  " command, please check and try again."
-		return
+		MsgBox, % 0x20 + 0x04
+		      , % "Warning"
+		      , % "One of the hotkeys you tried to setup is already used by another "
+		      .  " command. It means it will be replaced.`n`n"
+		      .  "Do you want to save it anyways?"
+
+		IfMsgBox, No
+			return
 	}
 
 	Gui Hotkeys:Submit
