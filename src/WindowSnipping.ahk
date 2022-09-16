@@ -1,4 +1,4 @@
-;******************************************************************************
+﻿;******************************************************************************
 ; Want a clear path for learning AutoHotkey?                                  *
 ; Take a look at our AutoHotkey Udemy courses.                                *
 ; They're structured in a way to make learning AHK EASY                       *
@@ -1911,7 +1911,7 @@ disableHK:
 return
 
 #IfWinActive ScreenClippingWindow ahk_class AutoHotkeyGUI ;activates last clipped window
-~Esc::WinClose, ScreenClippingWindow ahk_class AutoHotkeyGUI ;Close
+~^Esc::WinClose, ScreenClippingWindow ahk_class AutoHotkeyGUI ;Close
 ^c:: ;copy
 	SCW_Win2Clipboard(0)  ;copies to clipboard by default w/o border
 return
