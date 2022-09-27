@@ -28,7 +28,7 @@ else
 
 global script := {base         : script
                  ,name         : regexreplace(A_ScriptName, "\.\w+")
-                 ,version      : "1.56.5"
+                 ,version      : "0.57.4"
                  ,author       : "Joe Glines"
                  ,email        : "joe@the-automator.com"
                  ,homepagetext : "www.the-automator.com/snip"
