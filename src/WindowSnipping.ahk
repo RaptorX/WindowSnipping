@@ -1,4 +1,4 @@
-;******************************************************************************
+﻿;******************************************************************************
 ; Want a clear path for learning AutoHotkey?                                  *
 ; Take a look at our AutoHotkey Udemy courses.                                *
 ; They're structured in a way to make learning AHK EASY                       *
@@ -1548,8 +1548,12 @@ notUnique(mod1, mod2, mod3, mod4)
 	if (mod1 && mod2 || mod1 && mod3 || mod2 && mod3
 	.   mod1 && mod4 || mod2 && mod4 || mod3 && mod4) ; at least 2 of them are set
 	{
-		if (mod1 == mod2 || mod1 == mod3 || mod2 == mod3
-		.   mod1 == mod4 || mod2 == mod4 || mod3 == mod4)
+		if ((mod1 && mod2) && mod1 == mod2 
+		||  (mod1 && mod3) && mod1 == mod3 
+		||  (mod2 && mod3) && mod2 == mod3
+		||  (mod1 && mod4) && mod1 == mod4 
+		||  (mod2 && mod4) && mod2 == mod4 
+		||  (mod3 && mod4) && mod3 == mod4)
 			return true
 		else
 			return false
