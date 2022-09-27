@@ -28,7 +28,7 @@ else
 
 global script := {base         : script
                  ,name         : regexreplace(A_ScriptName, "\.\w+")
-                 ,version      : "1.56.5"
+                 ,version      : "1.57.4"
                  ,author       : "Joe Glines"
                  ,email        : "joe@the-automator.com"
                  ,homepagetext : "www.the-automator.com/snip"
@@ -55,6 +55,7 @@ Menu, Tray, Icon, % script.iconfile
 
 ;~ Menu,Tray,Add,"Windows and left mouse click"
 IniRead, ShowUsage, % script.configfile, Settings, ShowUsage, % true
+IniRead, SWW,  % script.configfile, Settings, StartWithWindows
 
 Menu, Tray, NoStandard ;removes default options
 Menu, Tray, Add	; to divide from standard menu, remove when above line is uncommented
@@ -78,6 +79,7 @@ if (!FileExist(script.configfile))
 
 	IniWrite, % true, % script.configfile, Settings, FirstRun
 	IniWrite, % true, % script.configfile, Settings, ShowUsage
+	IniWrite, % true, % script.configfile, Settings, StartWithWindows
 	Gosub HotkeysGUI
 }
 else
@@ -1546,8 +1548,12 @@ notUnique(mod1, mod2, mod3, mod4)
 	if (mod1 && mod2 || mod1 && mod3 || mod2 && mod3
 	.   mod1 && mod4 || mod2 && mod4 || mod3 && mod4) ; at least 2 of them are set
 	{
-		if (mod1 == mod2 || mod1 == mod3 || mod2 == mod3
-		.   mod1 == mod4 || mod2 == mod4 || mod3 == mod4)
+		if ((mod1 && mod2) && mod1 == mod2 
+		||  (mod1 && mod3) && mod1 == mod3 
+		||  (mod2 && mod3) && mod2 == mod3
+		||  (mod1 && mod4) && mod1 == mod4 
+		||  (mod2 && mod4) && mod2 == mod4 
+		||  (mod3 && mod4) && mod3 == mod4)
 			return true
 		else
 			return false
@@ -1704,10 +1710,12 @@ HotkeysGUI:
 	IniRead, firstRun, % script.configfile, Settings, FirstRun
 
 	IniRead, currHK, % script.configfile, Hotkeys, Screen, #
+	IniRead, SWW, % script.configfile, Settings, StartWithWindows, % true
 	if (firstRun)
 		currHK := "#"
 
-	Gui Add,Text,, Please select the hotkeys of your choice:`n
+	Gui, Add, Checkbox, % "xm Checked" SWW " vsww", % "Start with windows"
+	Gui Add,Text, y+15, Please select the hotkeys of your choice:`n
 	Gui Add, Text, w220 x0 right, Left mouse drag to screen capture +
 	Gui Add, Checkbox, % (instr(currHK, "#") ? "checked" : "") " x+10 section vWsc gdisableHK", Win
 	Gui Add, Checkbox, % (instr(currHK, "^") ? "checked" : "") " x+10 vCsc gdisableHK", Ctrl
@@ -1849,6 +1857,8 @@ SetHotkeys:
 	</HTML>"
 	)
 
+	script.AutoStart(sww)
+	IniWrite, % SWW,  % script.configfile, Settings, StartWithWindows
 	; we make sure to disable all hotkeys to be able to set the new ones without issues
 	; without this the new hotkeys wont work
 	Loop parse, hotkeys, |
@@ -1861,16 +1871,15 @@ SetHotkeys:
 			Hotkey, IfWinActive, % "ScreenClippingWindow ahk_class AutoHotkeyGUI"
 
 		IniRead, currHK, % script.configfile, Hotkeys, % A_LoopField, % %defHK%
-		try
-			Hotkey, % currHK (A_LoopField != "Desktop" ? "Lbutton" : ""), OFF
-		catch e
-			if ((!currHK || currHK == "disabled") && !%disHK%)
-				currHK := %defHK%
-		Finally
-			if (!%disHK%)
-				Hotkey, % (%newHK% ? %newHK% : currHK) (A_LoopField != "Desktop" ? "Lbutton" : ""), % A_LoopField "HK", ON
+		
+		; disable if it exists
+		try Hotkey, % (%newHK% ? %newHK% : currHK) (A_LoopField != "Desktop" ? "Lbutton" : ""), OFF
+		
+		currHK := %newHK% ? %newHK% : %disHK% ? "Disabled" : currHK
+		
+		if (currHK != "Disabled")
+			Hotkey, % (%newHK% ? %newHK% : currHK) (A_LoopField != "Desktop" ? "Lbutton" : ""), % A_LoopField "HK", ON
 
-		; OutputDebug, % currHK ">" %newHK%
 		Hotkey, IfWinActive
 
 		if (newHK == "ocrhk" && !isWin10)
