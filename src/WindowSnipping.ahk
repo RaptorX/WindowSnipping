@@ -1,12 +1,20 @@
-;******************************************************************************
-; Want a clear path for learning AutoHotkey?                                  *
-; Take a look at our AutoHotkey Udemy courses.                                *
-; They're structured in a way to make learning AHK EASY                       *
-; Right now you can  get a coupon code here: https://the-Automator.com/Learn  *
-;******************************************************************************
 #NoEnv
 #SingleInstance Force
-#Requires AutoHotkey v1.1.1+
+#Requires Autohotkey v1.1.36+
+;--
+;@Ahk2Exe-SetVersion     1.57.5
+; @Ahk2Exe-SetMainIcon    res\main.ico
+;@Ahk2Exe-SetProductName Window Snipping Tool
+;@Ahk2Exe-SetDescription Allows to take quick screenshots and perform OCR with hotkeys
+/**
+ * ============================================================================ *
+ * Want a clear path for learning AutoHotkey?                                   *
+ * Take a look at our AutoHotkey Udemy courses.                                 *
+ * They're structured in a way to make learning AHK EASY                        *
+ * Right now you can  get a coupon code here: https://the-Automator.com/Learn   *
+ * ============================================================================ *
+ */
+
 #include <ScriptObj/ScriptObj>
 
 if ((A_PtrSize != 4 || !A_IsUnicode) && !A_IsCompiled)
@@ -28,7 +36,7 @@ else
 
 global script := {base         : script
                  ,name         : regexreplace(A_ScriptName, "\.\w+")
-                 ,version      : "1.57.4"
+                 ,version      : "1.57.5"
                  ,author       : "Joe Glines"
                  ,email        : "joe@the-automator.com"
                  ,homepagetext : "www.the-automator.com/snip"
