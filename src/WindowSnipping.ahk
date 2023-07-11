@@ -317,7 +317,6 @@ SCW_ScreenClip2Win(clip=0,email=0,OCR=0) {
 	Gdip_Shutdown("pToken")
 	if (clip=1){
 		;********************** added to copy to clipboard by default*********************************
-		WinActivate, ScreenClippingWindow ahk_class AutoHotkeyGUI ;activates last clipped window
 		SCW_Win2Clipboard(0)  ;copies to clipboard by default w/o border
 		;*******************************************************
 	}
@@ -369,6 +368,8 @@ SCW_CreateLayeredWinMod(GuiNum,pBitmap,x,y,DrawCloseButton=0) {
 
 	Gui %GuiNum%: -Caption +E0x80000 +LastFound +ToolWindow +AlwaysOnTop +OwnDialogs
 	Gui %GuiNum%: Show, Na, ScreenClippingWindow
+	WinWait, ScreenClippingWindow
+
 	hwnd := WinExist()
 
 	Width := Gdip_GetImageWidth(pBitmap), Height := Gdip_GetImageHeight(pBitmap)
@@ -425,7 +426,13 @@ SCW_Default(ByRef Variable,DefaultValue) {
 }
 
 SCW_Win2Clipboard(KeepBorders=0) {
+	#WinActivateForce 
+	WinActivate, ScreenClippingWindow ahk_class AutoHotkeyGUI ;activates last clipped window
+	
+	Clipboard := ""
 	Send, !{PrintScreen} ; Active Win's client area to Clipboard
+	ClipWait, 0
+
 	if !KeepBorders {
 		pToken := Gdip_Startup()
 		pBitmap := Gdip_CreateBitmapFromClipboard()
