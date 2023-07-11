@@ -53,6 +53,7 @@ global script := {base         : script
 */
 
 if !fileExist(script.resfolder)
+|| !FileExist(script.iconfile)
 {
 	FileCreateDir, % script.resfolder
 	FileInstall, res\sct.ico, % script.iconfile
