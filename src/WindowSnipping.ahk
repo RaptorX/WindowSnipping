@@ -77,6 +77,7 @@ Menu, Tray, Add, Clear Settings, ClearSettings
 Menu, Tray, Add, Check for Updates, Update
 Menu, Tray, Add, About, AboutGUI
 Menu, Tray, Add
+Menu, Tray, Add,Reload,Reload
 Menu, Tray, Add,Exit App,Exit
 Menu, Tray, Default, Hotkeys
 
@@ -1962,7 +1963,7 @@ disableHK:
 return
 
 #IfWinActive ScreenClippingWindow ahk_class AutoHotkeyGUI ;activates last clipped window
-~^Esc::WinClose, ScreenClippingWindow ahk_class AutoHotkeyGUI ;Close
+~Esc::WinClose, ScreenClippingWindow ahk_class AutoHotkeyGUI ;Close
 ^c:: ;copy
 	SCW_Win2Clipboard(0)  ;copies to clipboard by default w/o border
 return
@@ -1995,5 +1996,7 @@ ClearSettings:
 	Reload
 return
 
+Reload:
+	Reload
 Exit:
 	ExitApp
