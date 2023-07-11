@@ -1,8 +1,8 @@
-#NoEnv
+﻿#NoEnv
 #SingleInstance Force
 #Requires Autohotkey v1.1.36+
 ;--
-;@Ahk2Exe-SetVersion     1.57.5
+;@Ahk2Exe-SetVersion     1.57.10
 ; @Ahk2Exe-SetMainIcon    res\main.ico
 ;@Ahk2Exe-SetProductName Window Snipping Tool
 ;@Ahk2Exe-SetDescription Allows to take quick screenshots and perform OCR with hotkeys
@@ -28,6 +28,11 @@ if ((A_PtrSize != 4 || !A_IsUnicode) && !A_IsCompiled)
 	Run,"%correct%" "%A_ScriptName%",%A_ScriptDir%
 	ExitApp
 }
+else if A_IsCompiled && A_PtrSize = 8
+{
+	MsgBox, % "This program should be compiled in 32 Bit version of AHK"
+	ExitApp, 0
+}
 
 if (A_OSVersion ~= "10\.")
 	appdata := A_AppData "\" regexreplace(A_ScriptName, "\.\w+"), isWin10 := true
@@ -36,7 +41,7 @@ else
 
 global script := {base         : script
                  ,name         : regexreplace(A_ScriptName, "\.\w+")
-                 ,version      : "1.57.5"
+                 ,version      : "1.57.10"
                  ,author       : "Joe Glines"
                  ,email        : "joe@the-automator.com"
                  ,homepagetext : "www.the-automator.com/snip"
@@ -53,6 +58,7 @@ global script := {base         : script
 */
 
 if !fileExist(script.resfolder)
+|| !FileExist(script.iconfile)
 {
 	FileCreateDir, % script.resfolder
 	FileInstall, res\sct.ico, % script.iconfile
@@ -77,6 +83,7 @@ Menu, Tray, Add, Clear Settings, ClearSettings
 Menu, Tray, Add, Check for Updates, Update
 Menu, Tray, Add, About, AboutGUI
 Menu, Tray, Add
+Menu, Tray, Add,Reload,Reload
 Menu, Tray, Add,Exit App,Exit
 Menu, Tray, Default, Hotkeys
 
@@ -226,7 +233,7 @@ SCW_ScreenClip2Win(clip=0,email=0,OCR=0) {
 
 		if (!Clipboard)
 			MsgBox % 0x10, % "Error"
-						 , % "No text was captured by the OCR engine.`nPlease Try again."
+			              , % "No text was captured by the OCR engine.`nPlease Try again."
 		else if (Clipboard != "error")
 		{
 			ToolTip, % Clipboard
@@ -317,7 +324,6 @@ SCW_ScreenClip2Win(clip=0,email=0,OCR=0) {
 	Gdip_Shutdown("pToken")
 	if (clip=1){
 		;********************** added to copy to clipboard by default*********************************
-		WinActivate, ScreenClippingWindow ahk_class AutoHotkeyGUI ;activates last clipped window
 		SCW_Win2Clipboard(0)  ;copies to clipboard by default w/o border
 		;*******************************************************
 	}
@@ -369,6 +375,8 @@ SCW_CreateLayeredWinMod(GuiNum,pBitmap,x,y,DrawCloseButton=0) {
 
 	Gui %GuiNum%: -Caption +E0x80000 +LastFound +ToolWindow +AlwaysOnTop +OwnDialogs
 	Gui %GuiNum%: Show, Na, ScreenClippingWindow
+	WinWait, ScreenClippingWindow
+
 	hwnd := WinExist()
 
 	Width := Gdip_GetImageWidth(pBitmap), Height := Gdip_GetImageHeight(pBitmap)
@@ -425,7 +433,13 @@ SCW_Default(ByRef Variable,DefaultValue) {
 }
 
 SCW_Win2Clipboard(KeepBorders=0) {
+	#WinActivateForce 
+	WinActivate, ScreenClippingWindow ahk_class AutoHotkeyGUI ;activates last clipped window
+	
+	Clipboard := ""
 	Send, !{PrintScreen} ; Active Win's client area to Clipboard
+	ClipWait, 0
+
 	if !KeepBorders {
 		pToken := Gdip_Startup()
 		pBitmap := Gdip_CreateBitmapFromClipboard()
@@ -1421,19 +1435,22 @@ Gdip_DeleteRegion(Region){
 SCW_Win2File(KeepBorders=0) {
 	Send, !{PrintScreen} ; Active Win's client area to Clipboard
 	sleep 50
+	pToken := Gdip_Startup()
+	pBitmap := Gdip_CreateBitmapFromClipboard()
+	Gdip_GetDimensions(pBitmap, w, h)
+	
 	if !KeepBorders
-	{
-		pToken := Gdip_Startup()
-		pBitmap := Gdip_CreateBitmapFromClipboard()
-		Gdip_GetDimensions(pBitmap, w, h)
-		pBitmap2 := SCW_CropImage(pBitmap, 3, 3, w-6, h-6)
-		;~ File2:=A_Desktop . "\" . A_Now . ".PNG" ; tervon  time /path to file to save
-		FormatTime, TodayDate , YYYYMMDDHH24MISS, yyyy_MM_dd@h-mmtt ;This is Joe's time format
-		File2:=A_Desktop . "\" . TodayDate . ".PNG" ;path to file to save
-		Gdip_SaveBitmapToFile(pBitmap2, File2) ;Exports automatcially to file
-		Gdip_DisposeImage(pBitmap), Gdip_DisposeImage(pBitmap2)
-		Gdip_Shutdown("pToken")
-	}
+		pBitmap := SCW_CropImage(pBitmap, 3, 3, w-6, h-6)
+	
+	FormatTime, TodayDate , YYYYMMDDHH24MISS, yyyyMMdd@HH-mm-ss ;This is Joe's time format
+	
+	Gdip_SaveBitmapToFile(pBitmap, file:=A_Desktop "\" TodayDate ".PNG") ;Exports automatcially to file
+	Gdip_DisposeImage(pBitmap)
+	Gdip_Shutdown("pToken")
+
+	ToolTip, % "Image saved to: " file
+	Sleep, 1500
+	ToolTip
 }
 
 ;*******************************************************
@@ -1533,7 +1550,7 @@ OCR(IRandomAccessStream, language := "en"){
 		if (OcrEngineObject = 0){
 			Run % "ms-settings:regionlanguage"
 			MsgBox % 0x10, % "OCR Error"
-						 , % "Can not use language """ rlangList[language] """ for OCR, please install the corresponding language pack."
+			             , % "Can not use language """ rlangList[language] """ for OCR, please install the corresponding language pack."
 			return "error"
 		}
 		CurrentLanguage := language
@@ -1952,7 +1969,7 @@ disableHK:
 return
 
 #IfWinActive ScreenClippingWindow ahk_class AutoHotkeyGUI ;activates last clipped window
-~^Esc::WinClose, ScreenClippingWindow ahk_class AutoHotkeyGUI ;Close
+~Esc::WinClose, ScreenClippingWindow ahk_class AutoHotkeyGUI ;Close
 ^c:: ;copy
 	SCW_Win2Clipboard(0)  ;copies to clipboard by default w/o border
 return
@@ -1985,5 +2002,7 @@ ClearSettings:
 	Reload
 return
 
+Reload:
+	Reload
 Exit:
 	ExitApp
