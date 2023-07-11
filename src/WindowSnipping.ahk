@@ -1,4 +1,4 @@
-#NoEnv
+﻿#NoEnv
 #SingleInstance Force
 #Requires Autohotkey v1.1.36+
 ;--
@@ -27,6 +27,11 @@ if ((A_PtrSize != 4 || !A_IsUnicode) && !A_IsCompiled)
 	}
 	Run,"%correct%" "%A_ScriptName%",%A_ScriptDir%
 	ExitApp
+}
+else if A_IsCompiled && A_PtrSize = 8
+{
+	MsgBox, % "This program should be compiled in 32 Bit version of AHK"
+	ExitApp, 0
 }
 
 if (A_OSVersion ~= "10\.")
@@ -228,7 +233,7 @@ SCW_ScreenClip2Win(clip=0,email=0,OCR=0) {
 
 		if (!Clipboard)
 			MsgBox % 0x10, % "Error"
-						 , % "No text was captured by the OCR engine.`nPlease Try again."
+			              , % "No text was captured by the OCR engine.`nPlease Try again."
 		else if (Clipboard != "error")
 		{
 			ToolTip, % Clipboard
@@ -1430,9 +1435,9 @@ Gdip_DeleteRegion(Region){
 SCW_Win2File(KeepBorders=0) {
 	Send, !{PrintScreen} ; Active Win's client area to Clipboard
 	sleep 50
-		pToken := Gdip_Startup()
-		pBitmap := Gdip_CreateBitmapFromClipboard()
-		Gdip_GetDimensions(pBitmap, w, h)
+	pToken := Gdip_Startup()
+	pBitmap := Gdip_CreateBitmapFromClipboard()
+	Gdip_GetDimensions(pBitmap, w, h)
 	
 	if !KeepBorders
 		pBitmap := SCW_CropImage(pBitmap, 3, 3, w-6, h-6)
@@ -1441,7 +1446,7 @@ SCW_Win2File(KeepBorders=0) {
 	
 	Gdip_SaveBitmapToFile(pBitmap, file:=A_Desktop "\" TodayDate ".PNG") ;Exports automatcially to file
 	Gdip_DisposeImage(pBitmap)
-		Gdip_Shutdown("pToken")
+	Gdip_Shutdown("pToken")
 
 	ToolTip, % "Image saved to: " file
 	Sleep, 1500
@@ -1545,7 +1550,7 @@ OCR(IRandomAccessStream, language := "en"){
 		if (OcrEngineObject = 0){
 			Run % "ms-settings:regionlanguage"
 			MsgBox % 0x10, % "OCR Error"
-						 , % "Can not use language """ rlangList[language] """ for OCR, please install the corresponding language pack."
+			             , % "Can not use language """ rlangList[language] """ for OCR, please install the corresponding language pack."
 			return "error"
 		}
 		CurrentLanguage := language
