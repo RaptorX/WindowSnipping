@@ -1,12 +1,20 @@
-﻿;******************************************************************************
-; Want a clear path for learning AutoHotkey?                                  *
-; Take a look at our AutoHotkey Udemy courses.                                *
-; They're structured in a way to make learning AHK EASY                       *
-; Right now you can  get a coupon code here: https://the-Automator.com/Learn  *
-;******************************************************************************
 #NoEnv
 #SingleInstance Force
-#Requires AutoHotkey v1.1.1+
+#Requires Autohotkey v1.1.36+
+;--
+;@Ahk2Exe-SetVersion     1.57.5
+; @Ahk2Exe-SetMainIcon    res\main.ico
+;@Ahk2Exe-SetProductName Window Snipping Tool
+;@Ahk2Exe-SetDescription Allows to take quick screenshots and perform OCR with hotkeys
+/**
+ * ============================================================================ *
+ * Want a clear path for learning AutoHotkey?                                   *
+ * Take a look at our AutoHotkey Udemy courses.                                 *
+ * They're structured in a way to make learning AHK EASY                        *
+ * Right now you can  get a coupon code here: https://the-Automator.com/Learn   *
+ * ============================================================================ *
+ */
+
 #include <ScriptObj/ScriptObj>
 
 if ((A_PtrSize != 4 || !A_IsUnicode) && !A_IsCompiled)
@@ -28,7 +36,7 @@ else
 
 global script := {base         : script
                  ,name         : regexreplace(A_ScriptName, "\.\w+")
-                 ,version      : "1.57.4"
+                 ,version      : "1.57.5"
                  ,author       : "Joe Glines"
                  ,email        : "joe@the-automator.com"
                  ,homepagetext : "www.the-automator.com/snip"
@@ -157,6 +165,7 @@ SCW_SetUp(Options="") {
 
 SCW_ScreenClip2Win(clip=0,email=0,OCR=0) {
 	static c
+	static MONITOR_DEFAULTTONEAREST := 0x00000002
 	global defaultSignature, origText
 
 	if !(SCW_Reg("WasSetUp"))
@@ -170,6 +179,25 @@ SCW_ScreenClip2Win(clip=0,email=0,OCR=0) {
 	GuiNum := StartAfter + c
 	Area := SCW_SelectAreaMod("g" GuiNum " c" SelColor " t" SelTrans)
 	StringSplit, v, Area, |
+
+	Gui %GuiNum%:+LastFound
+	$hwnd1 := WinExist()
+
+	if !hMon := DllCall("MonitorFromWindow", "ptr", $hwnd1, "int", MONITOR_DEFAULTTONEAREST)
+		Throw, Exception("couldnt get the monitor handle", A_ThisFunc, $hwnd1)
+
+	DllCall("Shcore.dll\GetScaleFactorForMonitor"
+	       , "ptr", hMon     ; [in]  HMONITOR            hMon,
+	       , "ptr*", pScale) ; [out] DEVICE_SCALE_FACTOR *pScale
+
+	pScale /= 100.0
+
+	scaled_v1 := v1 * pScale
+	scaled_v2 := v2 * pScale
+	scaled_v3 := v3 * pScale
+	scaled_v4 := v4 * pScale
+	scaled_area := scaled_v1 "|" scaled_v2 "|" scaled_v3 "|" scaled_v4
+	
 	if (v3 < 10 and v4 < 10)   ; too small area
 		return
 
@@ -180,7 +208,11 @@ SCW_ScreenClip2Win(clip=0,email=0,OCR=0) {
 	}
 	Sleep, 100
 
-	pBitmap := Gdip_BitmapFromScreen(Area)
+	if !pBitmap := Gdip_BitmapFromScreen(scaled_area){
+		MsgBox, 64, GDI+ error, GDI+ failed to create a Bitmap from screen.
+		return
+	}
+
 	if (OCR)
 	{
 		hBitmap:=Gdip_CreateHBITMAPFromBitmap(pBitmap) ;Convert an hBitmap from the pBitmap
