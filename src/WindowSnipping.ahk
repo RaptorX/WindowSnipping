@@ -2,7 +2,7 @@
 #SingleInstance Force
 #Requires Autohotkey v1.1.36+
 ;--
-;@Ahk2Exe-SetVersion     1.57.10
+;@Ahk2Exe-SetVersion     1.57.12
 ; @Ahk2Exe-SetMainIcon    res\main.ico
 ;@Ahk2Exe-SetProductName Window Snipping Tool
 ;@Ahk2Exe-SetDescription Allows to take quick screenshots and perform OCR with hotkeys
@@ -35,13 +35,13 @@ else if A_IsCompiled && A_PtrSize = 8
 }
 
 if (A_OSVersion ~= "10\.")
-	appdata := A_AppData "\" regexreplace(A_ScriptName, "\.\w+"), isWin10 := true
+	appdata := A_AppData "\" RegexReplace(A_ScriptName, "\.\w+"), isWin10 := true
 else
 	appdata := A_ScriptDir
 
 global script := {base         : script
-                 ,name         : regexreplace(A_ScriptName, "\.\w+")
-                 ,version      : "1.57.10"
+                 ,name         : RegexReplace(A_ScriptName, "\.\w+")
+                 ,version      : "1.57.12"
                  ,author       : "Joe Glines"
                  ,email        : "joe@the-automator.com"
                  ,homepagetext : "www.the-automator.com/snip"
@@ -89,7 +89,7 @@ Menu, Tray, Default, Hotkeys
 
 if (!FileExist(script.configfile))
 {
-	FileCreateDir % regexreplace(script.configfile, "^(.*)\\([^\\]*)$", "$1")
+	FileCreateDir % RegexReplace(script.configfile, "^(.*)\\([^\\]*)$", "$1")
 	FileAppend,, % script.configfile, UTF-8-RAW
 
 	IniWrite, % true, % script.configfile, Settings, FirstRun
@@ -188,7 +188,8 @@ SCW_ScreenClip2Win(clip=0,email=0,OCR=0) {
 	StringSplit, v, Area, |
 
 	Gui %GuiNum%:+LastFound
-	$hwnd1 := WinExist()
+	; we cannot get the activewindow does not deactive previous window
+	MouseGetPos, ,, $Hwnd1 
 
 	if !hMon := DllCall("MonitorFromWindow", "ptr", $hwnd1, "int", MONITOR_DEFAULTTONEAREST)
 		Throw, Exception("couldnt get the monitor handle", A_ThisFunc, $hwnd1)
@@ -197,8 +198,8 @@ SCW_ScreenClip2Win(clip=0,email=0,OCR=0) {
 	       , "ptr", hMon     ; [in]  HMONITOR            hMon,
 	       , "ptr*", pScale) ; [out] DEVICE_SCALE_FACTOR *pScale
 
-	pScale /= 100.0
-
+	pScale /= (A_ScreenDPI / 96) * 100.0
+	
 	scaled_v1 := v1 * pScale
 	scaled_v2 := v2 * pScale
 	scaled_v3 := v3 * pScale
@@ -1833,6 +1834,24 @@ HotkeysGUI:
 	Gui Add, Text, w220 x0 y+13 right, % "Save clip to desktop"
 	Gui Add, Hotkey, w185 xs yp-3 vdeshk, % currHK
 	Gui Add, Checkbox, % (instr(currHK, "disabled") ? "checked" : "") " x+10 yp+3 gdisableHK vDisableddt", Disabled
+
+	; ; add: Draw arrows gui
+	; IniRead, currHK, % script.configfile, Hotkeys, Arrow, ~LCtrl
+	; if (firstRun)
+	; 	currHK := "~LCtrl"
+	; arrowhkddl := "~LCtrl|~RCtrl|~LShift|~RShift|~LAlt|~LAlt"
+	; for k,v in  StrSplit(arrowhkddl,"|")
+	; {
+	; 	if(currHK = v)
+	; 		ArrN := k
+	; }
+	; Gui Add, Text, w220 x0 y+13 right, % "Left mouse drag to draw arrows"
+	; ;Gui Add, Hotkey, w185 xs yp-3 vDrArrow, % currHK
+	; Gui Add, DDL, w185 xs yp-3 choose%ArrN% vDrArrow, % arrowhkddl
+	; ;GuiControl, Choose, Hotkeys:DrArrow, 1
+	; ;GuiControl, ChooseString, Hotkeys:DrArrow, % currHK
+	; Gui Add, Checkbox, % (instr(currHK, "disabled") ? "checked" : "") " x+10 yp+3 gdisableHK vDisabledAr", Disabled
+	; ; end add draw arrow gui
 
 	Gui Add, Text, w500 x0 y+20 0x10
 	Gui Add, Button, xm yp+10 gHokeysReset, Reset Hotkeys
