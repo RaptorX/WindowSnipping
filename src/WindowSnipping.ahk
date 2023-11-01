@@ -1,8 +1,8 @@
-#NoEnv
+﻿#NoEnv
 #SingleInstance Force
 #Requires Autohotkey v1.1.36+
 ;--
-;@Ahk2Exe-SetVersion     1.57.10
+;@Ahk2Exe-SetVersion     1.57.12
 ; @Ahk2Exe-SetMainIcon    res\main.ico
 ;@Ahk2Exe-SetProductName Window Snipping Tool
 ;@Ahk2Exe-SetDescription Allows to take quick screenshots and perform OCR with hotkeys
@@ -41,7 +41,7 @@ else
 
 global script := {base         : script
                  ,name         : RegexReplace(A_ScriptName, "\.\w+")
-                 ,version      : "1.57.10"
+                 ,version      : "1.57.12"
                  ,author       : "Joe Glines"
                  ,email        : "joe@the-automator.com"
                  ,homepagetext : "www.the-automator.com/snip"
