@@ -71,6 +71,7 @@ Menu, Tray, Icon, % script.iconfile
 IniRead, ShowUsage, % script.configfile, Settings, ShowUsage, % true
 IniRead, SWW,  % script.configfile, Settings, StartWithWindows
 
+Menu, Tray, Tip, Window Snipping Tool
 Menu, Tray, NoStandard ;removes default options
 Menu, Tray, Add	; to divide from standard menu, remove when above line is uncommented
 Menu, Tray, Add, Hotkeys, HotkeysGUI
