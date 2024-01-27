@@ -104,6 +104,9 @@ else
 	Gosub SetHotkeys
 }
 
+; If monitor count changes, reload. This is a hack to re-initalize DPI changes for new configuration.
+OnMessage(0x007E, "ReloadScript")
+
 if (ShowUsage)
 	Gosub ShowUsageGUI
 return
@@ -1623,6 +1626,10 @@ Base64Enc( ByRef Bin, nBytes, LineLength := 64, LeadingSpaces := 0 )
 	Loop % Ceil( StrLen(B64) / LineLength )
 		B .= Format("{1:" LeadingSpaces "s}","" ) . SubStr( B64, N += LineLength, LineLength ) . "`n"
 	Return RTrim( B,"`n" )
+}
+
+ReloadScript() {
+  Reload
 }
 
 ;*******************************************************
