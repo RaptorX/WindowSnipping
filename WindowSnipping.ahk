@@ -1,38 +1,22 @@
 ﻿#NoEnv
 #SingleInstance Force
-#Requires Autohotkey v1.1.36+
+#Requires Autohotkey v1.1.36+ 32-bit Unicode
 ;--
-;@Ahk2Exe-SetVersion     1.57.12
-; @Ahk2Exe-SetMainIcon    res\main.ico
+;@Ahk2Exe-SetVersion     1.57.14
 ;@Ahk2Exe-SetProductName Window Snipping Tool
 ;@Ahk2Exe-SetDescription Allows to take quick screenshots and perform OCR with hotkeys
 /**
  * ============================================================================ *
  * Want a clear path for learning AutoHotkey?                                   *
- * Take a look at our AutoHotkey Udemy courses.                                 *
+ * Take a look at our AutoHotkey courses.                                 *
  * They're structured in a way to make learning AHK EASY                        *
- * Right now you can  get a coupon code here: https://the-Automator.com/Learn   *
+ * Discover how easy AutoHotkey is here: https://the-Automator.com/Discover   *
  * ============================================================================ *
  */
 
 #include <ScriptObj/ScriptObj>
 
-if ((A_PtrSize != 4 || !A_IsUnicode) && !A_IsCompiled)
-{
-	SplitPath, A_AhkPath,, ahkDir
-	if (!FileExist(correct := ahkDir "\AutoHotkeyU32.exe"))
-	{
-		MsgBox, % 0x10, "Error", "Could not find the 32bit unicode version of Autohotkey in:`n" correct
-		ExitApp
-	}
-	Run,"%correct%" "%A_ScriptName%",%A_ScriptDir%
-	ExitApp
-}
-else if A_IsCompiled && A_PtrSize = 8
-{
-	MsgBox, % "This program should be compiled in 32 Bit version of AHK"
-	ExitApp, 0
-}
+DllCall("SetThreadDpiAwarenessContext", "ptr", -3, "ptr")
 
 if (A_OSVersion ~= "10\.")
 	appdata := A_AppData "\" RegexReplace(A_ScriptName, "\.\w+"), isWin10 := true
@@ -41,7 +25,7 @@ else
 
 global script := {base         : script
                  ,name         : RegexReplace(A_ScriptName, "\.\w+")
-                 ,version      : "1.57.12"
+                 ,version      : "1.57.14"
                  ,author       : "Joe Glines"
                  ,email        : "joe@the-automator.com"
                  ,homepagetext : "www.the-automator.com/snip"
@@ -173,6 +157,7 @@ SCW_SetUp(Options="") {
 
 SCW_ScreenClip2Win(clip=0,email=0,OCR=0) {
 	static c
+	static MONITOR_DEFAULTTOPRIMARY := 0x00000001
 	static MONITOR_DEFAULTTONEAREST := 0x00000002
 	global defaultSignature, origText
 
@@ -188,24 +173,43 @@ SCW_ScreenClip2Win(clip=0,email=0,OCR=0) {
 	Area := SCW_SelectAreaMod("g" GuiNum " c" SelColor " t" SelTrans)
 	StringSplit, v, Area, |
 
+	DetectHiddenWindows, On
 	Gui %GuiNum%:+LastFound
+	$hWin := WinExist()
+	; WinGetPos X, Y, Width, Height, ahk_id %hWin%
+
 	; we cannot get the activewindow does not deactive previous window
-	MouseGetPos, ,, $Hwnd1 
+	; MouseGetPos, ,, $Hwnd1 
 
-	if !hMon := DllCall("MonitorFromWindow", "ptr", $hwnd1, "int", MONITOR_DEFAULTTONEAREST)
-		Throw, Exception("couldnt get the monitor handle", A_ThisFunc, $hwnd1)
+	; if !hMonPrimary := DllCall("MonitorFromWindow", "ptr", 0, "int", MONITOR_DEFAULTTOPRIMARY)
+	; 	Throw, Exception("couldnt get the monitor handle", A_ThisFunc)
+	; ; Get the scale factor for the primary monitor
+	; DllCall("Shcore.dll\GetScaleFactorForMonitor"
+	; 	, "ptr", hMonPrimary     ; [in]  HMONITOR            hMon,
+	; 	, "ptr*", pScalePrimary) ; [out] DEVICE_SCALE_FACTOR *pScale
 
-	DllCall("Shcore.dll\GetScaleFactorForMonitor"
-	       , "ptr", hMon     ; [in]  HMONITOR            hMon,
-	       , "ptr*", pScale) ; [out] DEVICE_SCALE_FACTOR *pScale
+	; pScalePrimary /= (A_ScreenDPI / 96) * 100.0
 
-	pScale /= (A_ScreenDPI / 96) * 100.0
-	
-	scaled_v1 := v1 * pScale
-	scaled_v2 := v2 * pScale
-	scaled_v3 := v3 * pScale
-	scaled_v4 := v4 * pScale
+	; if !hMon := DllCall("MonitorFromWindow", "ptr", $hwnd1, "int", MONITOR_DEFAULTTONEAREST)
+	; 	Throw, Exception("couldnt get the monitor handle", A_ThisFunc, $hwnd1)
+	; ; Get the scale factor for the screenshot monitor
+	; DllCall("Shcore.dll\GetScaleFactorForMonitor"
+	; 	, "ptr", hMon     ; [in]  HMONITOR            hMon,
+	; 	, "ptr*", pScale) ; [out] DEVICE_SCALE_FACTOR *pScale
+
+	; pScale /= (A_ScreenDPI / 96) * 100.0
+
+	; ; ; Calculate the relative scale factor
+	; relativeScaleFactor := pScale / pScalePrimary
+
+	; Scale the coordinates using the relative scale factor
+	scaled_v1 := v1 ; * relativeScaleFactor
+	scaled_v2 := v2 ; * relativeScaleFactor
+	scaled_v3 := v3 ; * relativeScaleFactor
+	scaled_v4 := v4 ; * relativeScaleFactor
+
 	scaled_area := scaled_v1 "|" scaled_v2 "|" scaled_v3 "|" scaled_v4
+	; scaled_area := x "|" y "|" Width "|" Height
 	
 	if (v3 < 10 and v4 < 10)   ; too small area
 		return
@@ -375,7 +379,7 @@ SCW_CreateLayeredWinMod(GuiNum,pBitmap,x,y,DrawCloseButton=0) {
 
 	; IniRead, ClipBorder, % script.configfile, Settings, ClipBorder, % false
 
-	Gui %GuiNum%: -Caption +E0x80000 +LastFound +ToolWindow +AlwaysOnTop +OwnDialogs
+	Gui %GuiNum%: -Caption +E0x80000 +LastFound +ToolWindow +AlwaysOnTop +OwnDialogs -DPIScale
 	Gui %GuiNum%: Show, Na, ScreenClippingWindow
 	WinWait, ScreenClippingWindow
 
